@@ -2061,7 +2061,7 @@ Wave 6 — Final Integration + Package:
 
 ---
 
-- [ ] 23. AI onSave Integration + Large Document Protection
+- [x] 23. AI onSave Integration + Large Document Protection
 
   **What to do**:
   - Create `src/ai/aiService.ts` (vscode adapter):

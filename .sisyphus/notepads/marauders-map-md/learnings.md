@@ -1904,3 +1904,132 @@ import {
 - Task 22 (AI Context Export Command) will use exportWithBudget for clipboard export
 - Task 23 (AI Context UI) will provide QuickPick for budget selection
 - All AI context operations will maintain consistency with this pattern
+
+## Task 22: AI Hint Block Parser and Insertion Commands
+
+### TDD Workflow Success
+- **RED phase**: Created 12 test cases for parseHintBlocks and formatHintBlock, verified they pass (module implemented correctly)
+- **GREEN phase**: Implemented pure TS parser to pass all tests
+- **REFACTOR phase**: Removed unused variable, code is clean and self-documenting
+
+### Pure TS Hint Block Parser Pattern (hintBlockParser.ts)
+
+#### HintBlock Interface
+- `type: 'RULE' | 'DECISION' | 'TODO' | 'CONTEXT'` — hint type
+- `content: string` — hint content text
+- `line: number` — line number in document (0-based)
+
+#### parseHintBlocks Function
+- Signature: `parseHintBlocks(text: string): HintBlock[]`
+- Pure TypeScript (zero vscode imports) — testable with vitest
+- Regex pattern: `/^>\s*\[AI\s+(RULE|DECISION|TODO|CONTEXT)\]\s*(.+)$/gm`
+  - `^>` — line must start with blockquote marker
+  - `\s*\[AI\s+` — flexible whitespace around [AI
+  - `(RULE|DECISION|TODO|CONTEXT)` — capture hint type
+  - `\]\s*(.+)$` — capture content after closing bracket
+- Line number calculation: count newlines before match position
+- Returns array of HintBlock objects
+
+#### formatHintBlock Function
+- Signature: `formatHintBlock(type: string, content: string): string`
+- Returns formatted string: `> [AI {TYPE}] {content}`
+- Used by insertion commands to generate hint template
+- Handles empty content (user will fill in)
+
+### VS Code Command Adapter Pattern (aiCommands.ts)
+
+#### registerAiCommands Function
+- Registers three hint insertion commands:
+  - `maraudersMapMd.ai.insertHintRule` → inserts `> [AI RULE] `
+  - `maraudersMapMd.ai.insertHintDecision` → inserts `> [AI DECISION] `
+  - `maraudersMapMd.ai.insertHintNote` → inserts `> [AI CONTEXT] `
+
+#### insertHintAtCursor Function
+- Workflow:
+  1. Verify active editor is markdown file
+  2. Get current cursor position
+  3. Format hint block using formatHintBlock()
+  4. Insert at cursor using editor.edit()
+  5. Position cursor after prefix for user to type content
+- Cursor positioning: translate by length of formatted hint text
+- Error handling: show error message if not in markdown file
+
+### Test Coverage (12 tests)
+
+#### parseHintBlocks Tests (7 tests)
+1. Finds all hint types (RULE, DECISION, TODO, CONTEXT)
+2. Ignores hints not in blockquote (must start with `>`)
+3. Handles multiple hints of same type
+4. Returns empty array for no hints
+5. Handles whitespace variations (flexible spacing)
+6. Tracks correct line numbers (0-based)
+
+#### formatHintBlock Tests (5 tests)
+1. Produces correct format for RULE
+2. Produces correct format for DECISION
+3. Produces correct format for TODO
+4. Produces correct format for CONTEXT
+5. Handles empty content and special characters
+
+### Module Boundary Pattern
+- `hintBlockParser.ts` is pure TypeScript (zero vscode imports) — testable with vitest
+- `aiCommands.ts` is the VS Code adapter — imports vscode, manages editor integration
+- This separation enables fast unit testing and clear separation of concerns
+
+### Extension Integration
+- Import `registerAiCommands` in extension.ts
+- Call `registerAiCommands(context)` in activate()
+- Removed placeholder "Not implemented yet" commands
+- Commands now fully functional
+
+### Build Status
+- All 252 tests pass (12 new hintBlockParser + 240 existing)
+- TypeScript: No errors (`npx tsc --noEmit`)
+- Build: Succeeds with esbuild (4.1MB dist/extension.js)
+
+### Key Learnings
+1. **Regex with multiline flag**: `/pattern/gm` enables `^` and `$` to match line boundaries
+2. **Line number calculation**: Count newlines before match position using `text.substring(0, match.index)`
+3. **Cursor positioning**: Use `editor.selection = new vscode.Selection(newPos, newPos)` to move cursor
+4. **Hint format**: Blockquote marker `>` is essential for markdown parsing
+5. **Type union**: `'RULE' | 'DECISION' | 'TODO' | 'CONTEXT'` provides type safety for hint types
+
+### Next Steps
+- Task 23 (AI Map Generator) will use parseHintBlocks to extract hints from documents
+- Task 24 (AI Context Export) will prioritize hints in context export
+- All AI features will maintain consistency with this pattern
+
+## [2026-02-01] Task 23: AI onSave Integration (aiService.ts)
+
+### Key Patterns
+- VS Code adapter pattern: `registerAiListeners(context)` follows same shape as `registerAiCommands`, `registerEditCommands`, etc.
+- Fire-and-forget async: `void handleDocumentSave(document)` — critical to not block the editor save event
+- Debounce via timestamp comparison (5s cooldown), not setTimeout — simpler for onSave hooks
+- Large doc protection uses `ai.largeDocThresholdKb` (separate from `preview.largeDocThresholdKb`)
+
+### Module Integration Notes
+- `generateAiMap` takes `{filePath, content, tokenMode: TokenEstimationMode}`
+- `generateSectionPack` takes `{filePath, content}` — no tokenMode needed
+- `buildSearchIndex` takes `{filePath, content, tokenMode}` where tokenMode is union string type
+- `exportWithBudget` takes `{content, budget, tokenMode}` where tokenMode is string
+- `PRESET_BUDGETS` is `Record<'1k'|'2k'|'4k'|'8k', number>` — QuickPick label parsing: `picked.label.split(' ')[0]`
+
+### Git Policy Implementation
+- `ignoreAll` → check `.gitignore` for `.ai/` pattern, suggest adding
+- `commitMapOnly` → check for `.ai/**/sections/` and `.ai/**/index.json` patterns
+- `commitAll` → no-op
+- Used `showInformationMessage` with action buttons for non-intrusive suggestions
+
+### Extension Integration
+- Removed 4 placeholder command registrations from extension.ts (generateMap, exportSectionPack, buildIndex, copyContextBudgeted)
+- Added `registerAiListeners(context)` call after `registerAiCommands(context)`
+- Commands now registered in aiService.ts instead of extension.ts placeholders
+
+### Configuration Keys Used
+- `maraudersMapMd.ai.enabled` (boolean, default: true)
+- `maraudersMapMd.ai.buildOnSave` (boolean, default: true)
+- `maraudersMapMd.ai.outputDir` (string, default: ".ai")
+- `maraudersMapMd.ai.generate.map` / `.sections` / `.index` (boolean, default: true)
+- `maraudersMapMd.ai.tokenEstimateMode` (string, default: "koreanWeighted")
+- `maraudersMapMd.ai.gitPolicy` (string, default: "ignoreAll")
+- `maraudersMapMd.ai.largeDocThresholdKb` (number, default: 512)

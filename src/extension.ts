@@ -10,6 +10,7 @@ import {
   pruneNowCommand,
 } from './history/historyCommands';
 import { registerAiCommands } from './ai/aiCommands';
+import { registerAiListeners } from './ai/aiService';
 
 export function activate(context: vscode.ExtensionContext): void {
   const previewManager = new PreviewManager(context.extensionUri);
@@ -47,6 +48,7 @@ export function activate(context: vscode.ExtensionContext): void {
   registerExportCommands(context);
   registerHistoryListeners(context);
   registerAiCommands(context);
+  registerAiListeners(context);
 
   // Toggle commands
   context.subscriptions.push(
@@ -87,32 +89,6 @@ export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(
     vscode.commands.registerCommand('maraudersMapMd.history.pruneNow', () => pruneNowCommand(context))
   );
-
-  // AI commands
-  context.subscriptions.push(
-    vscode.commands.registerCommand('maraudersMapMd.ai.generateMap', () => {
-      vscode.window.showInformationMessage('Not implemented yet');
-    })
-  );
-
-  context.subscriptions.push(
-    vscode.commands.registerCommand('maraudersMapMd.ai.exportSectionPack', () => {
-      vscode.window.showInformationMessage('Not implemented yet');
-    })
-  );
-
-  context.subscriptions.push(
-    vscode.commands.registerCommand('maraudersMapMd.ai.buildIndex', () => {
-      vscode.window.showInformationMessage('Not implemented yet');
-    })
-  );
-
-  context.subscriptions.push(
-    vscode.commands.registerCommand('maraudersMapMd.ai.copyContextBudgeted', () => {
-      vscode.window.showInformationMessage('Not implemented yet');
-    })
-  );
-
 
 }
 
