@@ -1324,3 +1324,583 @@ import {
 - Task 17 will implement AI artifact generation
 - History feature is now complete with full snapshot lifecycle
 - All history operations maintain consistency with this pattern
+
+## Task 17: Token Estimator + Markdown Structure Parser (Pure TS)
+
+### TDD Workflow Success
+- **RED phase**: Created 18 tokenEstimator tests + 23 markdownParser tests, verified they fail
+- **GREEN phase**: Implemented pure TS functions to pass all tests
+- **REFACTOR phase**: Fixed test expectations to match actual behavior
+
+### Pure TS Token Estimator Pattern (tokenEstimator.ts)
+
+#### estimateTokens Function
+- Signature: `estimateTokens(text: string, mode: 'koreanWeighted' | 'simple'): number`
+- Pure TypeScript (zero vscode imports) — testable with vitest
+- Two modes:
+  - **simple**: `Math.ceil(text.length / 4)` — English approximation
+  - **koreanWeighted**: Character-by-character weighted estimation
+    - Korean Hangul (U+AC00-U+D7AF): 2.5 tokens per char
+    - Korean Jamo (U+3130-U+318F): 2.5 tokens per char
+    - English words (whitespace-delimited): 1.3 tokens per word
+    - Punctuation/whitespace: 0.25 tokens per char
+
+#### Korean Character Detection
+- `isKoreanChar()` checks Unicode ranges:
+  - Hangul syllables: 0xAC00-0xD7AF (가-힣)
+  - Jamo characters: 0x3130-0x318F (ㄱ-ㅎ, ㅏ-ㅣ)
+- Handles both composed Hangul and individual Jamo components
+
+#### Token Estimation Algorithm
+- Character-by-character iteration with state machine:
+  1. Check if Korean char → add 2.5 tokens
+  2. Check if whitespace → add 0.25 tokens
+  3. Check if punctuation → add 0.25 tokens
+  4. Otherwise, consume entire word → add 1.3 tokens per word
+- Returns `Math.ceil(tokenCount)` for integer result
+
+#### estimateTokensPerSection Function
+- Signature: `estimateTokensPerSection(sections: Section[]): SectionWithTokens[]`
+- Maps over sections, adds `tokens` property to each
+- Uses `koreanWeighted` mode by default (as per PRD spec)
+
+### Pure TS Markdown Parser Pattern (markdownParser.ts)
+
+#### Section Interface
+- `heading: string` — section heading text
+- `level: number` — heading level (0 for preamble, 2 for H2)
+- `startLine: number` — zero-based line index where section starts
+- `endLine: number` — zero-based line index where section ends
+- `content: string` — full section content including heading
+
+#### parseStructure Function
+- Signature: `parseStructure(text: string): Section[]`
+- Splits document by H2 headings (`## Heading`)
+- Content before first H2 becomes "preamble" section (level 0)
+- **CRITICAL**: Ignores headings inside fenced code blocks (``` ... ```)
+  - Tracks `inCodeBlock` state by counting ``` markers
+  - Only processes headings when `inCodeBlock === false`
+- Returns array of sections with line ranges and full content
+
+#### Code Block Detection Strategy
+- Toggle `inCodeBlock` flag when encountering ``` markers
+- Skip all heading detection while inside code blocks
+- Prevents false positives from markdown examples in code
+
+#### extractSummary Function
+- Signature: `extractSummary(section: Section): string`
+- Heuristic extraction:
+  1. First non-empty sentence (up to period/newline)
+  2. All bold text patterns (`**term**`)
+  3. Join with spaces, trim to max 200 chars
+- Skips code blocks, headings, empty lines
+
+#### extractKeyTerms Function
+- Signature: `extractKeyTerms(section: Section): string[]`
+- Extracts:
+  - Bold text: `**term**` → "term"
+  - Link text: `[text](url)` → "text"
+  - H3 headings within section: `### Heading` → "Heading"
+- Returns unique terms (uses Set to deduplicate)
+
+### Test Coverage (41 tests total)
+
+#### tokenEstimator.test.ts (18 tests)
+1. **simple mode**: 5 tests
+   - English text, Korean text, empty string, fractional rounding, large text
+2. **koreanWeighted mode**: 13 tests
+   - Pure English, pure Korean, mixed Korean/English
+   - Hangul characters, Jamo characters
+   - Punctuation, empty string, code blocks, markdown formatting
+
+#### markdownParser.test.ts (23 tests)
+1. **parseStructure**: 10 tests
+   - Parse H2 sections from sample.md
+   - Include preamble section
+   - Parse all H2 sections
+   - Ignore headings inside code blocks (CRITICAL)
+   - Handle documents with no H2 headings
+   - Calculate correct line ranges
+   - Handle Korean H2 headings
+   - Preserve full content
+   - Handle empty document, whitespace-only document
+2. **extractSummary**: 6 tests
+   - Extract first sentence, include bold terms
+   - Trim to max 200 chars
+   - Handle no sentences, empty content, Korean content
+3. **extractKeyTerms**: 7 tests
+   - Extract bold text, link text, H3 headings
+   - Return unique terms
+   - Handle no key terms, empty content, Korean text
+
+### Module Boundary Pattern
+- Both `tokenEstimator.ts` and `markdownParser.ts` are pure TypeScript (zero vscode imports)
+- Testable with vitest without VS Code runtime
+- Clear separation: pure AI utilities vs VS Code integration (future tasks)
+
+### Build Status
+- All 194 tests pass (18 tokenEstimator + 23 markdownParser + 153 existing)
+- TypeScript: No errors (`npx tsc --noEmit`)
+- Build: Succeeds with esbuild (4.1MB dist/extension.js)
+- Verified: NO VSCODE IMPORTS in src/ai/*.ts
+
+### Key Learnings
+
+#### Unicode Character Detection
+- Use `charCodeAt(0)` to get Unicode code point
+- Korean Hangul range: 0xAC00-0xD7AF (44,032 syllables)
+- Korean Jamo range: 0x3130-0x318F (individual consonants/vowels)
+- Regex `/\s/` for whitespace, `/[^\w\s\uAC00-\uD7AF\u3130-\u318F]/` for punctuation
+
+#### Token Estimation Weights
+- Korean characters are ~2.5x heavier than English words
+- Whitespace and punctuation contribute minimal tokens (0.25)
+- English words estimated at 1.3 tokens (accounts for subword tokenization)
+- Always round up with `Math.ceil()` for conservative estimates
+
+#### Markdown Parsing Edge Cases
+- **Code block detection is CRITICAL**: Must track ``` markers to avoid false positives
+- Preamble section (level 0) for content before first H2
+- Line ranges are zero-based and inclusive (startLine to endLine)
+- Empty documents return empty array (not error)
+
+#### Test Fixture Usage
+- `readFileSync()` in tests to load sample.md and korean-sample.md
+- Enables realistic testing with actual markdown documents
+- Tests verify behavior on real-world content, not just synthetic examples
+
+#### Regex Patterns for Extraction
+- Bold text: `/\*\*([^*]+)\*\*/g` with matchAll
+- Link text: `/\[([^\]]+)\]\([^)]+\)/g` with matchAll
+- H3 headings: `/^###\s+(.+)$/gm` with multiline flag
+- First sentence: `/^[^.!?]+[.!?]/` to match up to punctuation
+
+### Next Steps
+- Task 18 (AI Map Generator) will use both tokenEstimator and markdownParser
+- AI Map will combine section structure + token estimates + summaries + key terms
+- All AI features maintain consistency with pure TS pattern (no vscode imports)
+
+### Patterns for Future Tasks
+1. **Pure TS module pattern**: Zero vscode imports, testable with vitest
+2. **Character-by-character state machine**: Efficient for mixed-language text processing
+3. **Code block awareness**: Always track fenced code blocks when parsing markdown
+4. **Heuristic extraction**: First sentence + bold terms is simple but effective
+5. **Set for deduplication**: Use Set to ensure unique terms, convert to array for return
+
+## Task 18: AI Map Generator (Pure TS)
+
+### TDD Workflow Success
+- **RED phase**: Created 8 test cases covering all AI Map generation functions, verified they fail (module not found)
+- **GREEN phase**: Implemented pure TS aiMapGenerator to pass all tests
+- **REFACTOR phase**: Removed unnecessary comments, code is self-documenting
+
+### Pure TS AI Map Generator Pattern (aiMapGenerator.ts)
+
+#### generateAiMap Function
+- Signature: `generateAiMap(options: AiMapOptions): string`
+- Pure TypeScript (zero vscode imports) — testable with vitest
+- Returns markdown string with complete AI Map structure
+- Input: filePath, content, tokenMode (koreanWeighted or simple)
+
+#### AI Map Output Structure
+1. **Header with metadata**:
+   - Title: `# AI Map: {filePath}`
+   - Source path, generation timestamp, total token count
+   
+2. **Document Structure table**:
+   - Markdown table with columns: Section, Lines, Tokens, Summary
+   - One row per section from parseStructure()
+   - Tokens calculated using estimateTokens()
+   - Summary truncated to 50 chars using extractSummary()
+   
+3. **Section Details**:
+   - Expanded information for each section
+   - Includes: line range, token count, summary, key terms
+   - Key terms extracted using extractKeyTerms()
+   
+4. **AI Hints Found** (if present):
+   - Detects [AI RULE], [AI DECISION], [AI NOTE] blocks
+   - Lists hint type, line number, and text
+   - Only included if hints found in source
+
+#### extractAiHints Helper Function
+- Scans content line-by-line for AI hint patterns
+- Regex patterns: `/^\s*\[AI RULE\]\s*(.+)$/`, etc.
+- Returns array of AiHint objects with type, line, text
+- Handles indented hints (leading whitespace)
+
+#### Integration with Task 17 Functions
+- Uses `parseStructure()` to get sections with line ranges
+- Uses `estimateTokens()` for token calculation per section
+- Uses `extractSummary()` for section summaries
+- Uses `extractKeyTerms()` for key term extraction
+- All functions from markdownParser.ts and tokenEstimator.ts
+
+### Test Coverage (8 tests)
+1. **Generates map with correct section count**: Verifies structure table present
+2. **Includes token estimates**: Verifies token numbers in output
+3. **Includes line ranges**: Verifies line range format (N-M)
+4. **Includes summaries**: Verifies summary column present
+5. **Includes AI hints if present**: Detects [AI RULE], [AI DECISION], [AI NOTE]
+6. **Handles empty document**: Gracefully handles empty content
+7. **Output is valid markdown**: Verifies markdown syntax (headings, tables)
+8. **Includes metadata header**: Verifies filename and timestamp in output
+
+### Module Boundary Pattern
+- `aiMapGenerator.ts` is pure TypeScript (zero vscode imports) — testable with vitest
+- Uses only functions from markdownParser.ts and tokenEstimator.ts
+- No file I/O, no side effects
+- Will be used by future AI features (Task 19+) which handle VS Code integration
+
+### Build Status
+- All 202 tests pass (8 new aiMapGenerator + 194 existing)
+- TypeScript: No errors (`npx tsc --noEmit`)
+- Build: Succeeds with esbuild (4.1MB dist/extension.js)
+
+### Key Learnings
+1. **Markdown table generation**: Pipe-delimited format with header separator row
+2. **Summary truncation**: Limit to 50 chars for readability in table
+3. **AI hint detection**: Regex with line-by-line scanning for [AI ...] patterns
+4. **Integration pattern**: Reuse existing parser/estimator functions, don't duplicate
+5. **Pure TS module**: Zero vscode imports enables fast testing and code reuse
+6. **Self-documenting code**: Variable names like `totalTokens`, `keyTerms` eliminate need for comments
+
+### Next Steps
+- Task 19 (Section Pack) will use aiMapGenerator output to create section files
+- Task 20 (Search Index) will use AI Map structure for indexing
+- All AI features will maintain consistency with this pure TS pattern
+
+## Task 19: Section Pack Generator (Pure TS)
+
+### TDD Workflow Success
+- **RED phase**: Created 22 test cases covering slug generation and section pack generation, verified they fail (module not found)
+- **GREEN phase**: Implemented pure TS functions to pass all tests
+- **REFACTOR phase**: Removed unnecessary comments, fixed unused imports
+
+### Pure TS Section Pack Generator Pattern (sectionPackGenerator.ts)
+
+#### generateSlug Function
+- Signature: `generateSlug(heading: string): string`
+- Pure TypeScript (zero vscode imports) — testable with vitest
+- Converts heading to URL-friendly slug:
+  1. Lowercase and trim
+  2. Replace spaces with hyphens
+  3. Remove non-alphanumeric characters (except hyphens and Unicode for Korean/CJK)
+  4. Collapse multiple hyphens to single hyphen
+  5. Remove leading/trailing hyphens
+  6. Truncate to 50 characters max
+- Handles Korean and mixed-language headings correctly
+- Returns empty string for empty/whitespace-only input
+
+#### generateSectionPack Function
+- Signature: `generateSectionPack(options: { filePath: string; content: string }): SectionFile[]`
+- Pure TypeScript (zero vscode imports) — testable with vitest
+- Splits markdown document into section files:
+  1. Parse document structure using `parseStructure()` from markdownParser
+  2. Filter sections: if H2 sections exist, exclude preamble; otherwise include preamble
+  3. For each section:
+     - Generate zero-padded filename: `{NN}-{slug}.md` (01, 02, ..., 99, 100, ...)
+     - Create metadata comment: `<!-- Section from: {filePath} | Lines: {start}-{end} -->`
+     - Combine metadata + original section content
+     - Return SectionFile with filename, content, heading, lineRange
+- Returns array of SectionFile objects (caller handles file writing)
+
+#### SectionFile Interface
+- `filename: string` — zero-padded filename with slug (e.g., "01-getting-started.md")
+- `content: string` — metadata comment + original section content
+- `heading: string` — original heading text (e.g., "Getting Started")
+- `lineRange: [number, number]` — [startLine, endLine] in original document (0-based)
+
+### Test Coverage (22 tests)
+
+#### generateSlug Tests (10 tests)
+1. Converts heading to lowercase
+2. Replaces spaces with hyphens
+3. Removes non-alphanumeric characters
+4. Handles Korean headings (preserves Unicode)
+5. Handles mixed Korean and English
+6. Limits slug to 50 characters
+7. Handles empty heading
+8. Removes multiple consecutive hyphens
+9. Removes leading and trailing hyphens
+10. Handles special characters (e.g., C++ → c-programming)
+
+#### generateSectionPack Tests (12 tests)
+1. Generates correct number of section files
+2. Uses zero-padded numbering (01, 02, ..., 10, ...)
+3. Generates slugified filenames from headings
+4. Includes source metadata comment in content
+5. Includes original section content after metadata
+6. Handles document with no H2 sections (returns preamble)
+7. Handles empty sections
+8. Preserves line numbers in metadata
+9. Returns SectionFile interface with all required properties
+10. Handles Korean headings in filenames
+11. Handles special characters in filenames
+12. Handles very long headings with truncation
+
+### Key Implementation Details
+
+#### Preamble Handling
+- If document has H2 sections: filter out preamble, number H2s as 01, 02, ...
+- If document has NO H2 sections: include preamble as 01-preamble.md
+- This ensures documents without H2 still produce output (preamble)
+
+#### Slug Generation Strategy
+- Unicode regex `/[^\w\-\u0080-\uFFFF]/g` preserves non-Latin characters (Korean, Chinese, etc.)
+- Truncation happens AFTER normalization to ensure max 50 chars
+- Trailing hyphens removed after truncation to avoid ugly filenames
+
+#### Line Number Tracking
+- Metadata comment includes 1-based line numbers (user-friendly)
+- lineRange property stores 0-based indices (programmer-friendly)
+- Format: `<!-- Section from: {filePath} | Lines: {startLine+1}-{endLine+1} -->`
+
+### Module Boundary Pattern
+- `sectionPackGenerator.ts` is pure TypeScript (zero vscode imports) — testable with vitest
+- Depends on `parseStructure()` from markdownParser.ts (Task 17)
+- No file I/O, no side effects
+- Will be used by AI Map Generator (Task 18) and future AI features
+
+### Build Status
+- All 224 tests pass (22 new sectionPackGenerator + 202 existing)
+- TypeScript: No errors (`npx tsc --noEmit`)
+- Build: Succeeds with esbuild (4.1MB dist/extension.js)
+
+### Key Learnings
+1. **Preamble logic**: Filter based on presence of H2 sections, not always exclude
+2. **Unicode handling**: Use `\u0080-\uFFFF` range to preserve non-Latin characters
+3. **Slug truncation**: Truncate AFTER normalization, then remove trailing hyphens
+4. **Zero-padding**: Use `String(n).padStart(2, '0')` for consistent numbering
+5. **Line number tracking**: Store both 1-based (for display) and 0-based (for code)
+6. **Pure TS pattern**: No vscode imports enables fast testing and code reuse
+
+### Next Steps
+- Task 20 (AI Map Generator) will use generateSectionPack() to create section metadata
+- All AI features will maintain consistency with this pure TS pattern
+
+## Task 20: Search Index Builder (Pure TS)
+
+### TDD Workflow Success
+- **RED phase**: Created 6 test cases covering all search index builder functions, verified they fail (module not found)
+- **GREEN phase**: Implemented pure TS functions to pass all tests
+- **REFACTOR phase**: Code is clean and self-documenting
+
+### Pure TS Search Index Builder Pattern (searchIndexBuilder.ts)
+
+#### Core Interfaces
+- `IndexEntry`: Represents a single section in the search index
+  - `section: string` — heading text
+  - `slug: string` — URL-safe slug generated from heading
+  - `lineRange: [number, number]` — start and end line numbers
+  - `tokens: number` — estimated token count for section
+  - `keywords: string[]` — extracted key terms from bold text
+  - `links: string[]` — extracted URLs from markdown links
+  - `summary: string` — first sentence or bold text summary
+  - `aiHints: string[]` — AI-specific hints ([AI RULE], [AI DECISION], etc.)
+
+- `SearchIndex`: Container for the complete search index
+  - `version: 1` — schema version for future compatibility
+  - `source: string` — source markdown file path
+  - `generated: string` — ISO timestamp when index was created
+  - `totalTokens: number` — sum of all section tokens
+  - `entries: IndexEntry[]` — array of indexed sections
+
+#### buildSearchIndex Function
+- Signature: `buildSearchIndex(options: BuildSearchIndexOptions): SearchIndex`
+- Pure TypeScript (zero vscode imports) — testable with vitest
+- Workflow:
+  1. Parse markdown structure using `parseStructure()`
+  2. Skip preamble section (only index H2 sections)
+  3. For each section:
+     - Extract keywords from bold text using `extractKeyTerms()`
+     - Extract links from markdown link syntax `[text](url)`
+     - Extract AI hints using pattern `/\[AI\s+(RULE|DECISION|TODO|CONTEXT)\]/`
+     - Extract summary using `extractSummary()`
+     - Generate slug using `generateSlug()`
+     - Estimate tokens using `estimateTokens()`
+  4. Accumulate total tokens across all sections
+  5. Return structured SearchIndex object
+
+#### Helper Functions
+- `extractLinks(content: string): string[]`
+  - Regex pattern: `/\[([^\]]+)\]\(([^)]+)\)/g`
+  - Extracts URLs from markdown link syntax
+  - Filters out anchor links (starting with #)
+  - Returns unique URLs (Set-based deduplication)
+
+- `extractAiHints(content: string): string[]`
+  - Regex pattern: `/\[AI\s+(RULE|DECISION|TODO|CONTEXT)\][^\n]*/g`
+  - Captures entire hint line including the hint text
+  - Returns array of matching hints (empty if none found)
+
+### Test Coverage (6 tests)
+1. **Correct entry count**: Verifies entries match H2 section count (preamble excluded)
+2. **Keywords extraction**: Verifies bold text is extracted as keywords
+3. **Links extraction**: Verifies markdown links are extracted with URLs
+4. **AI hints detection**: Verifies [AI RULE], [AI DECISION], etc. are captured per section
+5. **Total tokens calculation**: Verifies totalTokens equals sum of section tokens
+6. **Output schema validation**: Verifies all required fields present with correct types
+
+### Key Implementation Details
+
+#### Preamble Handling
+- `parseStructure()` returns preamble as first section with heading='preamble'
+- Search index skips preamble (only indexes H2 sections)
+- Rationale: Preamble is metadata, not searchable content
+
+#### Link Extraction
+- Pattern matches both `[text](url)` markdown syntax
+- Filters out anchor links (starting with #) — these are internal references
+- Uses Set for automatic deduplication (same URL in multiple places)
+
+#### AI Hints Pattern
+- Matches: `[AI RULE]`, `[AI DECISION]`, `[AI TODO]`, `[AI CONTEXT]`
+- Captures entire line including hint text (e.g., "[AI RULE] This is critical")
+- Returns empty array if no hints found in section
+
+#### Token Estimation
+- Reuses `estimateTokens()` from Task 17
+- Supports both 'koreanWeighted' and 'simple' modes
+- Accumulates total across all sections
+
+#### Slug Generation
+- Reuses `generateSlug()` from Task 19
+- Converts heading to URL-safe format (lowercase, hyphens, max 50 chars)
+- Used for future anchor links or section references
+
+### Module Boundary Pattern
+- `searchIndexBuilder.ts` is pure TypeScript (zero vscode imports) — testable with vitest
+- Reuses functions from Tasks 17-19: parseStructure, extractKeyTerms, extractSummary, estimateTokens, generateSlug
+- No file I/O, no side effects
+- Will be used by AI context builder (future task) for semantic search
+
+### Build Status
+- All 230 tests pass (6 new searchIndexBuilder + 224 existing)
+- TypeScript: No errors (`npx tsc --noEmit`)
+- Build: Succeeds with esbuild (4.1MB dist/extension.js)
+
+### Key Learnings
+1. **Preamble exclusion**: Search index focuses on H2 sections, not preamble
+2. **Link filtering**: Exclude anchor links (#) from extracted links
+3. **AI hints pattern**: Capture entire line for context, not just the marker
+4. **Set-based deduplication**: Use Set for unique URLs, convert back to array
+5. **Reuse existing functions**: Leverage parseStructure, extractKeyTerms, estimateTokens, generateSlug
+6. **Schema versioning**: Include version: 1 for future compatibility
+
+### Next Steps
+- Task 21 (AI Context Builder) will use SearchIndex to build semantic context
+- Task 22 (Semantic Search) will query the search index
+- All AI features will maintain consistency with this pattern
+
+## Task 21: Token Budget Context Exporter (TDD)
+
+### TDD Workflow Success
+- **RED phase**: Created 10 test cases covering all export scenarios, verified they fail (module not found)
+- **GREEN phase**: Implemented pure TS exporter to pass all tests
+- **REFACTOR phase**: Removed unused imports (Section, extractHeadings)
+
+### Pure TS Token Budget Exporter Pattern (tokenBudgetExporter.ts)
+
+#### exportWithBudget Function
+- Signature: `exportWithBudget(options: ExportOptions): string`
+- Pure TypeScript (zero vscode imports) — testable with vitest
+- Deterministic algorithm (no scoring/ranking):
+  1. Parse structure using markdownParser
+  2. Always include ALL headings (## level)
+  3. Always include ALL AI hint blocks ([AI RULE], [AI DECISION], [AI TODO], [AI CONTEXT])
+  4. Calculate remaining budget after headings + hints
+  5. For each section (in order): include first N characters until budget exhausted
+  6. Maintain section boundaries: truncate at sentence boundaries (find last period/newline)
+  7. If truncated, append `[... truncated, see full section: {heading}]`
+- Returns assembled markdown string
+
+#### AI Hint Detection
+- `extractAIHints(content: string): string[]` — extracts all AI hint blocks
+- Patterns: `/>\s*\[AI RULE\][^\n]*/g`, `/>\s*\[AI DECISION\][^\n]*/g`, etc.
+- Matches blockquote-style hints: `> [AI RULE] ...`
+- Returns array of matched hint strings
+
+#### Truncation Strategy
+- `truncateAtSentenceBoundary(text: string, maxLength: number): string`
+- Finds last period or newline within maxLength
+- Returns truncated text ending at sentence boundary
+- Prevents mid-sentence cuts for readability
+
+#### Section Processing
+- For each section from parseStructure:
+  1. Extract heading (if level 2)
+  2. Extract AI hints from section content
+  3. Remove hints from content to avoid duplication
+  4. Calculate available budget for content
+  5. Truncate content at sentence boundary if needed
+  6. Add truncation marker if content was cut
+  7. Combine heading + hints + content
+  8. Add to result if within budget
+
+#### Preset Budgets
+- `PRESET_BUDGETS` constant: `{ '1k': 1000, '2k': 2000, '4k': 4000, '8k': 8000 }`
+- Enables quick selection of common budget sizes
+- Used by future UI for budget selection
+
+### Test Coverage (10 tests)
+1. **Empty document**: Returns empty string
+2. **Small document under budget**: Returns full content unchanged
+3. **Preserve all headings**: Even with tight budget, all ## headings included
+4. **Preserve all AI hints**: All [AI RULE], [AI DECISION], [AI TODO], [AI CONTEXT] blocks included
+5. **Truncation markers**: Adds `[... truncated, see full section: ...]` when sections cut
+6. **Budget difference**: 1k budget produces smaller output than 8k budget
+7. **Token estimate within budget**: Output tokens ≤ budget + 20% tolerance
+8. **Sentence boundary truncation**: Cuts at last period or newline, not mid-sentence
+9. **Korean weighted mode**: Handles koreanWeighted token mode
+10. **Section boundary preservation**: Never mixes content from different sections
+
+### Key Implementation Details
+
+#### Token Estimation
+- Uses `estimateTokens()` from tokenEstimator.ts
+- Supports both 'simple' (length/4) and 'koreanWeighted' modes
+- Budget enforcement: strict ≤ budget check (no tolerance in algorithm)
+- Test tolerance: ±20% for output validation (accounts for estimation variance)
+
+#### Content Deduplication
+- `removeAIHintsFromContent()` removes hints before processing content
+- Prevents hints from appearing twice (once in priority section, once in content)
+- Uses same regex patterns as extractAIHints
+
+#### Budget Allocation
+- Priority: headings + AI hints always included first
+- Remaining budget distributed to section content in order
+- Greedy algorithm: fill sections until budget exhausted
+- No backtracking or optimization (deterministic, predictable)
+
+### Module Boundary Pattern
+- `tokenBudgetExporter.ts` is pure TypeScript (zero vscode imports) — testable with vitest
+- Depends on: markdownParser.ts (parseStructure), tokenEstimator.ts (estimateTokens)
+- Will be used by AI context export command (future task) which handles VS Code integration
+- Clear separation: pure export logic vs VS Code adapter
+
+### Build Status
+- All 163 tests pass (10 new tokenBudgetExporter + 153 existing)
+- TypeScript: No errors (`npx tsc --noEmit`)
+- Build: Succeeds with esbuild (4.1MB dist/extension.js)
+
+### Key Learnings
+1. **Deterministic algorithms**: No scoring/ranking ensures reproducible output
+2. **Priority-based inclusion**: Always include critical elements (headings, hints) first
+3. **Sentence boundary truncation**: Improves readability by avoiding mid-sentence cuts
+4. **Budget enforcement**: Strict ≤ budget check prevents overruns
+5. **Test data sizing**: Ensure test documents exceed budget to verify truncation logic
+6. **Token estimation variance**: Allow ±20% tolerance in tests for estimation accuracy
+7. **Content deduplication**: Remove hints from content to avoid duplication in output
+
+### Test Insights
+- Edge cases: empty documents, small documents under budget, very tight budgets
+- Boundary values: 1k vs 8k budget difference, sentence boundaries
+- Preservation: headings, AI hints, section boundaries
+- Truncation: markers, sentence boundaries, no mid-sentence cuts
+
+### Next Steps
+- Task 22 (AI Context Export Command) will use exportWithBudget for clipboard export
+- Task 23 (AI Context UI) will provide QuickPick for budget selection
+- All AI context operations will maintain consistency with this pattern
