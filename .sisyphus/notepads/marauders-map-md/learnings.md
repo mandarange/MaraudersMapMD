@@ -283,3 +283,102 @@
 - Task 7 (Image Insert) can follow same pattern
 - Tasks 8-9 (Export, History) can parallelize
 - All edit operations maintain consistency with `editor.edit()` pattern
+
+## Task 7: Image Insert from File (TDD)
+
+### TDD Workflow Success
+- **RED phase**: Created 22 test cases for pathUtils functions, verified they fail (module not found)
+- **GREEN phase**: Implemented pure TS pathUtils to pass all tests
+- **REFACTOR phase**: Fixed unused parameter warning by prefixing with underscore
+
+### Pure TS Path Utilities Pattern (pathUtils.ts)
+- `generateImageFilename(originalName, pattern)` — applies filename pattern with timestamp
+  - Extracts basename and extension separately
+  - Supports `{basename}` and `{yyyyMMdd-HHmmss}` placeholders
+  - Preserves original file extension
+  - Handles filenames with multiple dots correctly
+  
+- `buildRelativePath(_mdFileDir, assetsDir, filename)` — builds POSIX relative path
+  - Converts Windows backslashes to forward slashes
+  - Returns `./assetsDir/filename` format
+  - Handles nested asset directories (e.g., `assets/2024/january`)
+  
+- `buildMarkdownImageLink(altText, relativePath)` — formats markdown image syntax
+  - Returns `![altText](relativePath)` format
+  - Handles empty alt text and special characters
+  
+- `getAltText(filename, source)` — determines alt text based on setting
+  - If source is 'filename': returns filename
+  - If source is 'prompt': returns empty string (user will provide via dialog)
+
+### VS Code Command Adapter Pattern (imageCommands.ts)
+- `registerImageCommands(context)` function registers `maraudersMapMd.images.insertFromFile`
+- Command workflow:
+  1. Verify active editor is markdown file
+  2. Get config: assetsDir, filenamePattern, altTextSource
+  3. Show file picker dialog for image files (png, jpg, jpeg, gif, webp, svg)
+  4. Create assets directory if not exists (`vscode.workspace.fs.createDirectory`)
+  5. Generate filename using pattern
+  6. Copy file to assets directory (`vscode.workspace.fs.copy`)
+  7. Build relative path and markdown link
+  8. Insert at cursor position using `editor.edit()`
+
+### Test Coverage (22 tests)
+1. **generateImageFilename**: 8 tests
+   - Basename pattern, timestamp pattern, combined patterns
+   - Extension preservation (lowercase, uppercase, multiple dots)
+   - Filenames without extension
+   
+2. **buildRelativePath**: 6 tests
+   - POSIX path generation
+   - Windows backslash conversion
+   - Nested asset directories
+   - Special characters in filenames
+   
+3. **buildMarkdownImageLink**: 4 tests
+   - Basic formatting, empty alt text
+   - Special characters in alt text
+   - Nested paths
+   
+4. **getAltText**: 4 tests
+   - Filename source returns filename
+   - Prompt source returns empty string
+   - Handles filenames without extension
+
+### Module Boundary Pattern
+- `pathUtils.ts` is pure TypeScript (zero vscode imports) — testable with vitest
+- `imageCommands.ts` is the VS Code adapter — imports vscode, manages file operations
+- This separation enables fast unit testing and clear separation of concerns
+
+### File Operations Pattern
+- `vscode.workspace.fs.createDirectory()` — creates directory recursively
+- `vscode.workspace.fs.copy()` — copies file with overwrite option
+- `vscode.Uri.joinPath()` — safely joins URI paths
+- `vscode.Uri.file()` — converts filesystem path to URI
+- Error handling: wrap in try-catch, show error message to user
+
+### Configuration Pattern
+- Read from `vscode.workspace.getConfiguration('maraudersMapMd.images')`
+- Supported settings:
+  - `assetsDir` (default: 'assets')
+  - `filenamePattern` (default: '{basename}-{yyyyMMdd-HHmmss}')
+  - `altTextSource` (default: 'filename')
+  - `allowRemote` (false — not implemented in Task 7)
+
+### Build Status
+- All 79 tests pass (1 smoke + 46 formatters + 22 pathUtils + 10 markdown engine)
+- TypeScript: No errors (`npx tsc --noEmit`)
+- Build: Succeeds with esbuild (262.0kb dist/extension.js)
+
+### Key Learnings
+1. **Timestamp generation**: Use `Date` object with padStart for zero-padding
+2. **Path normalization**: Always convert backslashes to forward slashes for consistency
+3. **File extension handling**: Split on last dot to handle multiple dots in filename
+4. **Unused parameters**: Prefix with underscore to satisfy TypeScript strict mode
+5. **VS Code file operations**: Use workspace.fs for cross-platform compatibility
+6. **Error handling**: Always wrap file operations in try-catch, show user-friendly messages
+
+### Next Steps
+- Task 8 (Drag & Drop) will reuse pathUtils functions
+- Task 9 (Paste to Assets) will reuse pathUtils functions
+- All image operations maintain consistency with this pattern
