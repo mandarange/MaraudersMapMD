@@ -3,6 +3,12 @@ import { PreviewManager } from './preview/previewManager';
 import { registerEditCommands } from './edit/editCommands';
 import { registerImageCommands } from './images/imageCommands';
 import { registerExportCommands } from './export/exportCommands';
+import {
+  registerHistoryListeners,
+  openHistoryCommand,
+  createCheckpointCommand,
+  pruneNowCommand,
+} from './history/historyCommands';
 
 export function activate(context: vscode.ExtensionContext): void {
   const previewManager = new PreviewManager(context.extensionUri);
@@ -38,6 +44,7 @@ export function activate(context: vscode.ExtensionContext): void {
   registerEditCommands(context);
   registerImageCommands(context);
   registerExportCommands(context);
+  registerHistoryListeners(context);
 
   // Toggle commands
   context.subscriptions.push(
@@ -53,17 +60,14 @@ export function activate(context: vscode.ExtensionContext): void {
     })
   );
 
-  // History commands
   context.subscriptions.push(
-    vscode.commands.registerCommand('maraudersMapMd.history.open', () => {
-      vscode.window.showInformationMessage('Not implemented yet');
-    })
+    vscode.commands.registerCommand('maraudersMapMd.history.open', () => openHistoryCommand(context))
   );
 
   context.subscriptions.push(
-    vscode.commands.registerCommand('maraudersMapMd.history.createCheckpoint', () => {
-      vscode.window.showInformationMessage('Not implemented yet');
-    })
+    vscode.commands.registerCommand('maraudersMapMd.history.createCheckpoint', () =>
+      createCheckpointCommand(context)
+    )
   );
 
   context.subscriptions.push(
@@ -79,9 +83,7 @@ export function activate(context: vscode.ExtensionContext): void {
   );
 
   context.subscriptions.push(
-    vscode.commands.registerCommand('maraudersMapMd.history.pruneNow', () => {
-      vscode.window.showInformationMessage('Not implemented yet');
-    })
+    vscode.commands.registerCommand('maraudersMapMd.history.pruneNow', () => pruneNowCommand(context))
   );
 
   // AI commands
