@@ -1,10 +1,10 @@
 import * as vscode from 'vscode';
 import {
-  wrapSelection,
   toggleWrap,
   createLink,
   createHeading,
   createBlockquote,
+  toggleTask,
 } from './formatters';
 
 export function registerEditCommands(context: vscode.ExtensionContext): void {
@@ -41,6 +41,12 @@ export function registerEditCommands(context: vscode.ExtensionContext): void {
   context.subscriptions.push(
     vscode.commands.registerCommand('maraudersMapMd.insert.quote', () => {
       insertQuote();
+    })
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand('maraudersMapMd.toggle.task', () => {
+      toggleTaskCheckbox();
     })
   );
 }
@@ -155,6 +161,21 @@ function insertQuote(): void {
       const selectedText = editor.document.getText(selection);
       const quoted = createBlockquote(selectedText);
       editBuilder.replace(selection, quoted);
+    }
+  });
+}
+
+function toggleTaskCheckbox(): void {
+  const editor = vscode.window.activeTextEditor;
+  if (!editor) {
+    return;
+  }
+
+  editor.edit((editBuilder) => {
+    for (const selection of editor.selections) {
+      const line = editor.document.lineAt(selection.start.line);
+      const toggled = toggleTask(line.text);
+      editBuilder.replace(line.range, toggled);
     }
   });
 }

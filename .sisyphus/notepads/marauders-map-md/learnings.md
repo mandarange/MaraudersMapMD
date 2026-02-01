@@ -93,3 +93,193 @@
 - Simple slug generation: lowercase, trim, remove special chars, replace spaces with hyphens
 - Used for heading anchor links (future feature)
 
+## Task 3: PreviewManager Implementation
+
+### Webview Lifecycle Patterns
+- Singleton panel pattern: check `this.panel` before creating, `reveal()` if exists
+- `createWebviewPanel()` takes viewType, title, showOptions, options
+- `preserveFocus: true` in showOptions keeps editor focused when opening beside
+- `retainContextWhenHidden: true` keeps webview state when tab is not visible (memory cost but prevents re-render)
+- `onDidDispose` callback fires when user closes the panel — must null out references
+- Push dispose listeners into `this.disposables` array, clean them up in `dispose()`
+
+### CSP Configuration
+- Strict CSP: `default-src 'none'` blocks everything, then whitelist per directive
+- `style-src ${cspSource} 'unsafe-inline'` — cspSource for external CSS, unsafe-inline for inline styles
+- `img-src ${cspSource} https: data: file:` — covers webview URIs, remote images, base64, local files
+- `script-src 'nonce-${nonce}'` — only scripts with matching nonce can execute
+- `font-src ${cspSource}` — fonts from extension resources only
+- `webview.cspSource` provides the VS Code webview origin string
+
+### Debouncing Strategy
+- Use `ReturnType<typeof setTimeout>` for cross-platform timeout type (avoids Node vs browser conflict)
+- Always clear previous timeout before setting new one: `clearTimeout(this.updateTimeout)`
+- Read delay from config each time (respects user changes without restart)
+- Large doc detection: `Buffer.byteLength(text, 'utf8') / 1024` for accurate KB size
+- Two-tier debounce: normal (200ms) vs large doc (700ms) based on `largeDocThresholdKb`
+
+### Version Tracking
+- Increment `this.version` on each update, capture into local `currentVersion`
+- Send version in `postMessage` — webview script should only apply if version >= last seen
+- Prevents stale renders from overwriting newer content (race condition prevention)
+
+### Module Boundaries
+- `htmlTemplate.ts` is pure TS (no vscode imports) — testable without VS Code runtime
+- `getNonce.ts` is pure TS — simple utility, no dependencies
+- `previewManager.ts` is the VS Code adapter — imports vscode, manages panel lifecycle
+- `extension.ts` wires PreviewManager to VS Code command/event system
+
+### Lock Feature
+- `toggleLock()` captures current document reference when locking
+- When locked: only updates for the locked document's URI (ignores editor switching)
+- When unlocking: immediately updates to current active editor's document
+- Lock state shown via emoji prefix in panel title
+
+### Event Wiring Pattern
+- `onDidChangeActiveTextEditor` → switch preview to new markdown file (unless locked)
+- `onDidChangeTextDocument` → debounced update for editing changes
+- Both registered in `extension.ts` via `context.subscriptions.push()`
+- PreviewManager methods are public thin handlers; internal logic stays private
+
+
+## Task 5: Format and Insert Commands (TDD)
+
+### TDD Workflow Success
+- **RED phase**: Created 26 test cases covering all formatter functions
+- **GREEN phase**: Implemented pure TS formatters to pass all tests
+- **REFACTOR phase**: Removed verbose docstrings, used self-documenting variable names
+
+### Pure TS Formatter Pattern
+- `src/edit/formatters.ts` has ZERO vscode imports — pure text manipulation
+- Functions: wrapSelection, toggleWrap, insertAtLineStart, createLink, createHeading, createBlockquote
+- All functions are deterministic and testable without VS Code runtime
+- This separation enables fast unit testing and code reuse
+
+### Test Coverage (26 tests)
+1. **wrapSelection**: Basic wrapping, empty text, different before/after
+2. **toggleWrap**: Add wrap if missing, remove if present, partial wraps, empty text
+3. **insertAtLineStart**: Single line, multiline, empty text, trailing newlines
+4. **createLink**: Basic link, empty text, empty URL
+5. **createHeading**: Levels 1-6, empty text, level clamping (0→1, 7→6)
+6. **createBlockquote**: Single line, multiline, empty text, trailing newlines
+
+### VS Code Command Adapter Pattern
+- `src/edit/editCommands.ts` imports vscode and formatters
+- `registerEditCommands(context)` function registers all 6 commands
+- Each command handler:
+  - Gets active editor
+  - Processes all selections (supports multi-cursor)
+  - Uses `editor.edit()` with EditBuilder for atomic changes
+  - Calls pure formatter functions
+
+### Command Implementation Details
+- **Bold/Italic/InlineCode**: Use `toggleWrap()` for smart toggle behavior
+- **Link**: Show `showInputBox()` for URL, apply `createLink()`
+- **Heading**: Show `showQuickPick()` with levels 1-6, apply `createHeading()`
+- **Quote**: Use `createBlockquote()` on all selections
+
+### Multi-Selection Support
+- Loop through `editor.selections` array
+- Each selection gets independent formatting
+- Enables formatting multiple text blocks in one command
+
+### Extension Integration
+- Import `registerEditCommands` in extension.ts
+- Call `registerEditCommands(context)` in activate()
+- Replaces 6 individual command registrations with single function call
+- Cleaner extension.ts, easier to maintain
+
+### Code Style Observations
+- Repository uses semantic commit style: `feat(scope): description`
+- Example: `feat(edit): implement text formatters with TDD`
+- Scope matches module/feature (edit, preview, etc.)
+
+### Key Learnings
+1. **Separation of concerns**: Pure formatters + VS Code adapter = testable + maintainable
+2. **Self-documenting code**: Variable names like `isAlreadyWrapped`, `validLevel` eliminate need for comments
+3. **Multi-selection**: Always loop through selections, not just first one
+4. **Input dialogs**: `showInputBox()` for text, `showQuickPick()` for choices
+5. **EditBuilder pattern**: All text changes go through `editor.edit()` callback for atomicity
+
+### Test Insights
+- Test edge cases: empty text, boundary values (level 0, 7), partial wraps
+- Test multiline behavior: ensure newlines are preserved correctly
+- Test toggle behavior: verify both add and remove paths work
+
+### Next Steps
+- Task 6 (Task Toggle) will follow same pattern: pure formatter + VS Code adapter
+- Tasks 7-9 (Images, Export, History) can parallelize with this pattern
+- All edit operations should use `editor.edit()` for consistency
+
+## Task 6: Task Toggle (Editor + Preview)
+
+### TDD Workflow Success
+- **RED phase**: Created 20 test cases for `isTaskLine()` and `toggleTask()` functions
+- **GREEN phase**: Implemented pure TS functions to pass all tests
+- **REFACTOR phase**: Code is clean and self-documenting
+
+### Task Toggle Implementation
+
+#### Pure TS Formatter Pattern (formatters.ts)
+- `isTaskLine(line: string): boolean` — detects task list lines with regex pattern
+  - Pattern: `/^\s*[-*]\s+\[[xX\s]\]/` matches indented task markers
+  - Handles both `-` and `*` list markers
+  - Handles indented task lines (any leading whitespace)
+  
+- `toggleTask(line: string): string` — toggles checkbox state
+  - Returns unchanged if not a task line
+  - Uses regex replace to toggle `[ ]` ↔ `[x]`
+  - Preserves indentation and task text
+  - Handles both `-` and `*` markers
+
+#### VS Code Command Adapter (editCommands.ts)
+- `maraudersMapMd.toggle.task` command registered in `registerEditCommands()`
+- `toggleTaskCheckbox()` function:
+  - Gets active editor
+  - Loops through all selections (multi-cursor support)
+  - Gets line at selection start
+  - Applies `toggleTask()` formatter
+  - Uses `editor.edit()` for atomic changes
+
+### Test Coverage (20 new tests)
+1. **isTaskLine**: 10 tests
+   - Detects `- [ ]` and `- [x]` patterns
+   - Detects `* [ ]` and `* [x]` patterns
+   - Detects indented task lines
+   - Rejects non-task lines, headings, empty lines
+
+2. **toggleTask**: 10 tests
+   - Toggles unchecked → checked
+   - Toggles checked → unchecked
+   - Handles both `-` and `*` markers
+   - Handles indented tasks
+   - Preserves task text
+   - Returns non-task lines unchanged
+
+### Integration Points
+- **Preview checkbox click**: preview.js sends `{ type: 'toggleCheckbox', line }` message
+- **PreviewManager handler**: `handleToggleCheckbox()` already implemented (Task 4)
+- **Editor command**: New `maraudersMapMd.toggle.task` command for keyboard shortcut
+- Both paths (preview click + editor command) update the source document
+
+### Key Learnings
+1. **Regex patterns for task detection**: `/^\s*[-*]\s+\[[xX\s]\]/` is robust for all variants
+2. **Capture groups in replace**: `$1` preserves indentation and marker in replacement
+3. **Multi-cursor support**: Loop through `editor.selections`, not just first selection
+4. **Line-based operations**: Use `editor.document.lineAt()` to get full line range
+5. **Case-insensitive checkbox**: Pattern `[xX]` handles both lowercase and uppercase
+
+### Test Insights
+- Edge cases: indented tasks, `*` vs `-` markers, non-task lines
+- Boundary values: empty lines, lines without markers
+- Preservation: indentation, task text, marker type
+
+### Build Status
+- All 57 tests pass (1 smoke + 26 formatters + 10 markdown engine + 20 task toggle)
+- TypeScript: No errors (`npx tsc --noEmit`)
+- Build: Succeeds with esbuild (258.5kb dist/extension.js)
+
+### Next Steps
+- Task 7 (Image Insert) can follow same pattern
+- Tasks 8-9 (Export, History) can parallelize
+- All edit operations maintain consistency with `editor.edit()` pattern

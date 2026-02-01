@@ -6,6 +6,8 @@ import {
   createLink,
   createHeading,
   createBlockquote,
+  isTaskLine,
+  toggleTask,
 } from '../../src/edit/formatters';
 
 describe('formatters', () => {
@@ -129,25 +131,129 @@ describe('formatters', () => {
     });
   });
 
-  describe('createBlockquote', () => {
-    it('should prepend > to single line', () => {
-      const result = createBlockquote('This is a quote');
-      expect(result).toBe('> This is a quote');
-    });
+   describe('createBlockquote', () => {
+     it('should prepend > to single line', () => {
+       const result = createBlockquote('This is a quote');
+       expect(result).toBe('> This is a quote');
+     });
 
-    it('should prepend > to each line in multiline text', () => {
-      const result = createBlockquote('Line 1\nLine 2\nLine 3');
-      expect(result).toBe('> Line 1\n> Line 2\n> Line 3');
-    });
+     it('should prepend > to each line in multiline text', () => {
+       const result = createBlockquote('Line 1\nLine 2\nLine 3');
+       expect(result).toBe('> Line 1\n> Line 2\n> Line 3');
+     });
 
-    it('should handle empty text', () => {
-      const result = createBlockquote('');
-      expect(result).toBe('> ');
-    });
+     it('should handle empty text', () => {
+       const result = createBlockquote('');
+       expect(result).toBe('> ');
+     });
 
-    it('should handle text with trailing newline', () => {
-      const result = createBlockquote('Quote\n');
-      expect(result).toBe('> Quote\n> ');
-    });
-  });
+     it('should handle text with trailing newline', () => {
+       const result = createBlockquote('Quote\n');
+       expect(result).toBe('> Quote\n> ');
+     });
+   });
+
+   describe('isTaskLine', () => {
+     it('should detect task line with dash and unchecked box', () => {
+       const result = isTaskLine('- [ ] Task item');
+       expect(result).toBe(true);
+     });
+
+     it('should detect task line with dash and checked box', () => {
+       const result = isTaskLine('- [x] Completed task');
+       expect(result).toBe(true);
+     });
+
+     it('should detect task line with asterisk and unchecked box', () => {
+       const result = isTaskLine('* [ ] Task item');
+       expect(result).toBe(true);
+     });
+
+     it('should detect task line with asterisk and checked box', () => {
+       const result = isTaskLine('* [x] Completed task');
+       expect(result).toBe(true);
+     });
+
+     it('should detect indented task line', () => {
+       const result = isTaskLine('  - [ ] Indented task');
+       expect(result).toBe(true);
+     });
+
+     it('should detect deeply indented task line', () => {
+       const result = isTaskLine('    - [x] Deep task');
+       expect(result).toBe(true);
+     });
+
+     it('should not detect non-task list line', () => {
+       const result = isTaskLine('- Regular list item');
+       expect(result).toBe(false);
+     });
+
+     it('should not detect heading', () => {
+       const result = isTaskLine('# Heading');
+       expect(result).toBe(false);
+     });
+
+     it('should not detect empty line', () => {
+       const result = isTaskLine('');
+       expect(result).toBe(false);
+     });
+
+     it('should not detect line without list marker', () => {
+       const result = isTaskLine('Just text');
+       expect(result).toBe(false);
+     });
+   });
+
+   describe('toggleTask', () => {
+     it('should toggle unchecked task to checked', () => {
+       const result = toggleTask('- [ ] Task item');
+       expect(result).toBe('- [x] Task item');
+     });
+
+     it('should toggle checked task to unchecked', () => {
+       const result = toggleTask('- [x] Completed task');
+       expect(result).toBe('- [ ] Completed task');
+     });
+
+     it('should toggle asterisk unchecked task to checked', () => {
+       const result = toggleTask('* [ ] Task item');
+       expect(result).toBe('* [x] Task item');
+     });
+
+     it('should toggle asterisk checked task to unchecked', () => {
+       const result = toggleTask('* [x] Completed task');
+       expect(result).toBe('* [ ] Completed task');
+     });
+
+     it('should toggle indented task line', () => {
+       const result = toggleTask('  - [ ] Indented task');
+       expect(result).toBe('  - [x] Indented task');
+     });
+
+     it('should toggle deeply indented task line', () => {
+       const result = toggleTask('    - [x] Deep task');
+       expect(result).toBe('    - [ ] Deep task');
+     });
+
+     it('should return non-task line unchanged', () => {
+       const result = toggleTask('- Regular list item');
+       expect(result).toBe('- Regular list item');
+     });
+
+     it('should return heading unchanged', () => {
+       const result = toggleTask('# Heading');
+       expect(result).toBe('# Heading');
+     });
+
+     it('should return empty line unchanged', () => {
+       const result = toggleTask('');
+       expect(result).toBe('');
+     });
+
+     it('should preserve task text after checkbox', () => {
+       const result = toggleTask('- [ ] Buy groceries and cook dinner');
+       expect(result).toBe('- [x] Buy groceries and cook dinner');
+     });
+   });
 });
