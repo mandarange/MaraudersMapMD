@@ -5,8 +5,21 @@ import {
   buildMarkdownImageLink,
   getAltText,
 } from './pathUtils';
+import { EditorDropProvider, EditorPasteProvider } from './editorDropProvider';
 
 export function registerImageCommands(context: vscode.ExtensionContext): void {
+  const dropProvider = new EditorDropProvider();
+  const pasteProvider = new EditorPasteProvider();
+
+  context.subscriptions.push(
+    vscode.languages.registerDocumentDropEditProvider({ language: 'markdown' }, dropProvider),
+    vscode.languages.registerDocumentPasteEditProvider(
+      { language: 'markdown' },
+      pasteProvider,
+      { providedPasteEditKinds: [vscode.DocumentDropOrPasteEditKind.Empty], pasteMimeTypes: ['image/*'] }
+    )
+  );
+
   context.subscriptions.push(
     vscode.commands.registerCommand('maraudersMapMd.images.insertFromFile', async () => {
       const editor = vscode.window.activeTextEditor;
