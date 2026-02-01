@@ -9,6 +9,7 @@ import {
   createCheckpointCommand,
   pruneNowCommand,
 } from './history/historyCommands';
+import { registerAiCommands } from './ai/aiCommands';
 
 export function activate(context: vscode.ExtensionContext): void {
   const previewManager = new PreviewManager(context.extensionUri);
@@ -45,6 +46,7 @@ export function activate(context: vscode.ExtensionContext): void {
   registerImageCommands(context);
   registerExportCommands(context);
   registerHistoryListeners(context);
+  registerAiCommands(context);
 
   // Toggle commands
   context.subscriptions.push(
@@ -111,23 +113,7 @@ export function activate(context: vscode.ExtensionContext): void {
     })
   );
 
-  context.subscriptions.push(
-    vscode.commands.registerCommand('maraudersMapMd.ai.insertHintRule', () => {
-      vscode.window.showInformationMessage('Not implemented yet');
-    })
-  );
 
-  context.subscriptions.push(
-    vscode.commands.registerCommand('maraudersMapMd.ai.insertHintDecision', () => {
-      vscode.window.showInformationMessage('Not implemented yet');
-    })
-  );
-
-  context.subscriptions.push(
-    vscode.commands.registerCommand('maraudersMapMd.ai.insertHintNote', () => {
-      vscode.window.showInformationMessage('Not implemented yet');
-    })
-  );
 }
 
 export function deactivate(): void {
