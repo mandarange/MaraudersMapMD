@@ -179,6 +179,12 @@
         "icon": "$(clippy)"
       },
       {
+        "command": "maraudersMapMd.ai.copyReadabilityPrompt",
+        "title": "Copy Readability Prompt",
+        "category": "MaraudersMapMD: AI",
+        "icon": "$(comment-discussion)"
+      },
+      {
         "command": "maraudersMapMd.ai.insertHintRule",
         "title": "Insert AI Rule Hint",
         "category": "MaraudersMapMD: AI",

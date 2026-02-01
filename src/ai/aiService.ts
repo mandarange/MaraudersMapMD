@@ -379,6 +379,44 @@ async function cmdCopyContextBudgeted(): Promise<void> {
   vscode.window.showInformationMessage(`Copied ~${actualTokens} tokens to clipboard`);
 }
 
+function buildReadabilityPrompt(source: string): string {
+  return `You are an expert technical editor. Rewrite the Markdown to maximize readability and scan-ability while preserving meaning and intent.
+
+Core requirements:
+- Keep the final language the same as the original (do not translate). If mixed, use the dominant language.
+- Preserve all facts, constraints, and technical details. Do not add new information.
+- Keep Markdown semantics correct (headings, lists, tables, code fences, links).
+- Use the project's AI hint block format where it helps: "> [AI RULE]", "> [AI DECISION]", "> [AI TODO]", "> [AI CONTEXT]".
+- Prefer short paragraphs, clear headings, and consistent numbering.
+- Use tables for settings, options, or structured comparisons when helpful.
+- Keep code blocks and inline code exactly as-is.
+- Remove fluff and redundancy; keep only what's necessary.
+- Output ONLY the final Markdown. No commentary.
+
+Formatting guidance:
+- Ensure headings follow a clean hierarchy.
+- Convert dense prose into bullet lists where it improves readability.
+- Keep a concise top summary if the document is long.
+
+SOURCE MARKDOWN (do not omit any content):
+<<<BEGIN MARKDOWN
+${source}
+END MARKDOWN>>>`;
+}
+
+async function cmdCopyReadabilityPrompt(): Promise<void> {
+  const editor = getMarkdownEditor();
+  if (!editor) {
+    vscode.window.showErrorMessage('Open a Markdown file first');
+    return;
+  }
+
+  const source = editor.document.getText();
+  const prompt = buildReadabilityPrompt(source);
+  await vscode.env.clipboard.writeText(prompt);
+  vscode.window.showInformationMessage('Readability prompt copied to clipboard');
+}
+
 // ── Registration ────────────────────────────────────────────────────
 
 export function registerAiListeners(context: vscode.ExtensionContext): void {
@@ -410,6 +448,12 @@ export function registerAiListeners(context: vscode.ExtensionContext): void {
   context.subscriptions.push(
     vscode.commands.registerCommand('maraudersMapMd.ai.copyContextBudgeted', () => {
       void cmdCopyContextBudgeted();
+    }),
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand('maraudersMapMd.ai.copyReadabilityPrompt', () => {
+      void cmdCopyReadabilityPrompt();
     }),
   );
 }
