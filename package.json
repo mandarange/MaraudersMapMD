@@ -1,0 +1,419 @@
+{
+  "name": "marauders-map-md",
+  "displayName": "MaraudersMapMD",
+  "description": "Ultra-fast Markdown preview, quick edits, images, PDF export, history, and AI readability support",
+  "version": "0.1.0",
+  "license": "MIT",
+  "publisher": "marauders-map-md",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/marauders-map-md"
+  },
+  "engines": {
+    "vscode": "^1.100.0"
+  },
+  "categories": [
+    "Markdown",
+    "Visualization",
+    "Other"
+  ],
+  "keywords": [
+    "markdown",
+    "preview",
+    "pdf",
+    "export",
+    "history",
+    "ai",
+    "readability"
+  ],
+  "activationEvents": [
+    "onLanguage:markdown"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "maraudersMapMd.openPreviewToSide",
+        "title": "Open Preview to Side",
+        "category": "MaraudersMapMD"
+      },
+      {
+        "command": "maraudersMapMd.togglePreviewLock",
+        "title": "Toggle Preview Lock",
+        "category": "MaraudersMapMD"
+      },
+      {
+        "command": "maraudersMapMd.format.bold",
+        "title": "Make Bold",
+        "category": "MaraudersMapMD: Format"
+      },
+      {
+        "command": "maraudersMapMd.format.italic",
+        "title": "Make Italic",
+        "category": "MaraudersMapMD: Format"
+      },
+      {
+        "command": "maraudersMapMd.format.inlineCode",
+        "title": "Make Inline Code",
+        "category": "MaraudersMapMD: Format"
+      },
+      {
+        "command": "maraudersMapMd.insert.link",
+        "title": "Insert Link",
+        "category": "MaraudersMapMD: Insert"
+      },
+      {
+        "command": "maraudersMapMd.insert.heading",
+        "title": "Insert Heading",
+        "category": "MaraudersMapMD: Insert"
+      },
+      {
+        "command": "maraudersMapMd.insert.quote",
+        "title": "Insert Quote",
+        "category": "MaraudersMapMD: Insert"
+      },
+      {
+        "command": "maraudersMapMd.toggle.task",
+        "title": "Toggle Task",
+        "category": "MaraudersMapMD: Toggle"
+      },
+      {
+        "command": "maraudersMapMd.images.insertFromFile",
+        "title": "Insert Image from File",
+        "category": "MaraudersMapMD: Images"
+      },
+      {
+        "command": "maraudersMapMd.images.pasteToAssets",
+        "title": "Paste Image to Assets",
+        "category": "MaraudersMapMD: Images"
+      },
+      {
+        "command": "maraudersMapMd.export.html",
+        "title": "Export to HTML",
+        "category": "MaraudersMapMD: Export"
+      },
+      {
+        "command": "maraudersMapMd.export.pdf",
+        "title": "Export to PDF",
+        "category": "MaraudersMapMD: Export"
+      },
+      {
+        "command": "maraudersMapMd.history.open",
+        "title": "Open History",
+        "category": "MaraudersMapMD: History"
+      },
+      {
+        "command": "maraudersMapMd.history.createCheckpoint",
+        "title": "Create Checkpoint",
+        "category": "MaraudersMapMD: History"
+      },
+      {
+        "command": "maraudersMapMd.history.diffWithCurrent",
+        "title": "Diff with Current",
+        "category": "MaraudersMapMD: History"
+      },
+      {
+        "command": "maraudersMapMd.history.restoreSnapshot",
+        "title": "Restore Snapshot",
+        "category": "MaraudersMapMD: History"
+      },
+      {
+        "command": "maraudersMapMd.history.pruneNow",
+        "title": "Prune History Now",
+        "category": "MaraudersMapMD: History"
+      },
+      {
+        "command": "maraudersMapMd.ai.generateMap",
+        "title": "Generate AI Map",
+        "category": "MaraudersMapMD: AI"
+      },
+      {
+        "command": "maraudersMapMd.ai.exportSectionPack",
+        "title": "Export Section Pack",
+        "category": "MaraudersMapMD: AI"
+      },
+      {
+        "command": "maraudersMapMd.ai.buildIndex",
+        "title": "Build Search Index",
+        "category": "MaraudersMapMD: AI"
+      },
+      {
+        "command": "maraudersMapMd.ai.copyContextBudgeted",
+        "title": "Copy Context (Budgeted)",
+        "category": "MaraudersMapMD: AI"
+      },
+      {
+        "command": "maraudersMapMd.ai.insertHintRule",
+        "title": "Insert AI Rule Hint",
+        "category": "MaraudersMapMD: AI"
+      },
+      {
+        "command": "maraudersMapMd.ai.insertHintDecision",
+        "title": "Insert AI Decision Hint",
+        "category": "MaraudersMapMD: AI"
+      },
+      {
+        "command": "maraudersMapMd.ai.insertHintNote",
+        "title": "Insert AI Note Hint",
+        "category": "MaraudersMapMD: AI"
+      }
+    ],
+    "configuration": {
+      "title": "MaraudersMapMD",
+      "properties": {
+        "maraudersMapMd.preview.updateDelayMs": {
+          "type": "number",
+          "default": 200,
+          "description": "Delay in milliseconds before updating preview after text change",
+          "minimum": 50,
+          "maximum": 2000
+        },
+        "maraudersMapMd.preview.largeDocThresholdKb": {
+          "type": "number",
+          "default": 512,
+          "description": "Document size threshold in KB for large document handling",
+          "minimum": 100,
+          "maximum": 5000
+        },
+        "maraudersMapMd.preview.largeDocUpdateDelayMs": {
+          "type": "number",
+          "default": 700,
+          "description": "Delay in milliseconds for updating preview of large documents",
+          "minimum": 100,
+          "maximum": 3000
+        },
+        "maraudersMapMd.preview.scrollSync": {
+          "type": "boolean",
+          "default": true,
+          "description": "Synchronize scroll position between editor and preview"
+        },
+        "maraudersMapMd.render.allowHtml": {
+          "type": "boolean",
+          "default": false,
+          "description": "Allow rendering of raw HTML in markdown"
+        },
+        "maraudersMapMd.images.assetsDir": {
+          "type": "string",
+          "default": "assets",
+          "description": "Directory name for storing images relative to markdown file"
+        },
+        "maraudersMapMd.images.allowRemote": {
+          "type": "boolean",
+          "default": false,
+          "description": "Allow embedding remote images (URLs)"
+        },
+        "maraudersMapMd.images.filenamePattern": {
+          "type": "string",
+          "default": "{basename}-{yyyyMMdd-HHmmss}",
+          "description": "Pattern for generating image filenames"
+        },
+        "maraudersMapMd.images.altTextSource": {
+          "type": "string",
+          "enum": [
+            "filename",
+            "prompt",
+            "empty"
+          ],
+          "default": "filename",
+          "description": "Source for alt text when inserting images"
+        },
+        "maraudersMapMd.pdf.browserPath": {
+          "type": "string",
+          "default": "auto",
+          "description": "Path to Chrome/Chromium browser for PDF export (auto = auto-detect)"
+        },
+        "maraudersMapMd.pdf.format": {
+          "type": "string",
+          "enum": [
+            "A4",
+            "Letter",
+            "A3",
+            "A5"
+          ],
+          "default": "A4",
+          "description": "Paper format for PDF export"
+        },
+        "maraudersMapMd.pdf.marginMm": {
+          "type": "number",
+          "default": 12,
+          "description": "Margin size in millimeters for PDF export",
+          "minimum": 0,
+          "maximum": 50
+        },
+        "maraudersMapMd.pdf.printBackground": {
+          "type": "boolean",
+          "default": true,
+          "description": "Include background colors and images in PDF export"
+        },
+        "maraudersMapMd.pdf.embedImages": {
+          "type": "string",
+          "enum": [
+            "fileUrl",
+            "dataUri"
+          ],
+          "default": "fileUrl",
+          "description": "Method for embedding images in PDF"
+        },
+        "maraudersMapMd.pdf.outputDirectory": {
+          "type": "string",
+          "default": "${workspaceFolder}/exports",
+          "description": "Directory for PDF export output"
+        },
+        "maraudersMapMd.pdf.openAfterExport": {
+          "type": "boolean",
+          "default": true,
+          "description": "Open PDF file after successful export"
+        },
+        "maraudersMapMd.history.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable history snapshots for markdown files"
+        },
+        "maraudersMapMd.history.storageLocation": {
+          "type": "string",
+          "enum": [
+            "workspace",
+            "globalStorage"
+          ],
+          "default": "workspace",
+          "description": "Where to store history snapshots"
+        },
+        "maraudersMapMd.history.mode": {
+          "type": "string",
+          "enum": [
+            "onSave",
+            "interval",
+            "manual"
+          ],
+          "default": "onSave",
+          "description": "When to create history snapshots"
+        },
+        "maraudersMapMd.history.intervalMinutes": {
+          "type": "number",
+          "default": 10,
+          "description": "Interval in minutes for automatic snapshots (when mode is interval)",
+          "minimum": 1,
+          "maximum": 120
+        },
+        "maraudersMapMd.history.maxSnapshotsPerFile": {
+          "type": "number",
+          "default": 100,
+          "description": "Maximum number of snapshots to keep per file",
+          "minimum": 10,
+          "maximum": 1000
+        },
+        "maraudersMapMd.history.maxTotalStorageMb": {
+          "type": "number",
+          "default": 200,
+          "description": "Maximum total storage for all history snapshots in MB",
+          "minimum": 50,
+          "maximum": 2000
+        },
+        "maraudersMapMd.history.retentionDays": {
+          "type": "number",
+          "default": 30,
+          "description": "Number of days to retain history snapshots",
+          "minimum": 1,
+          "maximum": 365
+        },
+        "maraudersMapMd.history.protectManualCheckpoints": {
+          "type": "boolean",
+          "default": true,
+          "description": "Protect manually created checkpoints from automatic pruning"
+        },
+        "maraudersMapMd.history.snapshotCompression": {
+          "type": "string",
+          "enum": [
+            "none",
+            "gzip"
+          ],
+          "default": "gzip",
+          "description": "Compression method for history snapshots"
+        },
+        "maraudersMapMd.history.createPreRestoreSnapshot": {
+          "type": "boolean",
+          "default": true,
+          "description": "Create a snapshot before restoring from history"
+        },
+        "maraudersMapMd.ai.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable AI readability support features"
+        },
+        "maraudersMapMd.ai.outputDir": {
+          "type": "string",
+          "default": ".ai",
+          "description": "Directory for AI artifacts output (relative to workspace root)"
+        },
+        "maraudersMapMd.ai.buildOnSave": {
+          "type": "boolean",
+          "default": true,
+          "description": "Generate AI artifacts on file save"
+        },
+        "maraudersMapMd.ai.generate.map": {
+          "type": "boolean",
+          "default": true,
+          "description": "Generate AI map artifact"
+        },
+        "maraudersMapMd.ai.generate.sections": {
+          "type": "boolean",
+          "default": true,
+          "description": "Generate section pack artifact"
+        },
+        "maraudersMapMd.ai.generate.index": {
+          "type": "boolean",
+          "default": true,
+          "description": "Generate search index artifact"
+        },
+        "maraudersMapMd.ai.tokenEstimateMode": {
+          "type": "string",
+          "enum": [
+            "simple",
+            "koreanWeighted"
+          ],
+          "default": "koreanWeighted",
+          "description": "Method for estimating token counts"
+        },
+        "maraudersMapMd.ai.gitPolicy": {
+          "type": "string",
+          "enum": [
+            "ignoreAll",
+            "commitMapOnly",
+            "commitAll"
+          ],
+          "default": "ignoreAll",
+          "description": "Git policy for AI artifacts"
+        },
+        "maraudersMapMd.ai.largeDocThresholdKb": {
+          "type": "number",
+          "default": 512,
+          "description": "Document size threshold in KB for limiting AI artifact generation",
+          "minimum": 100,
+          "maximum": 5000
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run esbuild-base -- --minify",
+    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node",
+    "esbuild": "npm run esbuild-base -- --sourcemap",
+    "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
+    "compile": "npm run esbuild",
+    "watch": "npm run esbuild-watch",
+    "pretest": "npm run compile",
+    "test": "vitest",
+    "test:integration": "node ./test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.100.0",
+    "@vscode/test-electron": "^2.4.0",
+    "esbuild": "^0.21.0",
+    "typescript": "^5.3.0",
+    "vitest": "^1.0.0"
+  },
+  "dependencies": {
+    "markdown-it": "^14.0.0"
+  }
+}
