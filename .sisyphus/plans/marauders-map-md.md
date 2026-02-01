@@ -481,7 +481,7 @@ Wave 6 — Final Integration + Package:
 
 ### Wave 1 — Preview
 
-- [ ] 2. MarkdownEngine (Pure TS)
+- [x] 2. MarkdownEngine (Pure TS)
 
   **What to do**:
   - Create `src/preview/markdownEngine.ts`:
@@ -559,7 +559,7 @@ Wave 6 — Final Integration + Package:
 
 ---
 
-- [ ] 3. PreviewManager (VS Code Adapter)
+- [x] 3. PreviewManager (VS Code Adapter)
 
   **What to do**:
   - Create `src/preview/previewManager.ts`:
@@ -646,7 +646,7 @@ Wave 6 — Final Integration + Package:
 
 ---
 
-- [ ] 4. Preview Webview Assets (CSS + JS)
+- [x] 4. Preview Webview Assets (CSS + JS)
 
   **What to do**:
   - Create `media/preview.css`:
@@ -742,7 +742,7 @@ Wave 6 — Final Integration + Package:
 
 ### Wave 2 — Quick Edit + Images
 
-- [ ] 5. Format & Insert Commands
+- [x] 5. Format & Insert Commands
 
   **What to do**:
   - Create `src/edit/formatters.ts` (pure TS):
@@ -825,7 +825,7 @@ Wave 6 — Final Integration + Package:
 
 ---
 
-- [ ] 6. Task Toggle (Editor + Preview)
+- [x] 6. Task Toggle (Editor + Preview)
 
   **What to do**:
   - Add to `src/edit/formatters.ts` (pure TS):
@@ -884,7 +884,7 @@ Wave 6 — Final Integration + Package:
 
 ---
 
-- [ ] 7. Image Insert from File
+- [x] 7. Image Insert from File
 
   **What to do**:
   - Create `src/images/pathUtils.ts` (pure TS):
@@ -960,7 +960,7 @@ Wave 6 — Final Integration + Package:
 
 ---
 
-- [ ] 8. Image Drag-Drop (Editor-side)
+- [x] 8. Image Drag-Drop (Editor-side)
 
   **What to do**:
   - Create `src/images/editorDropProvider.ts`:
@@ -1108,7 +1108,7 @@ Wave 6 — Final Integration + Package:
 
 ### Wave 3 — Export
 
-- [ ] 10. HTML Export
+- [x] 10. HTML Export
 
   **What to do**:
   - Create `src/export/htmlTemplate.ts` (pure TS):
@@ -1180,7 +1180,7 @@ Wave 6 — Final Integration + Package:
 
 ---
 
-- [ ] 11. Chrome Detection
+- [x] 11. Chrome Detection
 
   **What to do**:
   - Create `src/export/chromeDetector.ts` (pure TS):
@@ -1246,7 +1246,7 @@ Wave 6 — Final Integration + Package:
 
 ---
 
-- [ ] 12. PDF Export with Local Image Embedding
+- [x] 12. PDF Export with Local Image Embedding
 
   **What to do**:
   - Create `src/export/pdfExporter.ts` (mixed — uses puppeteer-core but can accept browser path as param):
@@ -1337,7 +1337,7 @@ Wave 6 — Final Integration + Package:
 
 ### Wave 4 — History
 
-- [ ] 13. Snapshot Store (Pure TS)
+- [x] 13. Snapshot Store (Pure TS)
 
   **What to do**:
   - Create `src/history/snapshotStore.ts` (pure TS):
@@ -1411,7 +1411,7 @@ Wave 6 — Final Integration + Package:
 
 ---
 
-- [ ] 14. Retention Engine (Pure TS)
+- [x] 14. Retention Engine (Pure TS)
 
   **What to do**:
   - Create `src/history/retentionEngine.ts` (pure TS):
@@ -1474,7 +1474,7 @@ Wave 6 — Final Integration + Package:
 
 ---
 
-- [ ] 15. History Commands (onSave Hook + Checkpoint + QuickPick UI)
+- [x] 15. History Commands (onSave Hook + Checkpoint + QuickPick UI)
 
   **What to do**:
   - Create `src/history/historyCommands.ts` (vscode adapter):
@@ -1552,7 +1552,7 @@ Wave 6 — Final Integration + Package:
 
 ---
 
-- [ ] 16. Diff/Restore/Copy Actions
+- [x] 16. Diff/Restore/Copy Actions
 
   **What to do**:
   - Update `src/history/historyCommands.ts`:
@@ -1628,7 +1628,7 @@ Wave 6 — Final Integration + Package:
 
 ### Wave 5 — AI Readability Support
 
-- [ ] 17. Token Estimator + Markdown Structure Parser (Pure TS)
+- [x] 17. Token Estimator + Markdown Structure Parser (Pure TS)
 
   **What to do**:
   - Create `src/ai/tokenEstimator.ts` (pure TS):
@@ -1716,7 +1716,7 @@ Wave 6 — Final Integration + Package:
 
 ---
 
-- [ ] 18. AI Map Generator
+- [x] 18. AI Map Generator
 
   **What to do**:
   - Create `src/ai/aiMapGenerator.ts` (pure TS):
@@ -1807,7 +1807,7 @@ Wave 6 — Final Integration + Package:
 
 ---
 
-- [ ] 19. Section Pack Generator
+- [x] 19. Section Pack Generator
 
   **What to do**:
   - Create `src/ai/sectionPackGenerator.ts` (pure TS):
@@ -1870,7 +1870,7 @@ Wave 6 — Final Integration + Package:
 
 ---
 
-- [ ] 20. Search Index Builder
+- [x] 20. Search Index Builder
 
   **What to do**:
   - Create `src/ai/searchIndexBuilder.ts` (pure TS):
@@ -1927,7 +1927,7 @@ Wave 6 — Final Integration + Package:
 
 ---
 
-- [ ] 21. Token Budget Context Export
+- [x] 21. Token Budget Context Export
 
   **What to do**:
   - Create `src/ai/tokenBudgetExporter.ts` (pure TS):
@@ -1994,7 +1994,7 @@ Wave 6 — Final Integration + Package:
 
 ---
 
-- [ ] 22. AI Hint Blocks (Parser + Inserter)
+- [x] 22. AI Hint Blocks (Parser + Inserter)
 
   **What to do**:
   - Create `src/ai/hintBlockParser.ts` (pure TS):
