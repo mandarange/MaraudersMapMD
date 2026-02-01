@@ -404,7 +404,8 @@
     "pretest": "npm run compile",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:integration": "node ./test/runTest.js"
+    "test:integration": "tsc -p test/integration/tsconfig.json && node out/test/integration/runTests.js",
+    "package": "npm run esbuild-base -- --minify"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

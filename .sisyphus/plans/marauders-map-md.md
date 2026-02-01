@@ -2157,7 +2157,7 @@ Wave 6 — Final Integration + Package:
 
 ### Wave 6 — Final Integration
 
-- [ ] 24. Integration Tests + Smoke Tests + Package
+- [x] 24. Integration Tests + Smoke Tests + Package
 
   **What to do**:
   - Set up @vscode/test-electron:

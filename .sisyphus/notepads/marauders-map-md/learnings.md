@@ -2033,3 +2033,34 @@ import {
 - `maraudersMapMd.ai.tokenEstimateMode` (string, default: "koreanWeighted")
 - `maraudersMapMd.ai.gitPolicy` (string, default: "ignoreAll")
 - `maraudersMapMd.ai.largeDocThresholdKb` (number, default: 512)
+
+## [2026-02-01] Task 24: Integration Tests + Package (FINAL v0.1 MVP TASK)
+
+### Completed
+- Created `test/integration/runTests.ts` - @vscode/test-electron runner using v2.5.2
+- Created `test/integration/extension.test.ts` - Tests for activation, 25 commands, 35 config settings
+- Created `test/integration/tsconfig.json` - Separate tsconfig compiling to `out/test/integration/`
+- Added `package` script: `npm run esbuild-base -- --minify`
+- Updated `test:integration` script: `tsc -p test/integration/tsconfig.json && node out/test/integration/runTests.js`
+- Fixed `.vscodeignore` - CRITICAL: removed `dist` (was excluding the extension bundle!), removed `README.md`, added `out/`, `.sisyphus/`, `icon.png`
+- Updated `README.md` with full documentation: features, installation, 25 commands table, 35 settings table
+- Created VSIX: 720KB (well under 5MB target)
+- Added `out/` to `.gitignore`
+
+### Key Findings
+1. **CRITICAL .vscodeignore bug**: Original `.vscodeignore` excluded `dist/` directory, which meant `dist/extension.js` (the extension entry point) would NOT be in VSIX. Extension would be completely broken.
+2. **icon.png bloat**: A 8.3MB `icon.png` was inflating VSIX to 8.5MB. Added to `.vscodeignore` since no `icon` field in package.json references it.
+3. **@vscode/test-electron pattern**: Tests must export `run(): Promise<void>`. The runner's `extensionTestsPath` points to the module with the `run` export. Integration tests need their own tsconfig since main tsconfig only covers `src/`.
+4. **`__dirname` path resolution**: When compiled to `out/test/integration/`, need `../../../` to reach project root (3 levels up), not `../../` as in typical examples.
+5. **vsce vs @vscode/vsce**: `vsce` is deprecated. Use `@vscode/vsce` for packaging. Both work via `npx`.
+6. **VSIX compression**: 2.2MB minified JS compresses to ~700KB in VSIX zip.
+
+### v0.1 MVP Final Stats
+- 252 unit tests passing (16 test files)
+- 4 integration tests (activation, markdown activation, 25 commands, 35 config settings)
+- TypeScript: zero errors
+- Production bundle: 2.2MB minified
+- VSIX package: 720KB
+- 25 commands registered
+- 35 configuration settings
+- 6 feature areas: Preview, Quick Edit, Images, Export, History, AI

@@ -6,9 +6,9 @@
 .DS_Store
 *.vsix
 node_modules
-dist
 src
 test
+out
 **/*.ts
 **/*.map
 **/*.d.ts
@@ -19,7 +19,9 @@ tsconfig.json
 esbuild.js
 vitest.config.ts
 prd.md
-README.md
-LICENSE
 .maraudersmapmd
 .ai
+.sisyphus
+coverage
+.nyc_output
+icon.png
