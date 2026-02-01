@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { PreviewManager } from './preview/previewManager';
+import { registerEditCommands } from './edit/editCommands';
 
 export function activate(context: vscode.ExtensionContext): void {
   const previewManager = new PreviewManager(context.extensionUri);
@@ -32,43 +33,7 @@ export function activate(context: vscode.ExtensionContext): void {
     })
   );
 
-  // Format commands
-  context.subscriptions.push(
-    vscode.commands.registerCommand('maraudersMapMd.format.bold', () => {
-      vscode.window.showInformationMessage('Not implemented yet');
-    })
-  );
-
-  context.subscriptions.push(
-    vscode.commands.registerCommand('maraudersMapMd.format.italic', () => {
-      vscode.window.showInformationMessage('Not implemented yet');
-    })
-  );
-
-  context.subscriptions.push(
-    vscode.commands.registerCommand('maraudersMapMd.format.inlineCode', () => {
-      vscode.window.showInformationMessage('Not implemented yet');
-    })
-  );
-
-  // Insert commands
-  context.subscriptions.push(
-    vscode.commands.registerCommand('maraudersMapMd.insert.link', () => {
-      vscode.window.showInformationMessage('Not implemented yet');
-    })
-  );
-
-  context.subscriptions.push(
-    vscode.commands.registerCommand('maraudersMapMd.insert.heading', () => {
-      vscode.window.showInformationMessage('Not implemented yet');
-    })
-  );
-
-  context.subscriptions.push(
-    vscode.commands.registerCommand('maraudersMapMd.insert.quote', () => {
-      vscode.window.showInformationMessage('Not implemented yet');
-    })
-  );
+  registerEditCommands(context);
 
   // Toggle commands
   context.subscriptions.push(
