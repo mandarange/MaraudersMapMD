@@ -1,13 +1,18 @@
 {
   "name": "marauders-map-md",
   "displayName": "MaraudersMapMD",
-  "description": "Ultra-fast Markdown preview, quick edits, images, PDF export, history, and AI readability support",
-  "version": "0.1.0",
+  "description": "Ultra-fast Markdown preview with AI-native readability artifacts (AI Map, Section Pack, Token Budget), PDF/HTML export, document history, and GEO (Generative Engine Optimization) support for VS Code.",
+  "icon": "icon.png",
+  "version": "0.2.1",
   "license": "MIT",
   "publisher": "marauders-map-md",
+  "homepage": "https://github.com/mandarange/MaraudersMapMD#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/marauders-map-md"
+    "url": "https://github.com/mandarange/MaraudersMapMD.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mandarange/MaraudersMapMD/issues"
   },
   "engines": {
     "vscode": "^1.100.0"
@@ -15,16 +20,25 @@
   "categories": [
     "Markdown",
     "Visualization",
+    "Machine Learning",
     "Other"
   ],
   "keywords": [
     "markdown",
     "preview",
-    "pdf",
-    "export",
-    "history",
-    "ai",
-    "readability"
+    "pdf-export",
+    "ai-readability",
+    "llm-context",
+    "token-budget",
+    "generative-engine-optimization",
+    "geo",
+    "document-history",
+    "ai-map",
+    "section-pack",
+    "markdown-preview",
+    "ai-native",
+    "context-window",
+    "vendor-neutral"
   ],
   "activationEvents": [
     "onLanguage:markdown"
@@ -35,127 +49,254 @@
       {
         "command": "maraudersMapMd.openPreviewToSide",
         "title": "Open Preview to Side",
-        "category": "MaraudersMapMD"
+        "category": "MaraudersMapMD",
+        "icon": "$(open-preview)"
       },
       {
         "command": "maraudersMapMd.togglePreviewLock",
         "title": "Toggle Preview Lock",
-        "category": "MaraudersMapMD"
+        "category": "MaraudersMapMD",
+        "icon": "$(lock)"
       },
       {
         "command": "maraudersMapMd.format.bold",
         "title": "Make Bold",
-        "category": "MaraudersMapMD: Format"
+        "category": "MaraudersMapMD: Format",
+        "icon": "$(bold)"
       },
       {
         "command": "maraudersMapMd.format.italic",
         "title": "Make Italic",
-        "category": "MaraudersMapMD: Format"
+        "category": "MaraudersMapMD: Format",
+        "icon": "$(italic)"
       },
       {
         "command": "maraudersMapMd.format.inlineCode",
         "title": "Make Inline Code",
-        "category": "MaraudersMapMD: Format"
+        "category": "MaraudersMapMD: Format",
+        "icon": "$(code)"
       },
       {
         "command": "maraudersMapMd.insert.link",
         "title": "Insert Link",
-        "category": "MaraudersMapMD: Insert"
+        "category": "MaraudersMapMD: Insert",
+        "icon": "$(link)"
       },
       {
         "command": "maraudersMapMd.insert.heading",
         "title": "Insert Heading",
-        "category": "MaraudersMapMD: Insert"
+        "category": "MaraudersMapMD: Insert",
+        "icon": "$(symbol-key)"
       },
       {
         "command": "maraudersMapMd.insert.quote",
         "title": "Insert Quote",
-        "category": "MaraudersMapMD: Insert"
+        "category": "MaraudersMapMD: Insert",
+        "icon": "$(quote)"
       },
       {
         "command": "maraudersMapMd.toggle.task",
         "title": "Toggle Task",
-        "category": "MaraudersMapMD: Toggle"
+        "category": "MaraudersMapMD: Toggle",
+        "icon": "$(tasklist)"
       },
       {
         "command": "maraudersMapMd.images.insertFromFile",
         "title": "Insert Image from File",
-        "category": "MaraudersMapMD: Images"
+        "category": "MaraudersMapMD: Images",
+        "icon": "$(file-media)"
       },
       {
         "command": "maraudersMapMd.images.pasteToAssets",
         "title": "Paste Image to Assets",
-        "category": "MaraudersMapMD: Images"
+        "category": "MaraudersMapMD: Images",
+        "icon": "$(clippy)"
       },
       {
         "command": "maraudersMapMd.export.html",
         "title": "Export to HTML",
-        "category": "MaraudersMapMD: Export"
+        "category": "MaraudersMapMD: Export",
+        "icon": "$(file-code)"
       },
       {
         "command": "maraudersMapMd.export.pdf",
         "title": "Export to PDF",
-        "category": "MaraudersMapMD: Export"
+        "category": "MaraudersMapMD: Export",
+        "icon": "$(file-pdf)"
       },
       {
         "command": "maraudersMapMd.history.open",
         "title": "Open History",
-        "category": "MaraudersMapMD: History"
+        "category": "MaraudersMapMD: History",
+        "icon": "$(history)"
       },
       {
         "command": "maraudersMapMd.history.createCheckpoint",
         "title": "Create Checkpoint",
-        "category": "MaraudersMapMD: History"
+        "category": "MaraudersMapMD: History",
+        "icon": "$(bookmark)"
       },
       {
         "command": "maraudersMapMd.history.diffWithCurrent",
         "title": "Diff with Current",
-        "category": "MaraudersMapMD: History"
+        "category": "MaraudersMapMD: History",
+        "icon": "$(diff)"
       },
       {
         "command": "maraudersMapMd.history.restoreSnapshot",
         "title": "Restore Snapshot",
-        "category": "MaraudersMapMD: History"
+        "category": "MaraudersMapMD: History",
+        "icon": "$(discard)"
       },
       {
         "command": "maraudersMapMd.history.pruneNow",
         "title": "Prune History Now",
-        "category": "MaraudersMapMD: History"
+        "category": "MaraudersMapMD: History",
+        "icon": "$(trash)"
       },
       {
         "command": "maraudersMapMd.ai.generateMap",
         "title": "Generate AI Map",
-        "category": "MaraudersMapMD: AI"
+        "category": "MaraudersMapMD: AI",
+        "icon": "$(symbol-structure)"
       },
       {
         "command": "maraudersMapMd.ai.exportSectionPack",
         "title": "Export Section Pack",
-        "category": "MaraudersMapMD: AI"
+        "category": "MaraudersMapMD: AI",
+        "icon": "$(split-horizontal)"
       },
       {
         "command": "maraudersMapMd.ai.buildIndex",
         "title": "Build Search Index",
-        "category": "MaraudersMapMD: AI"
+        "category": "MaraudersMapMD: AI",
+        "icon": "$(search)"
       },
       {
         "command": "maraudersMapMd.ai.copyContextBudgeted",
         "title": "Copy Context (Budgeted)",
-        "category": "MaraudersMapMD: AI"
+        "category": "MaraudersMapMD: AI",
+        "icon": "$(clippy)"
       },
       {
         "command": "maraudersMapMd.ai.insertHintRule",
         "title": "Insert AI Rule Hint",
-        "category": "MaraudersMapMD: AI"
+        "category": "MaraudersMapMD: AI",
+        "icon": "$(warning)"
       },
       {
         "command": "maraudersMapMd.ai.insertHintDecision",
         "title": "Insert AI Decision Hint",
-        "category": "MaraudersMapMD: AI"
+        "category": "MaraudersMapMD: AI",
+        "icon": "$(lightbulb)"
       },
       {
         "command": "maraudersMapMd.ai.insertHintNote",
         "title": "Insert AI Note Hint",
-        "category": "MaraudersMapMD: AI"
+        "category": "MaraudersMapMD: AI",
+        "icon": "$(note)"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "maraudersMapMd.openPreviewToSide",
+          "when": "resourceLangId == markdown",
+          "group": "navigation"
+        },
+        {
+          "command": "maraudersMapMd.export.pdf",
+          "when": "resourceLangId == markdown",
+          "group": "navigation"
+        },
+        {
+          "command": "maraudersMapMd.ai.generateMap",
+          "when": "resourceLangId == markdown",
+          "group": "navigation"
+        },
+        {
+          "command": "maraudersMapMd.history.open",
+          "when": "resourceLangId == markdown",
+          "group": "navigation"
+        }
+      ],
+      "editor/context": [
+        {
+          "submenu": "maraudersMapMd.formatMenu",
+          "group": "marauders@1",
+          "when": "resourceLangId == markdown"
+        },
+        {
+          "submenu": "maraudersMapMd.insertMenu",
+          "group": "marauders@2",
+          "when": "resourceLangId == markdown"
+        },
+        {
+          "submenu": "maraudersMapMd.aiMenu",
+          "group": "marauders@3",
+          "when": "resourceLangId == markdown"
+        }
+      ],
+      "maraudersMapMd.formatMenu": [
+        { "command": "maraudersMapMd.format.bold", "group": "1_format@1" },
+        { "command": "maraudersMapMd.format.italic", "group": "1_format@2" },
+        { "command": "maraudersMapMd.format.inlineCode", "group": "1_format@3" },
+        { "command": "maraudersMapMd.toggle.task", "group": "2_toggle@1" }
+      ],
+      "maraudersMapMd.insertMenu": [
+        { "command": "maraudersMapMd.insert.link", "group": "1_insert@1" },
+        { "command": "maraudersMapMd.insert.heading", "group": "1_insert@2" },
+        { "command": "maraudersMapMd.insert.quote", "group": "1_insert@3" },
+        { "command": "maraudersMapMd.images.insertFromFile", "group": "2_images@1" }
+      ],
+      "maraudersMapMd.aiMenu": [
+        { "command": "maraudersMapMd.ai.insertHintRule", "group": "1_hints@1" },
+        { "command": "maraudersMapMd.ai.insertHintDecision", "group": "1_hints@2" },
+        { "command": "maraudersMapMd.ai.insertHintNote", "group": "1_hints@3" },
+        { "command": "maraudersMapMd.ai.generateMap", "group": "2_generate@1" },
+        { "command": "maraudersMapMd.ai.exportSectionPack", "group": "2_generate@2" },
+        { "command": "maraudersMapMd.ai.buildIndex", "group": "2_generate@3" },
+        { "command": "maraudersMapMd.ai.copyContextBudgeted", "group": "3_export@1" }
+      ]
+    },
+    "submenus": [
+      {
+        "id": "maraudersMapMd.formatMenu",
+        "label": "MaraudersMapMD: Format"
+      },
+      {
+        "id": "maraudersMapMd.insertMenu",
+        "label": "MaraudersMapMD: Insert"
+      },
+      {
+        "id": "maraudersMapMd.aiMenu",
+        "label": "MaraudersMapMD: AI"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "maraudersMapMd.openPreviewToSide",
+        "key": "ctrl+shift+m",
+        "mac": "cmd+shift+m",
+        "when": "resourceLangId == markdown"
+      },
+      {
+        "command": "maraudersMapMd.format.bold",
+        "key": "ctrl+b",
+        "mac": "cmd+b",
+        "when": "editorTextFocus && resourceLangId == markdown"
+      },
+      {
+        "command": "maraudersMapMd.format.italic",
+        "key": "ctrl+i",
+        "mac": "cmd+i",
+        "when": "editorTextFocus && resourceLangId == markdown"
+      },
+      {
+        "command": "maraudersMapMd.export.pdf",
+        "key": "ctrl+shift+e",
+        "mac": "cmd+shift+e",
+        "when": "resourceLangId == markdown"
       }
     ],
     "configuration": {

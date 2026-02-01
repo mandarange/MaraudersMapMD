@@ -6,6 +6,7 @@ import {
   getAltText,
 } from './pathUtils';
 import { EditorDropProvider, EditorPasteProvider } from './editorDropProvider';
+import { getMarkdownEditor } from '../utils/editorUtils';
 
 export function registerImageCommands(context: vscode.ExtensionContext): void {
   const dropProvider = new EditorDropProvider();
@@ -22,8 +23,8 @@ export function registerImageCommands(context: vscode.ExtensionContext): void {
 
   context.subscriptions.push(
     vscode.commands.registerCommand('maraudersMapMd.images.insertFromFile', async () => {
-      const editor = vscode.window.activeTextEditor;
-      if (!editor || editor.document.languageId !== 'markdown') {
+      const editor = getMarkdownEditor();
+      if (!editor) {
         vscode.window.showErrorMessage('Please open a markdown file first');
         return;
       }

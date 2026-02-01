@@ -1,0 +1,314 @@
+# MaraudersMapMD — Full AI Reference
+
+> Complete reference document for AI agents, LLMs, and automated tools interacting with MaraudersMapMD.
+
+## Identity
+
+- Name: MaraudersMapMD
+- Type: Visual Studio Code Extension
+- Version: 0.1.0
+- License: MIT
+- Repository: https://github.com/mandarange/MaraudersMapMD
+- Publisher: marauders-map-md
+- Minimum VS Code: ^1.100.0
+- Language: TypeScript
+- Bundler: esbuild
+- Markdown Engine: markdown-it (with markdown-it-task-lists plugin)
+- PDF Engine: puppeteer-core (uses system Chrome/Chromium, no bundled browser)
+- Testing: Vitest (unit), @vscode/test-electron (integration)
+
+## Purpose
+
+MaraudersMapMD is designed for the AI-first documentation workflow. It helps developers who write Markdown documents (PRDs, ADRs, RFCs, guides) and need those documents to be accurately consumable by AI assistants within token limits.
+
+The extension generates file-based AI readability artifacts in a `.ai/` directory. These artifacts allow AI tools (Cursor, Claude, Copilot, or any LLM) to:
+1. Understand document structure without reading the full text (AI Map)
+2. Load only relevant sections (Section Pack)
+3. Search for specific content (Search Index)
+4. Get optimally-sized context (Token Budget Exporter)
+5. Identify critical information marked by the author (AI Hint Blocks)
+
+MaraudersMapMD does NOT call any external AI API. It is completely vendor-neutral and file-first.
+
+## Architecture
+
+### Three-Plane Design
+
+1. **Editor Plane**: VS Code native editing + WorkspaceEdit API for programmatic changes
+2. **Preview Plane**: Webview rendering with click/drop/paste event handling
+3. **Storage Plane**: History snapshot storage/indexing and AI artifact generation
+
+### AI Artifact Output Structure
+
+```
+.ai/
+  <document-id>/
+    ai-map.md          # Document structure map
+    index.json         # Search index with keywords and links
+    sections/
+      01-introduction.md
+      02-architecture.md
+      ...
+```
+
+The `<document-id>` is derived from the source Markdown filename.
+
+### AI Map Format
+
+The AI Map (`ai-map.md`) contains a Markdown table with columns:
+- Heading level (depth)
+- Heading text
+- Line range (start-end)
+- Estimated token count
+- Key content summary (extractive)
+
+### Section Pack Format
+
+Each section file (`sections/NN-slug.md`) contains:
+- The heading and all content until the next heading of equal or higher level
+- Original line numbers preserved as comments
+- Standalone readable without other sections
+
+### Search Index Format
+
+The index (`index.json`) is a JSON file with:
+- Per-section entries containing: heading, keywords, links, AI hints, token estimate
+- Global metadata: total tokens, section count, generation timestamp
+
+### Token Budget Exporter
+
+Constructs a context string within a specified token limit:
+- Preserves heading structure
+- Prioritizes AI Hint Blocks (RULE > DECISION > NOTE)
+- Includes section boundaries
+- Truncates less important content
+- Supports budgets: 1k, 2k, 4k, 8k, or custom
+
+### AI Hint Block Types
+
+Semantic markers inserted into Markdown documents:
+
+```markdown
+> [AI RULE] This schema is the single source of truth. Do not infer alternatives.
+
+> [AI DECISION] We chose PostgreSQL over MongoDB for ACID compliance.
+
+> [AI NOTE] This section is deprecated as of v2.0. See section 5 for the replacement.
+```
+
+These blocks receive priority weighting during Token Budget context construction.
+
+## Complete Command Reference
+
+All commands are prefixed with `maraudersMapMd.` in the VS Code command system.
+
+### Preview Commands
+| Command ID | Title | Description |
+|------------|-------|-------------|
+| `maraudersMapMd.openPreviewToSide` | Open Preview to Side | Opens a live Markdown preview panel beside the editor |
+| `maraudersMapMd.togglePreviewLock` | Toggle Preview Lock | Locks or unlocks the preview to the current document |
+
+### Format Commands
+| Command ID | Title | Description |
+|------------|-------|-------------|
+| `maraudersMapMd.format.bold` | Make Bold | Wraps selected text in `**bold**` markers |
+| `maraudersMapMd.format.italic` | Make Italic | Wraps selected text in `*italic*` markers |
+| `maraudersMapMd.format.inlineCode` | Make Inline Code | Wraps selected text in backtick markers |
+
+### Insert Commands
+| Command ID | Title | Description |
+|------------|-------|-------------|
+| `maraudersMapMd.insert.link` | Insert Link | Inserts a Markdown link template `[text](url)` |
+| `maraudersMapMd.insert.heading` | Insert Heading | Inserts heading markup at cursor position |
+| `maraudersMapMd.insert.quote` | Insert Quote | Inserts blockquote markup |
+
+### Toggle Commands
+| Command ID | Title | Description |
+|------------|-------|-------------|
+| `maraudersMapMd.toggle.task` | Toggle Task | Toggles task checkbox between `- [ ]` and `- [x]` |
+
+### Image Commands
+| Command ID | Title | Description |
+|------------|-------|-------------|
+| `maraudersMapMd.images.insertFromFile` | Insert Image from File | Opens file picker, copies image to assets directory, inserts Markdown link |
+| `maraudersMapMd.images.pasteToAssets` | Paste Image to Assets | Saves clipboard image to assets directory, inserts Markdown link |
+
+### Export Commands
+| Command ID | Title | Description |
+|------------|-------|-------------|
+| `maraudersMapMd.export.html` | Export to HTML | Exports current document as standalone HTML with embedded images |
+| `maraudersMapMd.export.pdf` | Export to PDF | Exports current document as PDF using system Chrome/Chromium |
+
+### History Commands
+| Command ID | Title | Description |
+|------------|-------|-------------|
+| `maraudersMapMd.history.open` | Open History | Shows QuickPick list of snapshots for current file |
+| `maraudersMapMd.history.createCheckpoint` | Create Checkpoint | Creates a labeled checkpoint snapshot |
+| `maraudersMapMd.history.diffWithCurrent` | Diff with Current | Opens VS Code diff view comparing snapshot with current |
+| `maraudersMapMd.history.restoreSnapshot` | Restore Snapshot | Restores file content from selected snapshot |
+| `maraudersMapMd.history.pruneNow` | Prune History Now | Runs retention cleanup immediately |
+
+### AI Commands
+| Command ID | Title | Description |
+|------------|-------|-------------|
+| `maraudersMapMd.ai.generateMap` | Generate AI Map | Generates structure map with token estimates to `.ai/<docId>/ai-map.md` |
+| `maraudersMapMd.ai.exportSectionPack` | Export Section Pack | Splits document by headings to `.ai/<docId>/sections/` |
+| `maraudersMapMd.ai.buildIndex` | Build Search Index | Builds keyword/link index to `.ai/<docId>/index.json` |
+| `maraudersMapMd.ai.copyContextBudgeted` | Copy Context (Budgeted) | Copies token-budgeted context to clipboard |
+| `maraudersMapMd.ai.insertHintRule` | Insert AI Rule Hint | Inserts `> [AI RULE]` block at cursor |
+| `maraudersMapMd.ai.insertHintDecision` | Insert AI Decision Hint | Inserts `> [AI DECISION]` block at cursor |
+| `maraudersMapMd.ai.insertHintNote` | Insert AI Note Hint | Inserts `> [AI NOTE]` block at cursor |
+
+## Complete Settings Reference
+
+All settings use the `maraudersMapMd.*` namespace.
+
+### Preview Settings
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| `maraudersMapMd.preview.updateDelayMs` | number | 200 | Debounce delay in ms before preview update (50-2000) |
+| `maraudersMapMd.preview.largeDocThresholdKb` | number | 512 | Document size threshold in KB for large doc handling (100-5000) |
+| `maraudersMapMd.preview.largeDocUpdateDelayMs` | number | 700 | Debounce delay in ms for large documents (100-3000) |
+| `maraudersMapMd.preview.scrollSync` | boolean | true | Synchronize scroll position between editor and preview |
+| `maraudersMapMd.render.allowHtml` | boolean | false | Allow rendering of raw HTML in Markdown |
+
+### Image Settings
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| `maraudersMapMd.images.assetsDir` | string | "assets" | Asset directory name relative to Markdown file |
+| `maraudersMapMd.images.allowRemote` | boolean | false | Allow embedding remote images (URLs) |
+| `maraudersMapMd.images.filenamePattern` | string | "{basename}-{yyyyMMdd-HHmmss}" | Pattern for generating image filenames |
+| `maraudersMapMd.images.altTextSource` | enum | "filename" | Source for alt text: "filename", "prompt", "empty" |
+
+### PDF Export Settings
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| `maraudersMapMd.pdf.browserPath` | string | "auto" | Path to Chrome/Chromium ("auto" = auto-detect) |
+| `maraudersMapMd.pdf.format` | enum | "A4" | Paper format: "A4", "Letter", "A3", "A5" |
+| `maraudersMapMd.pdf.marginMm` | number | 12 | Margin size in millimeters (0-50) |
+| `maraudersMapMd.pdf.printBackground` | boolean | true | Include background colors and images in PDF |
+| `maraudersMapMd.pdf.embedImages` | enum | "fileUrl" | Image embedding: "fileUrl", "dataUri" |
+| `maraudersMapMd.pdf.outputDirectory` | string | "${workspaceFolder}/exports" | Output directory for PDFs |
+| `maraudersMapMd.pdf.openAfterExport` | boolean | true | Open PDF after export |
+
+### History Settings
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| `maraudersMapMd.history.enabled` | boolean | true | Enable history snapshots |
+| `maraudersMapMd.history.storageLocation` | enum | "workspace" | Storage: "workspace", "globalStorage" |
+| `maraudersMapMd.history.mode` | enum | "onSave" | Trigger: "onSave", "interval", "manual" |
+| `maraudersMapMd.history.intervalMinutes` | number | 10 | Auto-snapshot interval in minutes (1-120) |
+| `maraudersMapMd.history.maxSnapshotsPerFile` | number | 100 | Max snapshots per file (10-1000) |
+| `maraudersMapMd.history.maxTotalStorageMb` | number | 200 | Max total storage in MB (50-2000) |
+| `maraudersMapMd.history.retentionDays` | number | 30 | Retention period in days (1-365) |
+| `maraudersMapMd.history.protectManualCheckpoints` | boolean | true | Protect manual checkpoints from auto-pruning |
+| `maraudersMapMd.history.snapshotCompression` | enum | "gzip" | Compression: "none", "gzip" |
+| `maraudersMapMd.history.createPreRestoreSnapshot` | boolean | true | Create safety snapshot before restore |
+
+### AI Settings
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| `maraudersMapMd.ai.enabled` | boolean | true | Enable AI readability features |
+| `maraudersMapMd.ai.outputDir` | string | ".ai" | AI artifacts output directory (relative to workspace root) |
+| `maraudersMapMd.ai.buildOnSave` | boolean | true | Generate AI artifacts on file save |
+| `maraudersMapMd.ai.generate.map` | boolean | true | Generate AI Map artifact |
+| `maraudersMapMd.ai.generate.sections` | boolean | true | Generate Section Pack artifact |
+| `maraudersMapMd.ai.generate.index` | boolean | true | Generate Search Index artifact |
+| `maraudersMapMd.ai.tokenEstimateMode` | enum | "koreanWeighted" | Token estimation: "simple", "koreanWeighted" |
+| `maraudersMapMd.ai.gitPolicy` | enum | "ignoreAll" | Git policy: "ignoreAll", "commitMapOnly", "commitAll" |
+| `maraudersMapMd.ai.largeDocThresholdKb` | number | 512 | Size threshold in KB for limiting AI generation (100-5000) |
+
+## Use Cases
+
+### For Individual Developers
+- Write PRDs/ADRs in Markdown with fast preview
+- Generate AI artifacts so Cursor/Claude can read your docs accurately
+- Export polished PDFs for stakeholder review
+- Keep revision history without Git noise
+
+### For Teams
+- Standardize AI-readable documentation across the organization
+- Use AI Hint Blocks to mark critical decisions that AI must not miss
+- Share `ai-map.md` in Git so team AI tools have consistent document understanding
+- Use `commitMapOnly` git policy to track document structure changes
+
+### For AI Agents
+- Read `.ai/<docId>/ai-map.md` to understand document structure before processing
+- Use section packs for targeted retrieval instead of loading full documents
+- Respect AI Hint Block priorities (RULE > DECISION > NOTE)
+- Use `copyContextBudgeted` output for optimal prompt construction
+- Reference `index.json` for keyword-based section discovery
+
+## Dependencies
+
+### Runtime
+- markdown-it: ^14.1.0 (Markdown parsing)
+- markdown-it-task-lists: ^2.1.1 (Task list checkbox support)
+- puppeteer-core: ^24.36.1 (PDF export via system Chrome)
+
+### Development
+- typescript: ^5.3.0
+- esbuild: ^0.21.0
+- vitest: ^1.0.0
+- @types/vscode: ^1.100.0
+- @vscode/test-electron: ^2.4.0
+
+## Source File Structure
+
+```
+src/
+  extension.ts              # Extension entry point (activation, command registration)
+  ai/
+    aiService.ts            # AI artifact generation orchestration
+    aiCommands.ts           # AI command handlers
+    aiMapGenerator.ts       # AI Map generation logic
+    sectionPackGenerator.ts # Section Pack generation
+    searchIndexBuilder.ts   # Search Index generation
+    tokenBudgetExporter.ts  # Token Budget context construction
+    tokenEstimator.ts       # Token count estimation (simple + koreanWeighted)
+    markdownParser.ts       # Markdown parsing utilities
+    hintBlockParser.ts      # AI Hint Block parsing
+  preview/
+    previewManager.ts       # Webview panel management
+    markdownEngine.ts       # Markdown rendering engine
+    htmlTemplate.ts         # Preview HTML template
+    getNonce.ts             # CSP nonce generation
+  edit/
+    editCommands.ts         # Quick edit command handlers
+    formatters.ts           # Text formatting utilities
+  images/
+    imageCommands.ts        # Image insertion command handlers
+    editorDropProvider.ts   # Drag-drop support
+    pathUtils.ts            # Image path utilities
+  export/
+    exportCommands.ts       # Export command handlers
+    pdfExporter.ts          # PDF generation via puppeteer-core
+    htmlTemplate.ts         # Export HTML template
+    chromeDetector.ts       # System Chrome/Chromium detection
+  history/
+    historyCommands.ts      # History command handlers
+    snapshotStore.ts        # Snapshot storage and retrieval
+    retentionEngine.ts      # Retention policy enforcement
+  types/
+    markdown-it-task-lists.d.ts  # Type declarations
+```
+
+## Frequently Asked Questions
+
+Q: Does MaraudersMapMD call any AI API?
+A: No. It is completely vendor-neutral and generates file-based artifacts only. Zero API calls, zero cloud dependencies.
+
+Q: What token estimation method should I use?
+A: Use "koreanWeighted" (default) if your documents contain Korean or other CJK text. Use "simple" for English-only documents.
+
+Q: Can I commit AI artifacts to Git?
+A: Yes. Set `ai.gitPolicy` to "commitMapOnly" (recommended for teams) or "commitAll". Default is "ignoreAll".
+
+Q: How does the Token Budget Exporter prioritize content?
+A: It preserves heading structure, then includes AI Hint Blocks (RULE highest priority), then fills remaining budget with section content by document order.
+
+Q: What happens if Chrome is not installed for PDF export?
+A: The extension shows a clear error with instructions to either install Chrome, set a custom browser path, or use HTML export with browser print-to-PDF as a fallback.
+
+Q: Does the preview support Mermaid diagrams or LaTeX math?
+A: Not in v0.1. These are planned as optional plugins for v1.0 (default OFF to maintain performance).

@@ -1,105 +1,238 @@
-# MaraudersMapMD
+<p align="center">
+  <img src="icon.png" width="140" alt="MaraudersMapMD - AI-native Markdown preview extension for VS Code" />
+</p>
 
-Ultra-fast Markdown preview, quick edits, images, PDF export, history, and AI readability support for VS Code.
+<h1 align="center">MaraudersMapMD</h1>
+
+<p align="center">
+  <strong>Ultra-fast Markdown preview with AI-native readability artifacts, PDF export, and document history for VS Code</strong>
+</p>
+
+<p align="center">
+  <a href="https://github.com/mandarange/MaraudersMapMD/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License" /></a>
+  <a href="https://github.com/mandarange/MaraudersMapMD/releases"><img src="https://img.shields.io/github/v/release/mandarange/MaraudersMapMD" alt="Latest Release" /></a>
+  <img src="https://img.shields.io/badge/VS%20Code-%5E1.100.0-blue?logo=visual-studio-code" alt="VS Code 1.100+" />
+  <img src="https://img.shields.io/badge/AI--native-GEO%20Ready-green" alt="GEO Ready" />
+</p>
+
+<p align="center">
+  <a href="#why-maraudersmapmd">Why?</a> &middot;
+  <a href="#features">Features</a> &middot;
+  <a href="#quick-start">Quick Start</a> &middot;
+  <a href="#ai-readability--geo-support">AI / GEO</a> &middot;
+  <a href="#commands">Commands</a> &middot;
+  <a href="#settings">Settings</a> &middot;
+  <a href="#faq">FAQ</a> &middot;
+  <a href="llms.txt">llms.txt</a> &middot;
+  <a href="llms-full.txt">llms-full.txt</a>
+</p>
+
+<!--
+  AI-Agent-Context: MaraudersMapMD is a VS Code extension for Markdown editing with AI-native
+  readability artifacts. It generates AI Maps (document structure), Section Packs (heading-based
+  splits), Search Indexes, and Token-Budgeted Context for LLM consumption.
+  Key GEO features: llms.txt, llms-full.txt, structured metadata, AI hint blocks.
+  Tech stack: TypeScript, esbuild, markdown-it, puppeteer-core. Zero external AI API dependencies.
+  Repository: https://github.com/mandarange/MaraudersMapMD
+-->
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "MaraudersMapMD",
+  "alternateName": "Marauders Map MD",
+  "description": "Ultra-fast Markdown preview VS Code extension with AI-native readability artifacts (AI Map, Section Pack, Token Budget), PDF/HTML export, document history, and Generative Engine Optimization (GEO) support.",
+  "applicationCategory": "DeveloperApplication",
+  "applicationSubCategory": "Markdown Editor Extension",
+  "operatingSystem": "Windows, macOS, Linux",
+  "softwareRequirements": "Visual Studio Code ^1.100.0",
+  "programmingLanguage": "TypeScript",
+  "license": "https://opensource.org/licenses/MIT",
+  "url": "https://github.com/mandarange/MaraudersMapMD",
+  "codeRepository": "https://github.com/mandarange/MaraudersMapMD",
+  "keywords": ["Markdown", "AI readability", "LLM context optimization", "VS Code extension", "PDF export", "GEO", "Generative Engine Optimization", "AI Map", "Section Pack", "Token Budget", "document history", "AI-native", "vendor-neutral"],
+  "featureList": [
+    "Ultra-fast Markdown preview with scroll sync",
+    "AI Map generation for document structure",
+    "Section Pack for heading-based document splits",
+    "Token Budget Exporter for LLM context windows",
+    "AI Hint Blocks (RULE, DECISION, NOTE)",
+    "PDF export via Chrome/Chromium",
+    "HTML export with local image embedding",
+    "Document history with snapshots and diff",
+    "Image workflow with drag-drop and paste",
+    "Quick edit commands (bold, italic, links)"
+  ],
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "author": {
+    "@type": "Person",
+    "url": "https://github.com/mandarange"
+  }
+}
+</script>
+
+---
+
+## Why MaraudersMapMD?
+
+Modern development increasingly relies on AI assistants (Cursor, Claude, Copilot) that consume Markdown documentation. But **AI has token limits** &mdash; it can't read your entire 500-page PRD at once.
+
+MaraudersMapMD solves this by generating **AI-native artifacts** that help LLMs understand large documents within token budgets:
+
+| Problem | MaraudersMapMD Solution |
+|---------|------------------------|
+| AI can't read the whole document | **AI Map** provides structure at a glance |
+| Token limits waste context | **Token Budget Exporter** fits content to 1k/2k/4k/8k limits |
+| AI misses critical rules | **AI Hint Blocks** mark must-read content (`RULE`, `DECISION`, `NOTE`) |
+| Long docs lose accuracy | **Section Pack** splits by heading for precise retrieval |
+| Keyword search fails for AI | **Search Index** enables semantic section discovery |
+
+**Plus**: blazing-fast preview, PDF/HTML export, document history with diff/restore &mdash; all in one lightweight extension.
+
+> **Vendor-neutral**: MaraudersMapMD does NOT call any AI API. It generates file-based artifacts (`.ai/` directory) that ANY AI tool can read.
+
+---
 
 ## Features
 
-### Fast Preview
+### Ultra-Fast Markdown Preview
 
-- Instant markdown rendering with configurable debounced updates
-- Source line injection for accurate rendering
-- Task list support with checkbox toggle
-- Large document optimization with adaptive delay
+- Instant rendering with configurable debounce (default 200ms)
 - Scroll sync between editor and preview
+- Task list support with interactive checkbox toggle
+- Large document optimization with adaptive delay
+- Source line injection for accurate rendering
 
-### Quick Edit
+### AI Readability & GEO Support
 
-- **Format**: Bold, Italic, Inline Code
-- **Insert**: Link, Heading, Quote
-- **Toggle**: Task checkbox in editor and preview
+> **GEO (Generative Engine Optimization)**: Optimizing content for AI-powered search engines and LLM consumption.
 
-### Images
+- **AI Map** (`ai-map.md`): Structure table with heading hierarchy, line ranges, and token estimates &mdash; lets AI understand your document without reading it entirely
+- **Section Pack** (`sections/*.md`): Heading-based document splits for precise LLM consumption
+- **Search Index** (`index.json`): Keywords, links, and AI hint extraction per section
+- **Token Budget Exporter**: Deterministic context construction within configurable token limits (1k/2k/4k/8k/custom)
+- **AI Hint Blocks**: Insert semantic markers (`RULE`, `DECISION`, `NOTE`) that get priority in context budgets
+- **Build on Save**: Automatic AI artifact generation to `.ai/` directory
+- **llms.txt & llms-full.txt**: Standard AI documentation files for Generative Engine Optimization
 
-- Insert from file with automatic asset directory management
-- Drag-drop support (editor-side)
+### Quick Edit Commands
+
+- **Format**: Bold (`**`), Italic (`*`), Inline Code (`` ` ``)
+- **Insert**: Link, Heading, Blockquote
+- **Toggle**: Task checkbox in both editor and preview
+
+### Image Workflow
+
+- Insert from file with automatic `assets/` directory management
+- Editor-side drag-and-drop support
+- Clipboard paste to assets
 - Configurable filename patterns and alt text sources
-- Assets directory per markdown file
 
-### Export
+### PDF & HTML Export
 
-- **HTML**: Export with customizable templates, local image embedding
-- **PDF**: Export via Chrome/Chromium with auto-detection, configurable margins, paper format, and background printing
+- **PDF**: Export via system Chrome/Chromium (auto-detected, no bundled browser)
+- **HTML**: Standalone export with local image embedding
+- Configurable margins, paper format (A4/Letter/A3/A5), and background printing
+- Graceful fallback: if Chrome not found, guides to HTML print-to-PDF
 
-### History
+### Document History & Snapshots
 
-- Automatic snapshots on save (configurable: onSave, interval, manual)
+- Automatic snapshots on save (configurable: `onSave`, `interval`, `manual`)
 - Manual checkpoints with labels
-- Diff viewer and restore functionality
-- Configurable retention policies (days, max snapshots, storage limits)
-- gzip compression support
-- Pre-restore safety snapshots
+- Visual diff viewer and one-click restore
+- Configurable retention (days, max snapshots, storage limits)
+- gzip compression for efficient storage
+- Pre-restore safety snapshots (never lose data)
 
-### AI Readability Support
+---
 
-- **AI Map**: Structure table with heading hierarchy, line ranges, and token estimates
-- **Section Pack**: Heading-based document splits for LLM consumption
-- **Search Index**: Keywords, links, and AI hint extraction
-- **Token Budget Exporter**: Deterministic context construction within token limits
-- **AI Hint Blocks**: Insert RULE, DECISION, NOTE markers for AI-aware documents
-- **Build on Save**: Automatic AI artifact generation
+## Quick Start
 
-## Installation
+### Install from VSIX
 
-### From VSIX
+```bash
+# 1. Download the latest .vsix from GitHub Releases
+# 2. In VS Code, run:
+code --install-extension marauders-map-md-0.1.0.vsix
+```
 
-1. Download `marauders-map-md-0.1.0.vsix`
-2. Open VS Code
-3. Run command: `Extensions: Install from VSIX...`
-4. Select the downloaded file
+Or: Command Palette → `Extensions: Install from VSIX...` → select file.
 
-### From Marketplace (Coming Soon)
+### Install from Marketplace (Coming Soon)
 
-Search for "MaraudersMapMD" in the VS Code Extensions view.
+Search **"MaraudersMapMD"** in the VS Code Extensions view.
 
-## Usage
+### First Steps
 
-### Commands
+1. Open any `.md` file
+2. Run `MaraudersMapMD: Open Preview to Side` (Command Palette)
+3. Start editing &mdash; preview updates in real-time
+4. Save the file &mdash; AI artifacts auto-generate to `.ai/` directory
 
-Open the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`) and type "MaraudersMapMD":
+---
+
+## Commands
+
+Open the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`) and type **"MaraudersMapMD"**:
+
+### Preview & Edit
 
 | Command | Description |
 |---------|-------------|
-| `MaraudersMapMD: Open Preview to Side` | Open live markdown preview |
-| `MaraudersMapMD: Toggle Preview Lock` | Lock/unlock preview to current document |
-| `MaraudersMapMD: Format: Make Bold` | Wrap selection in `**bold**` |
-| `MaraudersMapMD: Format: Make Italic` | Wrap selection in `*italic*` |
-| `MaraudersMapMD: Format: Make Inline Code` | Wrap selection in `` `code` `` |
-| `MaraudersMapMD: Insert: Insert Link` | Insert markdown link |
-| `MaraudersMapMD: Insert: Insert Heading` | Insert heading markup |
-| `MaraudersMapMD: Insert: Insert Quote` | Insert blockquote |
-| `MaraudersMapMD: Toggle: Toggle Task` | Toggle task checkbox |
-| `MaraudersMapMD: Images: Insert Image from File` | Pick and insert image |
-| `MaraudersMapMD: Images: Paste Image to Assets` | Paste clipboard image |
-| `MaraudersMapMD: Export: Export to HTML` | Export document as HTML |
-| `MaraudersMapMD: Export: Export to PDF` | Export document as PDF |
-| `MaraudersMapMD: History: Open History` | View document snapshot history |
-| `MaraudersMapMD: History: Create Checkpoint` | Create labeled checkpoint |
-| `MaraudersMapMD: History: Diff with Current` | Compare snapshot with current |
-| `MaraudersMapMD: History: Restore Snapshot` | Restore from snapshot |
-| `MaraudersMapMD: History: Prune History Now` | Run retention cleanup |
-| `MaraudersMapMD: AI: Generate AI Map` | Generate structure map |
-| `MaraudersMapMD: AI: Export Section Pack` | Export heading-based splits |
-| `MaraudersMapMD: AI: Build Search Index` | Build keyword/link index |
-| `MaraudersMapMD: AI: Copy Context (Budgeted)` | Copy context within token budget |
-| `MaraudersMapMD: AI: Insert AI Rule Hint` | Insert RULE hint block |
-| `MaraudersMapMD: AI: Insert AI Decision Hint` | Insert DECISION hint block |
-| `MaraudersMapMD: AI: Insert AI Note Hint` | Insert NOTE hint block |
+| `Open Preview to Side` | Open live Markdown preview panel |
+| `Toggle Preview Lock` | Lock/unlock preview to current document |
+| `Format: Make Bold` | Wrap selection in `**bold**` |
+| `Format: Make Italic` | Wrap selection in `*italic*` |
+| `Format: Make Inline Code` | Wrap selection in `` `code` `` |
+| `Insert: Insert Link` | Insert Markdown link template |
+| `Insert: Insert Heading` | Insert heading markup |
+| `Insert: Insert Quote` | Insert blockquote |
+| `Toggle: Toggle Task` | Toggle task checkbox (`- [ ]` / `- [x]`) |
 
-### Settings
+### Images & Export
 
-All settings are under the `maraudersMapMd` namespace.
+| Command | Description |
+|---------|-------------|
+| `Images: Insert Image from File` | Pick image, copy to assets, insert link |
+| `Images: Paste Image to Assets` | Paste clipboard image to assets directory |
+| `Export: Export to HTML` | Export as standalone HTML file |
+| `Export: Export to PDF` | Export as PDF via Chrome/Chromium |
 
-#### Preview
+### History
+
+| Command | Description |
+|---------|-------------|
+| `History: Open History` | View snapshot history for current file |
+| `History: Create Checkpoint` | Create labeled checkpoint snapshot |
+| `History: Diff with Current` | Compare snapshot with current version |
+| `History: Restore Snapshot` | Restore file from selected snapshot |
+| `History: Prune History Now` | Run retention cleanup manually |
+
+### AI Readability (GEO)
+
+| Command | Description |
+|---------|-------------|
+| `AI: Generate AI Map` | Generate document structure map (`ai-map.md`) |
+| `AI: Export Section Pack` | Export heading-based section splits |
+| `AI: Build Search Index` | Build keyword/link search index |
+| `AI: Copy Context (Budgeted)` | Copy context fitted to token budget |
+| `AI: Insert AI Rule Hint` | Insert `[AI RULE]` semantic marker |
+| `AI: Insert AI Decision Hint` | Insert `[AI DECISION]` semantic marker |
+| `AI: Insert AI Note Hint` | Insert `[AI NOTE]` semantic marker |
+
+---
+
+## Settings
+
+All settings use the `maraudersMapMd.*` namespace. Configure via VS Code Settings UI or `settings.json`.
+
+<details>
+<summary><strong>Preview Settings</strong></summary>
 
 | Setting | Default | Description |
 |---------|---------|-------------|
@@ -107,18 +240,24 @@ All settings are under the `maraudersMapMd` namespace.
 | `preview.largeDocThresholdKb` | `512` | Size threshold (KB) for large document handling |
 | `preview.largeDocUpdateDelayMs` | `700` | Debounce delay (ms) for large documents |
 | `preview.scrollSync` | `true` | Synchronize scroll between editor and preview |
-| `render.allowHtml` | `false` | Allow raw HTML rendering in markdown |
+| `render.allowHtml` | `false` | Allow raw HTML rendering in Markdown |
 
-#### Images
+</details>
+
+<details>
+<summary><strong>Image Settings</strong></summary>
 
 | Setting | Default | Description |
 |---------|---------|-------------|
-| `images.assetsDir` | `"assets"` | Asset directory name relative to markdown file |
+| `images.assetsDir` | `"assets"` | Asset directory name relative to Markdown file |
 | `images.allowRemote` | `false` | Allow embedding remote image URLs |
 | `images.filenamePattern` | `"{basename}-{yyyyMMdd-HHmmss}"` | Pattern for generated image filenames |
 | `images.altTextSource` | `"filename"` | Source for alt text (`filename`, `prompt`, `empty`) |
 
-#### PDF Export
+</details>
+
+<details>
+<summary><strong>PDF Export Settings</strong></summary>
 
 | Setting | Default | Description |
 |---------|---------|-------------|
@@ -130,7 +269,10 @@ All settings are under the `maraudersMapMd` namespace.
 | `pdf.outputDirectory` | `"${workspaceFolder}/exports"` | Output directory for PDFs |
 | `pdf.openAfterExport` | `true` | Open PDF after export |
 
-#### History
+</details>
+
+<details>
+<summary><strong>History Settings</strong></summary>
 
 | Setting | Default | Description |
 |---------|---------|-------------|
@@ -145,36 +287,151 @@ All settings are under the `maraudersMapMd` namespace.
 | `history.snapshotCompression` | `"gzip"` | Compression (`none`, `gzip`) |
 | `history.createPreRestoreSnapshot` | `true` | Create safety snapshot before restore |
 
-#### AI
+</details>
+
+<details>
+<summary><strong>AI Readability Settings</strong></summary>
 
 | Setting | Default | Description |
 |---------|---------|-------------|
 | `ai.enabled` | `true` | Enable AI readability features |
 | `ai.outputDir` | `".ai"` | AI artifacts output directory |
 | `ai.buildOnSave` | `true` | Generate AI artifacts on save |
-| `ai.generate.map` | `true` | Generate AI map artifact |
-| `ai.generate.sections` | `true` | Generate section pack artifact |
-| `ai.generate.index` | `true` | Generate search index artifact |
+| `ai.generate.map` | `true` | Generate AI Map artifact |
+| `ai.generate.sections` | `true` | Generate Section Pack artifact |
+| `ai.generate.index` | `true` | Generate Search Index artifact |
 | `ai.tokenEstimateMode` | `"koreanWeighted"` | Token estimation method (`simple`, `koreanWeighted`) |
 | `ai.gitPolicy` | `"ignoreAll"` | Git policy for AI artifacts (`ignoreAll`, `commitMapOnly`, `commitAll`) |
 | `ai.largeDocThresholdKb` | `512` | Size threshold (KB) for limiting AI generation |
 
-## Screenshots
+</details>
 
-![Preview](docs/screenshots/preview.png)
-![Export](docs/screenshots/export.png)
-![History](docs/screenshots/history.png)
-![AI Map](docs/screenshots/ai-map.png)
+---
+
+## AI Artifacts Output Structure
+
+When AI features are enabled, MaraudersMapMD generates the following file structure:
+
+```
+.ai/
+  <document-id>/
+    ai-map.md          # Document structure map with token estimates
+    index.json         # Search index with keywords and links
+    sections/
+      01-introduction.md
+      02-architecture.md
+      ...
+```
+
+**For AI agents**: Read `.ai/<docId>/ai-map.md` first to understand document structure, then selectively load sections as needed. Use `copyContextBudgeted` command for pre-formatted LLM context.
+
+---
+
+## Generative Engine Optimization (GEO)
+
+MaraudersMapMD is designed for the **GEO era** &mdash; where AI search engines (ChatGPT, Perplexity, Claude, Gemini) answer questions by consuming documentation:
+
+| GEO Feature | File | Purpose |
+|-------------|------|---------|
+| **llms.txt** | [`llms.txt`](llms.txt) | Concise AI-readable project summary |
+| **llms-full.txt** | [`llms-full.txt`](llms-full.txt) | Complete reference for AI agents |
+| **AI Map** | `.ai/*/ai-map.md` | Token-efficient document structure |
+| **Section Pack** | `.ai/*/sections/` | Heading-based splits for retrieval |
+| **Search Index** | `.ai/*/index.json` | Semantic keyword index |
+| **AI Hint Blocks** | In-document markers | Priority content for AI consumption |
+| **Schema.org JSON-LD** | README.md | Structured data for search engines |
+
+### What is GEO?
+
+**Generative Engine Optimization (GEO)** is the practice of optimizing content to be accurately understood and cited by AI-powered search engines and large language models. Unlike traditional SEO (which targets keyword matching), GEO focuses on:
+
+- **Structured information**: Clear hierarchies, explicit relationships
+- **Machine-readable metadata**: Schema.org, llms.txt standards
+- **Token efficiency**: Conveying maximum information within context windows
+- **Semantic markers**: Explicit annotations for AI priority processing
+
+---
+
+## FAQ
+
+<details>
+<summary><strong>Does MaraudersMapMD call any AI API?</strong></summary>
+
+**No.** MaraudersMapMD is completely vendor-neutral. It generates file-based artifacts (`.ai/` directory) that any AI tool (Cursor, Claude, Copilot, etc.) can read. Zero external API calls, zero cloud dependencies.
+
+</details>
+
+<details>
+<summary><strong>What is the AI Map and why do I need it?</strong></summary>
+
+The AI Map (`ai-map.md`) is a structured table showing your document's heading hierarchy, line ranges, and token estimates. When an AI assistant reads your repository, it can read the AI Map first (small token cost) and then selectively load only the sections it needs, dramatically improving accuracy and reducing token usage.
+
+</details>
+
+<details>
+<summary><strong>How does Token Budget Exporter work?</strong></summary>
+
+It constructs a context string that fits within a specified token budget (1k, 2k, 4k, 8k, or custom). It preserves heading structure, prioritizes AI Hint Blocks, and truncates less important content &mdash; giving you a ready-to-paste context for any LLM prompt.
+
+</details>
+
+<details>
+<summary><strong>Does it work with Korean (or other CJK) text?</strong></summary>
+
+Yes. The token estimator supports a `koreanWeighted` mode (default) that accounts for the higher token-per-character ratio of CJK text, providing more accurate estimates.
+
+</details>
+
+<details>
+<summary><strong>Why Chrome/Chromium for PDF export?</strong></summary>
+
+MaraudersMapMD uses `puppeteer-core` with your system's Chrome/Chromium to avoid bundling a 300MB+ browser. If Chrome is not detected, it provides clear setup instructions and falls back to HTML export with browser print-to-PDF.
+
+</details>
+
+<details>
+<summary><strong>How is this different from Markdown Preview Enhanced or other Markdown extensions?</strong></summary>
+
+MaraudersMapMD is **AI-first**. While other extensions focus on rendering features (diagrams, math, charts), MaraudersMapMD focuses on making your documents optimally consumable by LLMs through AI Map, Section Pack, Token Budgeting, and AI Hint Blocks. It's designed for the workflow where you write docs AND AI reads them.
+
+</details>
+
+<details>
+<summary><strong>What is llms.txt?</strong></summary>
+
+`llms.txt` is an emerging standard (proposed by Jeremy Howard / Answer.AI) for providing AI-readable documentation alongside your project. It's like `robots.txt` but for LLMs. MaraudersMapMD ships with both `llms.txt` (concise) and `llms-full.txt` (comprehensive) to maximize discoverability by AI search engines.
+
+</details>
+
+---
 
 ## Development
 
 ```bash
+git clone https://github.com/mandarange/MaraudersMapMD.git
+cd MaraudersMapMD
 npm install
 npm run compile
 npm test
-npm run package
+npm run package    # Creates .vsix file
 ```
+
+### Tech Stack
+
+- **Language**: TypeScript
+- **Bundler**: esbuild (single-file bundle)
+- **Markdown**: markdown-it with task-lists plugin
+- **PDF**: puppeteer-core (system Chrome)
+- **Testing**: Vitest (unit) + VS Code Test Electron (integration)
+
+---
+
+## Contributing
+
+Contributions are welcome! Please see the [GitHub Issues](https://github.com/mandarange/MaraudersMapMD/issues) for open tasks.
+
+---
 
 ## License
 
-MIT
+[MIT](LICENSE) &copy; 2025

@@ -6,6 +6,7 @@ import { generateSectionPack } from './sectionPackGenerator';
 import { buildSearchIndex } from './searchIndexBuilder';
 import { exportWithBudget, PRESET_BUDGETS } from './tokenBudgetExporter';
 import { estimateTokens, TokenEstimationMode } from './tokenEstimator';
+import { getMarkdownEditor } from '../utils/editorUtils';
 
 // ── Debounce state ──────────────────────────────────────────────────
 let lastGenerationTimestamp = 0;
@@ -219,8 +220,8 @@ async function handleGitPolicy(): Promise<void> {
 // ── Manual commands ─────────────────────────────────────────────────
 
 async function cmdGenerateMap(): Promise<void> {
-  const editor = vscode.window.activeTextEditor;
-  if (!editor || editor.document.languageId !== 'markdown') {
+  const editor = getMarkdownEditor();
+  if (!editor) {
     vscode.window.showErrorMessage('Open a Markdown file first');
     return;
   }
@@ -237,6 +238,7 @@ async function cmdGenerateMap(): Promise<void> {
   const content = editor.document.getText();
   const workspaceRoot = getWorkspaceRoot();
   if (!workspaceRoot) {
+    vscode.window.showErrorMessage('Open a workspace folder first');
     return;
   }
 
@@ -250,8 +252,8 @@ async function cmdGenerateMap(): Promise<void> {
 }
 
 async function cmdExportSectionPack(): Promise<void> {
-  const editor = vscode.window.activeTextEditor;
-  if (!editor || editor.document.languageId !== 'markdown') {
+  const editor = getMarkdownEditor();
+  if (!editor) {
     vscode.window.showErrorMessage('Open a Markdown file first');
     return;
   }
@@ -268,6 +270,7 @@ async function cmdExportSectionPack(): Promise<void> {
   const content = editor.document.getText();
   const workspaceRoot = getWorkspaceRoot();
   if (!workspaceRoot) {
+    vscode.window.showErrorMessage('Open a workspace folder first');
     return;
   }
 
@@ -283,8 +286,8 @@ async function cmdExportSectionPack(): Promise<void> {
 }
 
 async function cmdBuildIndex(): Promise<void> {
-  const editor = vscode.window.activeTextEditor;
-  if (!editor || editor.document.languageId !== 'markdown') {
+  const editor = getMarkdownEditor();
+  if (!editor) {
     vscode.window.showErrorMessage('Open a Markdown file first');
     return;
   }
@@ -301,6 +304,7 @@ async function cmdBuildIndex(): Promise<void> {
   const content = editor.document.getText();
   const workspaceRoot = getWorkspaceRoot();
   if (!workspaceRoot) {
+    vscode.window.showErrorMessage('Open a workspace folder first');
     return;
   }
 
@@ -318,8 +322,8 @@ async function cmdBuildIndex(): Promise<void> {
 }
 
 async function cmdCopyContextBudgeted(): Promise<void> {
-  const editor = vscode.window.activeTextEditor;
-  if (!editor || editor.document.languageId !== 'markdown') {
+  const editor = getMarkdownEditor();
+  if (!editor) {
     vscode.window.showErrorMessage('Open a Markdown file first');
     return;
   }

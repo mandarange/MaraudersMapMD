@@ -1,0 +1,62 @@
+# MaraudersMapMD
+
+> Ultra-fast Markdown preview VS Code extension with AI-native readability artifacts, PDF/HTML export, and document history. Vendor-neutral, zero AI API dependencies.
+
+## Overview
+
+MaraudersMapMD is a Visual Studio Code extension that bridges human Markdown authoring and AI comprehension. It generates file-based AI artifacts (AI Map, Section Pack, Search Index, Token Budget Context) so that LLMs can understand large documents within token limits without any external API calls.
+
+## Core Problem Solved
+
+AI assistants (Cursor, Claude, Copilot) struggle with large Markdown documents due to token limits. MaraudersMapMD generates structured artifacts in `.ai/` that let AI read a document map first, then selectively load only needed sections. This improves accuracy and reduces token waste.
+
+## Key Features
+
+- AI Map: Document structure table with heading hierarchy, line ranges, and token estimates
+- Section Pack: Heading-based document splits for LLM consumption
+- Search Index: Per-section keywords, links, and AI hint extraction
+- Token Budget Exporter: Deterministic context construction within 1k/2k/4k/8k/custom token limits
+- AI Hint Blocks: Semantic markers (RULE, DECISION, NOTE) with priority in context budgets
+- Ultra-fast Markdown Preview with scroll sync and large document optimization
+- PDF Export via system Chrome/Chromium (no bundled browser)
+- HTML Export with local image embedding
+- Document History with snapshots, diff, restore, and retention policies
+- Image Workflow with drag-drop, paste, and asset directory management
+
+## Technical Details
+
+- Language: TypeScript
+- Bundler: esbuild (single-file output)
+- Markdown Engine: markdown-it with task-lists plugin
+- PDF Engine: puppeteer-core (system Chrome/Chromium)
+- Testing: Vitest (unit) + VS Code Test Electron (integration)
+- License: MIT
+- Minimum VS Code: ^1.100.0
+- Dependencies: markdown-it, markdown-it-task-lists, puppeteer-core
+
+## AI Artifact Structure
+
+```
+.ai/
+  <document-id>/
+    ai-map.md       # Structure map with token estimates
+    index.json      # Search index (keywords, links, hints)
+    sections/
+      01-*.md       # Heading-based splits
+      02-*.md
+```
+
+## Design Principles
+
+1. Vendor-neutral: No AI API calls. File-based artifacts only.
+2. Token-aware: Section decomposition, maps, indexes, and budget-based context.
+3. Lightweight: No React, Monaco, or Chromium bundling.
+4. onSave generation: AI artifacts build on save, not during typing.
+5. Korean/CJK support: Weighted token estimation for accurate CJK character counts.
+
+## Links
+
+- Repository: https://github.com/mandarange/MaraudersMapMD
+- Full AI Documentation: https://github.com/mandarange/MaraudersMapMD/blob/main/llms-full.txt
+- README: https://github.com/mandarange/MaraudersMapMD/blob/main/README.md
+- License: MIT

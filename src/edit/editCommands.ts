@@ -6,6 +6,7 @@ import {
   createBlockquote,
   toggleTask,
 } from './formatters';
+import { getMarkdownEditor } from '../utils/editorUtils';
 
 export function registerEditCommands(context: vscode.ExtensionContext): void {
   context.subscriptions.push(
@@ -52,7 +53,7 @@ export function registerEditCommands(context: vscode.ExtensionContext): void {
 }
 
 function formatBold(): void {
-  const editor = vscode.window.activeTextEditor;
+  const editor = getMarkdownEditor();
   if (!editor) {
     return;
   }
@@ -67,7 +68,7 @@ function formatBold(): void {
 }
 
 function formatItalic(): void {
-  const editor = vscode.window.activeTextEditor;
+  const editor = getMarkdownEditor();
   if (!editor) {
     return;
   }
@@ -82,7 +83,7 @@ function formatItalic(): void {
 }
 
 function formatInlineCode(): void {
-  const editor = vscode.window.activeTextEditor;
+  const editor = getMarkdownEditor();
   if (!editor) {
     return;
   }
@@ -97,7 +98,7 @@ function formatInlineCode(): void {
 }
 
 async function insertLink(): Promise<void> {
-  const editor = vscode.window.activeTextEditor;
+  const editor = getMarkdownEditor();
   if (!editor) {
     return;
   }
@@ -121,7 +122,7 @@ async function insertLink(): Promise<void> {
 }
 
 async function insertHeading(): Promise<void> {
-  const editor = vscode.window.activeTextEditor;
+  const editor = getMarkdownEditor();
   if (!editor) {
     return;
   }
@@ -151,7 +152,7 @@ async function insertHeading(): Promise<void> {
 }
 
 function insertQuote(): void {
-  const editor = vscode.window.activeTextEditor;
+  const editor = getMarkdownEditor();
   if (!editor) {
     return;
   }
@@ -166,7 +167,7 @@ function insertQuote(): void {
 }
 
 function toggleTaskCheckbox(): void {
-  const editor = vscode.window.activeTextEditor;
+  const editor = getMarkdownEditor();
   if (!editor) {
     return;
   }

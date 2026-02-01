@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { formatHintBlock } from './hintBlockParser';
+import { getMarkdownEditor } from '../utils/editorUtils';
 
 export function registerAiCommands(context: vscode.ExtensionContext): void {
   context.subscriptions.push(
@@ -22,8 +23,8 @@ export function registerAiCommands(context: vscode.ExtensionContext): void {
 }
 
 function insertHintAtCursor(type: 'RULE' | 'DECISION' | 'CONTEXT'): void {
-  const editor = vscode.window.activeTextEditor;
-  if (!editor || editor.document.languageId !== 'markdown') {
+  const editor = getMarkdownEditor();
+  if (!editor) {
     vscode.window.showErrorMessage('Please open a markdown file first');
     return;
   }

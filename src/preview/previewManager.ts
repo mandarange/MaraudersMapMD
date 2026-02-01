@@ -10,6 +10,9 @@ export class PreviewManager implements vscode.Disposable {
   private updateTimeout: ReturnType<typeof setTimeout> | undefined;
   private locked = false;
   private lockedDocument: vscode.TextDocument | undefined;
+  private webviewInitialized = false;
+  private currentDocument: vscode.TextDocument | undefined;
+  private suppressNextAutoOpen = false;
   private readonly disposables: vscode.Disposable[] = [];
   private readonly extensionUri: vscode.Uri;
 
@@ -67,6 +70,14 @@ export class PreviewManager implements vscode.Disposable {
     }
   }
 
+  shouldAutoOpenFor(editor: vscode.TextEditor | undefined): editor is vscode.TextEditor {
+    if (this.suppressNextAutoOpen) {
+      this.suppressNextAutoOpen = false;
+      return false;
+    }
+    return !!(editor && editor.document.languageId === 'markdown');
+  }
+
   onDocumentChanged(event: vscode.TextDocumentChangeEvent): void {
     if (!this.panel) {
       return;
@@ -119,10 +130,24 @@ export class PreviewManager implements vscode.Disposable {
       },
     );
 
+    this.disposables.push(
+      vscode.window.onDidChangeActiveColorTheme(() => {
+        if (!this.panel) {
+          return;
+        }
+        this.panel.webview.postMessage({
+          type: 'theme',
+          className: this.getThemeClass(),
+        });
+      })
+    );
+
     this.panel.onDidDispose(() => {
       this.panel = undefined;
       this.locked = false;
       this.lockedDocument = undefined;
+      this.webviewInitialized = false;
+      this.currentDocument = undefined;
       if (this.updateTimeout) {
         clearTimeout(this.updateTimeout);
         this.updateTimeout = undefined;
@@ -133,6 +158,12 @@ export class PreviewManager implements vscode.Disposable {
       async (message) => {
         if (message.type === 'toggleCheckbox') {
           await this.handleToggleCheckbox(message.line);
+        } else if (message.type === 'toolbarCommand') {
+          await this.handleToolbarCommand(message.command);
+        } else if (message.type === 'requestRawText') {
+          await this.handleRequestRawText(message.startLine, message.endLine);
+        } else if (message.type === 'applyEdit') {
+          await this.handleApplyEdit(message.startLine, message.endLine, message.newText);
         }
       },
       null,
@@ -140,13 +171,35 @@ export class PreviewManager implements vscode.Disposable {
     );
   }
 
+  private async handleToolbarCommand(command: string): Promise<void> {
+    // Ensure the markdown editor is active so command handlers can find activeTextEditor
+    let doc = this.currentDocument;
+    if (!doc) {
+      const mdEditor = vscode.window.visibleTextEditors.find(
+        (e) => e.document.languageId === 'markdown',
+      );
+      doc = mdEditor?.document;
+    }
+    if (doc) {
+      this.suppressNextAutoOpen = true;
+      try {
+        await vscode.window.showTextDocument(doc.uri, { preserveFocus: true, preview: true });
+      } catch { /* document may have been closed */ }
+    }
+    try {
+      await vscode.commands.executeCommand(`maraudersMapMd.${command}`);
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      vscode.window.showErrorMessage(`Command failed: ${errMsg}`);
+    }
+  }
+
   private async handleToggleCheckbox(lineNumber: number): Promise<void> {
-    const editor = vscode.window.activeTextEditor;
-    if (!editor || editor.document.languageId !== 'markdown') {
+    const document = this.getActiveMarkdownDocument();
+    if (!document) {
       return;
     }
 
-    const document = editor.document;
     if (lineNumber < 0 || lineNumber >= document.lineCount) {
       return;
     }
@@ -172,22 +225,78 @@ export class PreviewManager implements vscode.Disposable {
     await vscode.workspace.applyEdit(edit);
   }
 
+  private getActiveMarkdownDocument(): vscode.TextDocument | undefined {
+    if (this.locked && this.lockedDocument) {
+      return this.lockedDocument;
+    }
+    const editor = vscode.window.activeTextEditor;
+    if (editor && editor.document.languageId === 'markdown') {
+      return editor.document;
+    }
+    if (this.currentDocument && this.currentDocument.languageId === 'markdown') {
+      return this.currentDocument;
+    }
+    return undefined;
+  }
+
+  private async handleRequestRawText(startLine: number, endLine: number): Promise<void> {
+    const document = this.getActiveMarkdownDocument();
+    if (!document || !this.panel) return;
+
+    const lastLine = endLine === -1 ? document.lineCount : endLine;
+    const clampedEnd = Math.min(lastLine, document.lineCount);
+    const lines: string[] = [];
+    for (let i = startLine; i < clampedEnd; i++) {
+      lines.push(document.lineAt(i).text);
+    }
+
+    this.panel.webview.postMessage({
+      type: 'rawText',
+      text: lines.join('\n'),
+      startLine,
+      endLine: clampedEnd,
+    });
+  }
+
+  private async handleApplyEdit(startLine: number, endLine: number, newText: string): Promise<void> {
+    const document = this.getActiveMarkdownDocument();
+    if (!document) return;
+
+    const clampedEnd = Math.min(endLine, document.lineCount);
+    const startPos = new vscode.Position(startLine, 0);
+    const endPos = clampedEnd >= document.lineCount
+      ? document.lineAt(document.lineCount - 1).range.end
+      : new vscode.Position(clampedEnd, 0);
+
+    const range = new vscode.Range(startPos, endPos);
+    const trailingNewline = clampedEnd < document.lineCount ? '\n' : '';
+
+    const edit = new vscode.WorkspaceEdit();
+    edit.replace(document.uri, range, newText + trailingNewline);
+    await vscode.workspace.applyEdit(edit);
+  }
+
   private updatePreview(document: vscode.TextDocument): void {
     if (!this.panel) {
       return;
     }
 
+    this.currentDocument = document;
     this.version++;
     const currentVersion = this.version;
     const html = this.markdownEngine.render(document.getText());
 
-    this.panel.webview.postMessage({
-      type: 'update',
-      html,
-      version: currentVersion,
-    });
+    if (!this.webviewInitialized) {
+      this.setWebviewHtml(html);
+      this.webviewInitialized = true;
+    } else {
+      this.panel.webview.postMessage({
+        type: 'update',
+        html,
+        version: currentVersion,
+      });
+    }
 
-    this.setWebviewHtml(html);
     this.updatePanelTitle();
   }
 
@@ -206,13 +315,31 @@ export class PreviewManager implements vscode.Disposable {
     ).toString();
     const cspSource = webview.cspSource;
 
+    const themeClass = this.getThemeClass();
+
     webview.html = buildPreviewHtml({
       body,
       nonce,
       cspSource,
       cssUri,
       jsUri,
+      themeClass,
     });
+  }
+
+  private getThemeClass(): string {
+    const kind = vscode.window.activeColorTheme.kind;
+    switch (kind) {
+      case vscode.ColorThemeKind.Light:
+        return 'vscode-light';
+      case vscode.ColorThemeKind.HighContrastLight:
+        return 'vscode-high-contrast-light';
+      case vscode.ColorThemeKind.HighContrast:
+        return 'vscode-high-contrast';
+      case vscode.ColorThemeKind.Dark:
+      default:
+        return 'vscode-dark';
+    }
   }
 
   private getDebounceDelay(document: vscode.TextDocument): number {

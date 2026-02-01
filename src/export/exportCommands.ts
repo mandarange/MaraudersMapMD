@@ -6,6 +6,7 @@ import { MarkdownEngine } from '../preview/markdownEngine';
 import { buildExportHtml, resolveLocalImages } from './htmlTemplate';
 import { detectChrome } from './chromeDetector';
 import { exportToPdf } from './pdfExporter';
+import { getMarkdownEditor } from '../utils/editorUtils';
 
 const previewCss = `/* MaraudersMapMD Preview Styles */
 
@@ -199,9 +200,15 @@ export function registerExportCommands(context: vscode.ExtensionContext): void {
   );
 }
 
+function getExportDir(mdFileUri: vscode.Uri, mdFileName: string): string {
+  const workspaceFolder = vscode.workspace.getWorkspaceFolder(mdFileUri);
+  const root = workspaceFolder?.uri.fsPath ?? path.dirname(mdFileUri.fsPath);
+  return path.join(root, 'docs', 'MaraudersMap', mdFileName);
+}
+
 async function exportHtml(): Promise<void> {
-  const editor = vscode.window.activeTextEditor;
-  if (!editor || editor.document.languageId !== 'markdown') {
+  const editor = getMarkdownEditor();
+  if (!editor) {
     vscode.window.showErrorMessage('Please open a markdown file to export');
     return;
   }
@@ -223,25 +230,18 @@ async function exportHtml(): Promise<void> {
 
     htmlContent = resolveLocalImages(htmlContent, mdFileDir, 'fileUrl');
 
-    const workspaceFolder = vscode.workspace.getWorkspaceFolder(mdFileUri);
-    const defaultUri = workspaceFolder
-      ? vscode.Uri.joinPath(workspaceFolder.uri, 'exports', `${mdFileName}.html`)
-      : vscode.Uri.file(path.join(mdFileDir, 'exports', `${mdFileName}.html`));
-
-    const outputUri = await vscode.window.showSaveDialog({
-      defaultUri,
-      filters: { 'HTML Files': ['html'] },
-    });
-
-    if (!outputUri) {
-      return;
+    const exportDir = getExportDir(mdFileUri, mdFileName);
+    if (!fs.existsSync(exportDir)) {
+      fs.mkdirSync(exportDir, { recursive: true });
     }
 
+    const outputPath = path.join(exportDir, `${mdFileName}.html`);
+    const outputUri = vscode.Uri.file(outputPath);
     await vscode.workspace.fs.writeFile(outputUri, Buffer.from(htmlContent, 'utf8'));
 
     const openButton = 'Open';
     const result = await vscode.window.showInformationMessage(
-      `HTML exported to ${path.basename(outputUri.fsPath)}`,
+      `HTML exported to docs/MaraudersMap/${mdFileName}/${mdFileName}.html`,
       openButton
     );
 
@@ -255,8 +255,8 @@ async function exportHtml(): Promise<void> {
 }
 
 async function exportPdf(): Promise<void> {
-  const editor = vscode.window.activeTextEditor;
-  if (!editor || editor.document.languageId !== 'markdown') {
+  const editor = getMarkdownEditor();
+  if (!editor) {
     vscode.window.showErrorMessage('Please open a markdown file to export');
     return;
   }
@@ -267,7 +267,6 @@ async function exportPdf(): Promise<void> {
   const marginMm = config.get<number>('marginMm', 12);
   const printBackground = config.get<boolean>('printBackground', true);
   const embedMode = config.get<string>('embedImages', 'fileUrl') as 'fileUrl' | 'dataUri';
-  const outputDirectory = config.get<string>('outputDirectory', '${workspaceFolder}/exports');
   const openAfterExport = config.get<boolean>('openAfterExport', true);
 
   const browserPath = detectChrome(
@@ -297,17 +296,12 @@ async function exportPdf(): Promise<void> {
   const mdFileName = path.basename(mdFileUri.fsPath, '.md');
   const mdContent = editor.document.getText();
 
-  const workspaceFolder = vscode.workspace.getWorkspaceFolder(mdFileUri);
-  const resolvedOutputDir = outputDirectory.replace(
-    '${workspaceFolder}',
-    workspaceFolder?.uri.fsPath ?? mdFileDir
-  );
-
-  if (!fs.existsSync(resolvedOutputDir)) {
-    fs.mkdirSync(resolvedOutputDir, { recursive: true });
+  const exportDir = getExportDir(mdFileUri, mdFileName);
+  if (!fs.existsSync(exportDir)) {
+    fs.mkdirSync(exportDir, { recursive: true });
   }
 
-  const outputPath = path.join(resolvedOutputDir, `${mdFileName}.pdf`);
+  const outputPath = path.join(exportDir, `${mdFileName}.pdf`);
 
   await vscode.window.withProgress(
     {

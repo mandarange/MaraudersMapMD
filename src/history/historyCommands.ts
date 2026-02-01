@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import { join } from 'path';
 import {
   Snapshot,
   SnapshotIndex,
@@ -12,6 +11,9 @@ import {
   isDuplicate,
 } from './snapshotStore';
 import { getSnapshotsToDelete, RetentionPolicy } from './retentionEngine';
+import { getMarkdownEditor } from '../utils/editorUtils';
+import { getHistoryDirectory } from './historyPaths';
+import { HistoryPanel } from './historyPanel';
 
 /**
  * TextDocumentContentProvider for snapshot URIs (maraudersMapMd: scheme)
@@ -140,313 +142,30 @@ async function createSnapshotOnSave(
 /**
  * Get history directory based on storage location setting
  */
-function getHistoryDirectory(context: vscode.ExtensionContext, workspaceFolder: vscode.WorkspaceFolder): string {
-  const config = vscode.workspace.getConfiguration('maraudersMapMd.history');
-  const storageLocation = config.get<string>('storageLocation', 'workspace');
-
-  if (storageLocation === 'globalStorage') {
-    return context.globalStorageUri.fsPath;
-  } else {
-    return join(workspaceFolder.uri.fsPath, '.maraudersmapmd', 'history');
-  }
-}
+// getHistoryDirectory moved to historyPaths.ts
 
 /**
  * Command: maraudersMapMd.history.open
  * Show QuickPick with snapshot history for current file
  */
 export async function openHistoryCommand(context: vscode.ExtensionContext): Promise<void> {
-  const editor = vscode.window.activeTextEditor;
-  if (!editor || editor.document.languageId !== 'markdown') {
+  const editor = getMarkdownEditor();
+  if (!editor) {
     vscode.window.showWarningMessage('No active markdown file');
     return;
   }
 
-  const workspaceFolder = vscode.workspace.getWorkspaceFolder(editor.document.uri);
-  if (!workspaceFolder) {
-    vscode.window.showWarningMessage('File is not in a workspace');
-    return;
-  }
-
-  const historyDir = getHistoryDirectory(context, workspaceFolder);
-  const relativePath = vscode.workspace.asRelativePath(editor.document.uri, false);
-  const indexPath = buildIndexPath(historyDir, relativePath);
-  const indexUri = vscode.Uri.file(indexPath);
-
-  // Read index
-  let index: SnapshotIndex;
-  try {
-    const indexData = await vscode.workspace.fs.readFile(indexUri);
-    index = JSON.parse(Buffer.from(indexData).toString('utf8'));
-  } catch {
-    vscode.window.showInformationMessage('No history found for this file');
-    return;
-  }
-
-  if (index.snapshots.length === 0) {
-    vscode.window.showInformationMessage('No snapshots found for this file');
-    return;
-  }
-
-  // Sort snapshots newest first
-  const sortedSnapshots = [...index.snapshots].sort((a, b) => b.timestamp - a.timestamp);
-
-  // Create QuickPick items
-  const items: vscode.QuickPickItem[] = sortedSnapshots.map((snapshot) => {
-    const date = new Date(snapshot.timestamp);
-    const label = date.toLocaleString();
-    const description = snapshot.isCheckpoint && snapshot.label ? snapshot.label : 'auto';
-    const sizeKb = (snapshot.sizeBytes / 1024).toFixed(2);
-    const detail = `${sizeKb} KB${snapshot.compressed ? ' (compressed)' : ''}`;
-
-    return {
-      label,
-      description,
-      detail,
-      // Store snapshot ID in buttons for later use
-      buttons: [
-        { iconPath: new vscode.ThemeIcon('eye'), tooltip: 'View' },
-        { iconPath: new vscode.ThemeIcon('diff'), tooltip: 'Diff' },
-        { iconPath: new vscode.ThemeIcon('discard'), tooltip: 'Restore' },
-        { iconPath: new vscode.ThemeIcon('copy'), tooltip: 'Copy' },
-      ],
-    };
-  });
-
-  // Show QuickPick
-  const quickPick = vscode.window.createQuickPick();
-  quickPick.items = items;
-  quickPick.placeholder = 'Select a snapshot to view, diff, restore, or copy';
-  quickPick.title = `History: ${relativePath}`;
-
-  quickPick.onDidAccept(() => {
-    const selected = quickPick.selectedItems[0];
-    if (selected) {
-      const index = items.indexOf(selected);
-      const snapshot = sortedSnapshots[index];
-      // Default action: View
-      viewSnapshot(context, workspaceFolder, snapshot);
-    }
-    quickPick.hide();
-  });
-
-  quickPick.onDidTriggerItemButton(async (event) => {
-    const index = items.indexOf(event.item);
-    const snapshot = sortedSnapshots[index];
-    const buttonIndex = event.item.buttons?.indexOf(event.button) ?? -1;
-
-    switch (buttonIndex) {
-      case 0: // View
-        await viewSnapshot(context, workspaceFolder, snapshot);
-        break;
-      case 1: // Diff
-        await diffSnapshot(context, workspaceFolder, snapshot, editor.document);
-        break;
-      case 2: // Restore
-        await restoreSnapshot(context, workspaceFolder, snapshot, editor.document);
-        break;
-      case 3: // Copy
-        await copySnapshot(context, workspaceFolder, snapshot);
-        break;
-    }
-  });
-
-  quickPick.show();
+  HistoryPanel.show(context, editor.document);
 }
 
-/**
- * View snapshot in read-only editor
- */
-async function viewSnapshot(
-  context: vscode.ExtensionContext,
-  workspaceFolder: vscode.WorkspaceFolder,
-  snapshot: Snapshot
-): Promise<void> {
-  try {
-    const historyDir = getHistoryDirectory(context, workspaceFolder);
-    const snapshotPath = buildSnapshotPath(historyDir, snapshot.filePath, snapshot.id);
-    const snapshotUri = vscode.Uri.file(snapshotPath);
-
-    const data = await vscode.workspace.fs.readFile(snapshotUri);
-    const content = decompressContent(Buffer.from(data));
-
-    const doc = await vscode.workspace.openTextDocument({
-      content,
-      language: 'markdown',
-    });
-
-    await vscode.window.showTextDocument(doc, { preview: true });
-  } catch (error) {
-    vscode.window.showErrorMessage(`Failed to view snapshot: ${error}`);
-  }
-}
-
-/**
- * Diff snapshot with current document
- */
-async function diffSnapshot(
-  context: vscode.ExtensionContext,
-  workspaceFolder: vscode.WorkspaceFolder,
-  snapshot: Snapshot,
-  currentDocument: vscode.TextDocument
-): Promise<void> {
-  try {
-    const historyDir = getHistoryDirectory(context, workspaceFolder);
-    const snapshotPath = buildSnapshotPath(historyDir, snapshot.filePath, snapshot.id);
-    const snapshotUri = vscode.Uri.file(snapshotPath);
-
-    const data = await vscode.workspace.fs.readFile(snapshotUri);
-    const content = decompressContent(Buffer.from(data));
-
-    // Create temporary document for diff
-    const tempDoc = await vscode.workspace.openTextDocument({
-      content,
-      language: 'markdown',
-    });
-
-    const date = new Date(snapshot.timestamp).toLocaleString();
-    const title = `${snapshot.filePath} (${date}) ↔ Current`;
-
-    await vscode.commands.executeCommand('vscode.diff', tempDoc.uri, currentDocument.uri, title);
-  } catch (error) {
-    vscode.window.showErrorMessage(`Failed to diff snapshot: ${error}`);
-  }
-}
-
-/**
- * Restore snapshot to current document
- */
-async function restoreSnapshot(
-  context: vscode.ExtensionContext,
-  workspaceFolder: vscode.WorkspaceFolder,
-  snapshot: Snapshot,
-  currentDocument: vscode.TextDocument
-): Promise<void> {
-  try {
-    // Confirm restore
-    const answer = await vscode.window.showWarningMessage(
-      `Restore snapshot from ${new Date(snapshot.timestamp).toLocaleString()}? This will replace the current content.`,
-      { modal: true },
-      'Restore'
-    );
-
-    if (answer !== 'Restore') {
-      return;
-    }
-
-    // Check if we should create a pre-restore snapshot
-    const config = vscode.workspace.getConfiguration('maraudersMapMd.history');
-    const createPreRestore = config.get<boolean>('createPreRestoreSnapshot', true);
-
-    if (createPreRestore) {
-      // Create a snapshot of current content before restoring
-      try {
-        const currentContent = currentDocument.getText();
-        const historyDir = getHistoryDirectory(context, workspaceFolder);
-        const relativePath = vscode.workspace.asRelativePath(currentDocument.uri, false);
-        const indexPath = buildIndexPath(historyDir, relativePath);
-        const indexUri = vscode.Uri.file(indexPath);
-
-        let index: SnapshotIndex;
-        try {
-          const indexData = await vscode.workspace.fs.readFile(indexUri);
-          index = JSON.parse(Buffer.from(indexData).toString('utf8'));
-        } catch {
-          index = { version: 1, snapshots: [] };
-        }
-
-        // Create pre-restore snapshot
-        const preRestoreId = createSnapshotId();
-        const hash = computeHash(currentContent);
-        const compressed = compressContent(currentContent);
-        const snapshotPath = buildSnapshotPath(historyDir, relativePath, preRestoreId);
-        const snapshotUri = vscode.Uri.file(snapshotPath);
-
-        // Ensure directory exists
-        const snapshotDir = vscode.Uri.file(snapshotPath.substring(0, snapshotPath.lastIndexOf('/')));
-        await vscode.workspace.fs.createDirectory(snapshotDir);
-
-        // Write snapshot file
-        await vscode.workspace.fs.writeFile(snapshotUri, compressed);
-
-        // Add to index with special label
-        const preRestoreSnapshot: Snapshot = {
-          id: preRestoreId,
-          filePath: relativePath,
-          timestamp: Date.now(),
-          label: 'pre-restore',
-          isCheckpoint: false,
-          hash,
-          sizeBytes: compressed.length,
-          compressed: currentContent.length >= 1024,
-        };
-        index.snapshots.push(preRestoreSnapshot);
-
-        // Write index
-        const indexContent = JSON.stringify(index, null, 2);
-        await vscode.workspace.fs.writeFile(indexUri, Buffer.from(indexContent, 'utf8'));
-      } catch (error) {
-        console.error('Failed to create pre-restore snapshot:', error);
-        // Continue with restore even if pre-restore snapshot fails
-      }
-    }
-
-    const historyDir = getHistoryDirectory(context, workspaceFolder);
-    const snapshotPath = buildSnapshotPath(historyDir, snapshot.filePath, snapshot.id);
-    const snapshotUri = vscode.Uri.file(snapshotPath);
-
-    const data = await vscode.workspace.fs.readFile(snapshotUri);
-    const content = decompressContent(Buffer.from(data));
-
-    const edit = new vscode.WorkspaceEdit();
-    const fullRange = new vscode.Range(
-      currentDocument.positionAt(0),
-      currentDocument.positionAt(currentDocument.getText().length)
-    );
-    edit.replace(currentDocument.uri, fullRange, content);
-
-    const success = await vscode.workspace.applyEdit(edit);
-    if (success) {
-      await currentDocument.save();
-      vscode.window.showInformationMessage('Snapshot restored successfully');
-    } else {
-      vscode.window.showErrorMessage('Failed to restore snapshot');
-    }
-  } catch (error) {
-    vscode.window.showErrorMessage(`Failed to restore snapshot: ${error}`);
-  }
-}
-
-/**
- * Copy snapshot content to clipboard
- */
-async function copySnapshot(
-  context: vscode.ExtensionContext,
-  workspaceFolder: vscode.WorkspaceFolder,
-  snapshot: Snapshot
-): Promise<void> {
-  try {
-    const historyDir = getHistoryDirectory(context, workspaceFolder);
-    const snapshotPath = buildSnapshotPath(historyDir, snapshot.filePath, snapshot.id);
-    const snapshotUri = vscode.Uri.file(snapshotPath);
-
-    const data = await vscode.workspace.fs.readFile(snapshotUri);
-    const content = decompressContent(Buffer.from(data));
-
-    await vscode.env.clipboard.writeText(content);
-    vscode.window.showInformationMessage('Snapshot content copied to clipboard');
-  } catch (error) {
-    vscode.window.showErrorMessage(`Failed to copy snapshot: ${error}`);
-  }
-}
 
 /**
  * Command: maraudersMapMd.history.createCheckpoint
  * Create a manual checkpoint with user label
  */
 export async function createCheckpointCommand(context: vscode.ExtensionContext): Promise<void> {
-  const editor = vscode.window.activeTextEditor;
-  if (!editor || editor.document.languageId !== 'markdown') {
+  const editor = getMarkdownEditor();
+  if (!editor) {
     vscode.window.showWarningMessage('No active markdown file');
     return;
   }
@@ -532,8 +251,8 @@ export async function createCheckpointCommand(context: vscode.ExtensionContext):
  * Run retention engine on current file's snapshots
  */
 export async function pruneNowCommand(context: vscode.ExtensionContext): Promise<void> {
-  const editor = vscode.window.activeTextEditor;
-  if (!editor || editor.document.languageId !== 'markdown') {
+  const editor = getMarkdownEditor();
+  if (!editor) {
     vscode.window.showWarningMessage('No active markdown file');
     return;
   }

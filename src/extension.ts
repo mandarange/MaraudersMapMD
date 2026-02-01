@@ -33,9 +33,17 @@ export function activate(context: vscode.ExtensionContext): void {
 
   context.subscriptions.push(
     vscode.window.onDidChangeActiveTextEditor((editor) => {
+      if (previewManager.shouldAutoOpenFor(editor)) {
+        previewManager.openPreview(editor.document);
+      }
       previewManager.onActiveEditorChanged(editor);
     })
   );
+
+  const activeEditor = vscode.window.activeTextEditor;
+  if (activeEditor && activeEditor.document.languageId === 'markdown') {
+    previewManager.openPreview(activeEditor.document);
+  }
 
   context.subscriptions.push(
     vscode.workspace.onDidChangeTextDocument((event) => {
@@ -50,17 +58,10 @@ export function activate(context: vscode.ExtensionContext): void {
   registerAiCommands(context);
   registerAiListeners(context);
 
-  // Toggle commands
-  context.subscriptions.push(
-    vscode.commands.registerCommand('maraudersMapMd.toggle.task', () => {
-      vscode.window.showInformationMessage('Not implemented yet');
-    })
-  );
-
   // Paste to assets (deferred to v1.0)
   context.subscriptions.push(
     vscode.commands.registerCommand('maraudersMapMd.images.pasteToAssets', () => {
-      vscode.window.showInformationMessage('Not implemented yet');
+      vscode.window.showInformationMessage('Paste to Assets is not implemented yet');
     })
   );
 
