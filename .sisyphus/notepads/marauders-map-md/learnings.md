@@ -52,3 +52,44 @@
 - Task 2 (MarkdownEngine) will use test/unit/markdownEngine.test.ts pattern
 - All subsequent feature tasks will follow TDD: RED → GREEN → REFACTOR
 - Test fixtures are ready for use in markdown parsing tests
+
+## Task 2: MarkdownEngine Implementation (TDD)
+
+### TDD Workflow Success
+- **RED phase**: Created 10 test cases first, verified they fail (module not found)
+- **GREEN phase**: Implemented MarkdownEngine to make all tests pass
+- **Key insight**: Writing tests first forced clear API design (render vs renderWithMeta)
+
+### markdown-it Patterns
+- **Source line injection**: Use `md.core.ruler.push()` to add custom rules
+- **Token inspection**: Check `token.map` for line numbers, `token.type` for block detection
+- **Plugin configuration**: markdown-it-task-lists `enabled: false` adds `disabled` attribute to checkboxes
+- **Heading extraction**: Parse tokens, look for `heading_open` + `inline` pairs
+
+### Type Declarations
+- markdown-it-task-lists has no @types package
+- Created custom declaration in `src/types/markdown-it-task-lists.d.ts`
+- Pattern: `export = taskLists` for CommonJS module compatibility
+
+### Module Boundary Pattern
+- MarkdownEngine is pure TypeScript (zero vscode imports)
+- Testable with vitest without VS Code runtime
+- Exports: MarkdownEngine class, Heading interface, RenderResult interface
+- This enables fast unit testing and clear separation of concerns
+
+### Test Coverage Achieved
+1. Basic rendering (headings, paragraphs, lists)
+2. data-source-line attribute injection on block elements
+3. Task list rendering with disabled checkboxes
+4. HTML escaping (allowHtml: false)
+5. HTML passthrough (allowHtml: true)
+6. Empty input handling
+7. Frontmatter-like content (no crash)
+8. renderWithMeta: heading extraction with level, text, line, slug
+9. renderWithMeta: lineCount calculation
+10. Documents with no headings
+
+### Slugification
+- Simple slug generation: lowercase, trim, remove special chars, replace spaces with hyphens
+- Used for heading anchor links (future feature)
+

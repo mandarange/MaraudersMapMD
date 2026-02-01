@@ -252,7 +252,7 @@ Wave 6 — Final Integration + Package:
 
 ### Wave 0 — Project Scaffold
 
-- [ ] 0. Project Scaffolding
+- [x] 0. Project Scaffolding
 
   **What to do**:
   - Create `package.json` with:
@@ -412,7 +412,7 @@ Wave 6 — Final Integration + Package:
 
 ---
 
-- [ ] 1. Test Infrastructure Setup
+- [x] 1. Test Infrastructure Setup
 
   **What to do**:
   - Create `vitest.config.ts`:

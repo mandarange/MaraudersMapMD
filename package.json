@@ -415,6 +415,8 @@
     "vitest": "^1.0.0"
   },
   "dependencies": {
-    "markdown-it": "^14.0.0"
+    "@types/markdown-it": "^14.1.2",
+    "markdown-it": "^14.1.0",
+    "markdown-it-task-lists": "^2.1.1"
   }
 }
