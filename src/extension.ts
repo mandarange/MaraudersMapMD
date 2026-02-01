@@ -53,12 +53,6 @@ export function activate(context: vscode.ExtensionContext): void {
     })
   );
 
-  context.subscriptions.push(
-    vscode.commands.registerCommand('maraudersMapMd.export.pdf', () => {
-      vscode.window.showInformationMessage('Not implemented yet');
-    })
-  );
-
   // History commands
   context.subscriptions.push(
     vscode.commands.registerCommand('maraudersMapMd.history.open', () => {

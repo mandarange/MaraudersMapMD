@@ -1,7 +1,11 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
+import * as fs from 'fs';
+import puppeteer from 'puppeteer-core';
 import { MarkdownEngine } from '../preview/markdownEngine';
 import { buildExportHtml, resolveLocalImages } from './htmlTemplate';
+import { detectChrome } from './chromeDetector';
+import { exportToPdf } from './pdfExporter';
 
 const previewCss = `/* MaraudersMapMD Preview Styles */
 
@@ -187,6 +191,12 @@ export function registerExportCommands(context: vscode.ExtensionContext): void {
       await exportHtml();
     })
   );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand('maraudersMapMd.export.pdf', async () => {
+      await exportPdf();
+    })
+  );
 }
 
 async function exportHtml(): Promise<void> {
@@ -242,4 +252,104 @@ async function exportHtml(): Promise<void> {
     const message = error instanceof Error ? error.message : String(error);
     vscode.window.showErrorMessage(`Failed to export HTML: ${message}`);
   }
+}
+
+async function exportPdf(): Promise<void> {
+  const editor = vscode.window.activeTextEditor;
+  if (!editor || editor.document.languageId !== 'markdown') {
+    vscode.window.showErrorMessage('Please open a markdown file to export');
+    return;
+  }
+
+  const config = vscode.workspace.getConfiguration('maraudersMapMd.pdf');
+  const userBrowserPath = config.get<string>('browserPath', 'auto');
+  const format = config.get<string>('format', 'A4');
+  const marginMm = config.get<number>('marginMm', 12);
+  const printBackground = config.get<boolean>('printBackground', true);
+  const embedMode = config.get<string>('embedImages', 'fileUrl') as 'fileUrl' | 'dataUri';
+  const outputDirectory = config.get<string>('outputDirectory', '${workspaceFolder}/exports');
+  const openAfterExport = config.get<boolean>('openAfterExport', true);
+
+  const browserPath = detectChrome(
+    userBrowserPath === 'auto' ? null : userBrowserPath
+  );
+
+  if (!browserPath) {
+    const choice = await vscode.window.showErrorMessage(
+      'Chrome/Chromium browser not found. PDF export requires a Chromium-based browser.',
+      'Configure Browser Path',
+      'Export as HTML Instead'
+    );
+
+    if (choice === 'Configure Browser Path') {
+      await vscode.commands.executeCommand(
+        'workbench.action.openSettings',
+        'maraudersMapMd.pdf.browserPath'
+      );
+    } else if (choice === 'Export as HTML Instead') {
+      await exportHtml();
+    }
+    return;
+  }
+
+  const mdFileUri = editor.document.uri;
+  const mdFileDir = path.dirname(mdFileUri.fsPath);
+  const mdFileName = path.basename(mdFileUri.fsPath, '.md');
+  const mdContent = editor.document.getText();
+
+  const workspaceFolder = vscode.workspace.getWorkspaceFolder(mdFileUri);
+  const resolvedOutputDir = outputDirectory.replace(
+    '${workspaceFolder}',
+    workspaceFolder?.uri.fsPath ?? mdFileDir
+  );
+
+  if (!fs.existsSync(resolvedOutputDir)) {
+    fs.mkdirSync(resolvedOutputDir, { recursive: true });
+  }
+
+  const outputPath = path.join(resolvedOutputDir, `${mdFileName}.pdf`);
+
+  await vscode.window.withProgress(
+    {
+      location: vscode.ProgressLocation.Notification,
+      title: `Exporting ${mdFileName}.pdf...`,
+      cancellable: false,
+    },
+    async () => {
+      try {
+        const engine = new MarkdownEngine({ allowHtml: false });
+        const rendered = engine.render(mdContent);
+
+        let htmlContent = buildExportHtml({
+          title: mdFileName,
+          body: rendered,
+          css: previewCss,
+        });
+
+        htmlContent = resolveLocalImages(htmlContent, mdFileDir, embedMode);
+
+        await exportToPdf(
+          {
+            html: htmlContent,
+            outputPath,
+            browserPath,
+            format,
+            marginMm,
+            printBackground,
+          },
+          puppeteer.launch.bind(puppeteer)
+        );
+
+        if (openAfterExport) {
+          const outputUri = vscode.Uri.file(outputPath);
+          await vscode.commands.executeCommand('vscode.open', outputUri);
+        } else {
+          vscode.window.showInformationMessage(`PDF exported to ${outputPath}`);
+        }
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        vscode.window.showErrorMessage(`Failed to export PDF: ${message}`);
+      }
+    }
+  );
 }
