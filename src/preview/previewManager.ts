@@ -128,6 +128,48 @@ export class PreviewManager implements vscode.Disposable {
         this.updateTimeout = undefined;
       }
     }, null, this.disposables);
+
+    this.panel.webview.onDidReceiveMessage(
+      async (message) => {
+        if (message.type === 'toggleCheckbox') {
+          await this.handleToggleCheckbox(message.line);
+        }
+      },
+      null,
+      this.disposables,
+    );
+  }
+
+  private async handleToggleCheckbox(lineNumber: number): Promise<void> {
+    const editor = vscode.window.activeTextEditor;
+    if (!editor || editor.document.languageId !== 'markdown') {
+      return;
+    }
+
+    const document = editor.document;
+    if (lineNumber < 0 || lineNumber >= document.lineCount) {
+      return;
+    }
+
+    const line = document.lineAt(lineNumber);
+    const text = line.text;
+    let newText: string;
+
+    if (text.includes('- [ ]')) {
+      newText = text.replace('- [ ]', '- [x]');
+    } else if (text.includes('- [x]')) {
+      newText = text.replace('- [x]', '- [ ]');
+    } else if (text.includes('* [ ]')) {
+      newText = text.replace('* [ ]', '* [x]');
+    } else if (text.includes('* [x]')) {
+      newText = text.replace('* [x]', '* [ ]');
+    } else {
+      return;
+    }
+
+    const edit = new vscode.WorkspaceEdit();
+    edit.replace(document.uri, line.range, newText);
+    await vscode.workspace.applyEdit(edit);
   }
 
   private updatePreview(document: vscode.TextDocument): void {
