@@ -1,18 +1,34 @@
 import * as vscode from 'vscode';
+import { PreviewManager } from './preview/previewManager';
 
 export function activate(context: vscode.ExtensionContext): void {
-  console.log('MaraudersMapMD extension activated');
+  const previewManager = new PreviewManager(context.extensionUri);
+  context.subscriptions.push(previewManager);
 
-  // Preview commands
   context.subscriptions.push(
     vscode.commands.registerCommand('maraudersMapMd.openPreviewToSide', () => {
-      vscode.window.showInformationMessage('Not implemented yet');
+      const editor = vscode.window.activeTextEditor;
+      if (editor && editor.document.languageId === 'markdown') {
+        previewManager.openPreview(editor.document);
+      }
     })
   );
 
   context.subscriptions.push(
     vscode.commands.registerCommand('maraudersMapMd.togglePreviewLock', () => {
-      vscode.window.showInformationMessage('Not implemented yet');
+      previewManager.toggleLock();
+    })
+  );
+
+  context.subscriptions.push(
+    vscode.window.onDidChangeActiveTextEditor((editor) => {
+      previewManager.onActiveEditorChanged(editor);
+    })
+  );
+
+  context.subscriptions.push(
+    vscode.workspace.onDidChangeTextDocument((event) => {
+      previewManager.onDocumentChanged(event);
     })
   );
 
