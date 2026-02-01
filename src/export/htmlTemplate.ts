@@ -3,10 +3,12 @@ export interface ExportHtmlOptions {
   body: string;
   css: string;
   embedImages?: boolean;
+  bodyClass?: string;
 }
 
 export function buildExportHtml(options: ExportHtmlOptions): string {
-  const { title, body, css } = options;
+  const { title, body, css, bodyClass } = options;
+  const classAttr = bodyClass ? ` class="${bodyClass}"` : '';
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -18,7 +20,7 @@ export function buildExportHtml(options: ExportHtmlOptions): string {
 ${css}
   </style>
 </head>
-<body>
+<body${classAttr}>
 ${body}
 </body>
 </html>`;

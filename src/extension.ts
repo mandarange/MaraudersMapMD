@@ -11,6 +11,7 @@ import {
 } from './history/historyCommands';
 import { registerAiCommands } from './ai/aiCommands';
 import { registerAiListeners } from './ai/aiService';
+import { UsagePanel } from './usage/usagePanel';
 
 export function activate(context: vscode.ExtensionContext): void {
   const previewManager = new PreviewManager(context.extensionUri);
@@ -58,6 +59,12 @@ export function activate(context: vscode.ExtensionContext): void {
   registerAiCommands(context);
   registerAiListeners(context);
 
+  context.subscriptions.push(
+    vscode.commands.registerCommand('maraudersMapMd.usage.open', () => {
+      UsagePanel.show(context);
+    })
+  );
+
   // Paste to assets (deferred to v1.0)
   context.subscriptions.push(
     vscode.commands.registerCommand('maraudersMapMd.images.pasteToAssets', () => {
@@ -76,15 +83,15 @@ export function activate(context: vscode.ExtensionContext): void {
   );
 
   context.subscriptions.push(
-    vscode.commands.registerCommand('maraudersMapMd.history.diffWithCurrent', () => {
-      vscode.window.showInformationMessage('Not implemented yet');
-    })
+    vscode.commands.registerCommand('maraudersMapMd.history.diffWithCurrent', () =>
+      openHistoryCommand(context)
+    )
   );
 
   context.subscriptions.push(
-    vscode.commands.registerCommand('maraudersMapMd.history.restoreSnapshot', () => {
-      vscode.window.showInformationMessage('Not implemented yet');
-    })
+    vscode.commands.registerCommand('maraudersMapMd.history.restoreSnapshot', () =>
+      openHistoryCommand(context)
+    )
   );
 
   context.subscriptions.push(

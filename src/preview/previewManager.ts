@@ -172,19 +172,18 @@ export class PreviewManager implements vscode.Disposable {
   }
 
   private async handleToolbarCommand(command: string): Promise<void> {
-    // Ensure the markdown editor is active so command handlers can find activeTextEditor
-    let doc = this.currentDocument;
-    if (!doc) {
+    if (command !== 'ai.copyReadabilityPrompt') {
+      // Ensure the markdown editor is active so command handlers can find activeTextEditor
       const mdEditor = vscode.window.visibleTextEditors.find(
         (e) => e.document.languageId === 'markdown',
       );
-      doc = mdEditor?.document;
-    }
-    if (doc) {
-      this.suppressNextAutoOpen = true;
-      try {
-        await vscode.window.showTextDocument(doc.uri, { preserveFocus: true, preview: true });
-      } catch { /* document may have been closed */ }
+      const doc = this.currentDocument ?? mdEditor?.document;
+      if (doc && !mdEditor) {
+        this.suppressNextAutoOpen = true;
+        try {
+          await vscode.window.showTextDocument(doc.uri, { preserveFocus: true, preview: true });
+        } catch { /* document may have been closed */ }
+      }
     }
     try {
       await vscode.commands.executeCommand(`maraudersMapMd.${command}`);

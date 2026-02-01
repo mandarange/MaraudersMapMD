@@ -3,7 +3,7 @@
   "displayName": "MaraudersMapMD",
   "description": "Ultra-fast Markdown preview with AI-native readability artifacts (AI Map, Section Pack, Token Budget), PDF/HTML export, document history, and GEO (Generative Engine Optimization) support for VS Code.",
   "icon": "icon.png",
-  "version": "0.2.1",
+  "version": "1.0.0",
   "license": "MIT",
   "publisher": "marauders-map-md",
   "homepage": "https://github.com/mandarange/MaraudersMapMD#readme",
@@ -155,30 +155,6 @@
         "icon": "$(trash)"
       },
       {
-        "command": "maraudersMapMd.ai.generateMap",
-        "title": "Generate AI Map",
-        "category": "MaraudersMapMD: AI",
-        "icon": "$(symbol-structure)"
-      },
-      {
-        "command": "maraudersMapMd.ai.exportSectionPack",
-        "title": "Export Section Pack",
-        "category": "MaraudersMapMD: AI",
-        "icon": "$(split-horizontal)"
-      },
-      {
-        "command": "maraudersMapMd.ai.buildIndex",
-        "title": "Build Search Index",
-        "category": "MaraudersMapMD: AI",
-        "icon": "$(search)"
-      },
-      {
-        "command": "maraudersMapMd.ai.copyContextBudgeted",
-        "title": "Copy Context (Budgeted)",
-        "category": "MaraudersMapMD: AI",
-        "icon": "$(clippy)"
-      },
-      {
         "command": "maraudersMapMd.ai.copyReadabilityPrompt",
         "title": "Copy Readability Prompt",
         "category": "MaraudersMapMD: AI",
@@ -201,6 +177,12 @@
         "title": "Insert AI Note Hint",
         "category": "MaraudersMapMD: AI",
         "icon": "$(note)"
+      },
+      {
+        "command": "maraudersMapMd.usage.open",
+        "title": "Open Usage Guide",
+        "category": "MaraudersMapMD: Help",
+        "icon": "$(book)"
       }
     ],
     "menus": {
@@ -216,12 +198,12 @@
           "group": "navigation"
         },
         {
-          "command": "maraudersMapMd.ai.generateMap",
+          "command": "maraudersMapMd.history.open",
           "when": "resourceLangId == markdown",
           "group": "navigation"
         },
         {
-          "command": "maraudersMapMd.history.open",
+          "command": "maraudersMapMd.usage.open",
           "when": "resourceLangId == markdown",
           "group": "navigation"
         }
@@ -258,11 +240,7 @@
       "maraudersMapMd.aiMenu": [
         { "command": "maraudersMapMd.ai.insertHintRule", "group": "1_hints@1" },
         { "command": "maraudersMapMd.ai.insertHintDecision", "group": "1_hints@2" },
-        { "command": "maraudersMapMd.ai.insertHintNote", "group": "1_hints@3" },
-        { "command": "maraudersMapMd.ai.generateMap", "group": "2_generate@1" },
-        { "command": "maraudersMapMd.ai.exportSectionPack", "group": "2_generate@2" },
-        { "command": "maraudersMapMd.ai.buildIndex", "group": "2_generate@3" },
-        { "command": "maraudersMapMd.ai.copyContextBudgeted", "group": "3_export@1" }
+        { "command": "maraudersMapMd.ai.insertHintNote", "group": "1_hints@3" }
       ]
     },
     "submenus": [
@@ -489,7 +467,7 @@
         },
         "maraudersMapMd.ai.outputDir": {
           "type": "string",
-          "default": ".ai",
+          "default": "docs/MaraudersMap",
           "description": "Directory for AI artifacts output (relative to workspace root)"
         },
         "maraudersMapMd.ai.buildOnSave": {

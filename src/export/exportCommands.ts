@@ -186,7 +186,16 @@ img {
   }
 }`;
 
+let exportCssOverride: string | null = null;
+
 export function registerExportCommands(context: vscode.ExtensionContext): void {
+  try {
+    const cssPath = path.join(context.extensionUri.fsPath, 'media', 'preview.css');
+    exportCssOverride = fs.readFileSync(cssPath, 'utf8');
+  } catch {
+    exportCssOverride = null;
+  }
+
   context.subscriptions.push(
     vscode.commands.registerCommand('maraudersMapMd.export.html', async () => {
       await exportHtml();
@@ -204,6 +213,85 @@ function getExportDir(mdFileUri: vscode.Uri, mdFileName: string): string {
   const workspaceFolder = vscode.workspace.getWorkspaceFolder(mdFileUri);
   const root = workspaceFolder?.uri.fsPath ?? path.dirname(mdFileUri.fsPath);
   return path.join(root, 'docs', 'MaraudersMap', mdFileName);
+}
+
+function getThemeClass(): string {
+  const kind = vscode.window.activeColorTheme.kind;
+  switch (kind) {
+    case vscode.ColorThemeKind.Light:
+      return 'vscode-light';
+    case vscode.ColorThemeKind.HighContrastLight:
+      return 'vscode-high-contrast-light';
+    case vscode.ColorThemeKind.HighContrast:
+      return 'vscode-high-contrast';
+    case vscode.ColorThemeKind.Dark:
+    default:
+      return 'vscode-dark';
+  }
+}
+
+function getThemeVars(themeClass: string): string {
+  if (themeClass === 'vscode-light') {
+    return `:root {
+  --vscode-editor-background: #ffffff;
+  --vscode-editor-foreground: #1f2328;
+  --vscode-panel-border: #d0d7de;
+  --vscode-descriptionForeground: #57606a;
+  --vscode-textLink-foreground: #0969da;
+  --vscode-textLink-activeForeground: #0550ae;
+  --vscode-textCodeBlock-background: #f6f8fa;
+  --vscode-toolbar-hoverBackground: rgba(175, 184, 193, 0.3);
+  --vscode-toolbar-activeBackground: rgba(175, 184, 193, 0.5);
+  --vscode-charts-blue: #0550ae;
+  --vscode-charts-green: #116329;
+  --vscode-charts-yellow: #6f3800;
+  --vscode-charts-purple: #8250df;
+  --vscode-charts-lightBlue: #0969da;
+  --vscode-charts-orange: #c4432b;
+}`;
+  }
+  if (themeClass === 'vscode-high-contrast' || themeClass === 'vscode-high-contrast-light') {
+    return `:root {
+  --vscode-editor-background: #000000;
+  --vscode-editor-foreground: #ffffff;
+  --vscode-panel-border: #ffffff;
+  --vscode-descriptionForeground: #ffffff;
+  --vscode-textLink-foreground: #3794ff;
+  --vscode-textLink-activeForeground: #9cdcfe;
+  --vscode-textCodeBlock-background: rgba(255, 255, 255, 0.1);
+  --vscode-toolbar-hoverBackground: rgba(255, 255, 255, 0.2);
+  --vscode-toolbar-activeBackground: rgba(255, 255, 255, 0.3);
+  --vscode-charts-blue: #6fc3df;
+  --vscode-charts-green: #3ff23f;
+  --vscode-charts-yellow: #d7ba7d;
+  --vscode-charts-purple: #d670d6;
+  --vscode-charts-lightBlue: #9cdcfe;
+  --vscode-charts-orange: #ce9178;
+}`;
+  }
+  return `:root {
+  --vscode-editor-background: #1e1e1e;
+  --vscode-editor-foreground: #d4d4d4;
+  --vscode-panel-border: #30363d;
+  --vscode-descriptionForeground: #9da5b4;
+  --vscode-textLink-foreground: #4fc1ff;
+  --vscode-textLink-activeForeground: #9cdcfe;
+  --vscode-textCodeBlock-background: rgba(27, 31, 35, 0.3);
+  --vscode-toolbar-hoverBackground: rgba(90, 93, 94, 0.31);
+  --vscode-toolbar-activeBackground: rgba(90, 93, 94, 0.45);
+  --vscode-charts-blue: #569cd6;
+  --vscode-charts-green: #4ec9b0;
+  --vscode-charts-yellow: #dcdcaa;
+  --vscode-charts-purple: #c586c0;
+  --vscode-charts-lightBlue: #9cdcfe;
+  --vscode-charts-orange: #ce9178;
+}`;
+}
+
+function getExportCss(): string {
+  const themeClass = getThemeClass();
+  const baseCss = exportCssOverride ?? previewCss;
+  return `${getThemeVars(themeClass)}\n${baseCss}`;
 }
 
 async function exportHtml(): Promise<void> {
@@ -225,7 +313,8 @@ async function exportHtml(): Promise<void> {
     let htmlContent = buildExportHtml({
       title: mdFileName,
       body: rendered,
-      css: previewCss,
+      css: getExportCss(),
+      bodyClass: getThemeClass(),
     });
 
     htmlContent = resolveLocalImages(htmlContent, mdFileDir, 'fileUrl');
@@ -317,7 +406,8 @@ async function exportPdf(): Promise<void> {
         let htmlContent = buildExportHtml({
           title: mdFileName,
           body: rendered,
-          css: previewCss,
+          css: getExportCss(),
+          bodyClass: getThemeClass(),
         });
 
         htmlContent = resolveLocalImages(htmlContent, mdFileDir, embedMode);

@@ -39,20 +39,8 @@ export function buildPreviewHtml(params: HtmlTemplateParams): string {
     </div>
     <div class="toolbar-separator"></div>
     <div class="toolbar-group">
-      <button class="toolbar-btn" data-command="ai.generateMap" title="Generate AI Map">
-        <span class="btn-icon">&#x1F5FA;</span><span class="btn-label">AI Map</span>
-      </button>
-      <button class="toolbar-btn" data-command="ai.exportSectionPack" title="Export Section Pack">
-        <span class="btn-icon">&#x1F4E6;</span><span class="btn-label">Sections</span>
-      </button>
-      <button class="toolbar-btn" data-command="ai.buildIndex" title="Build Search Index">
-        <span class="btn-icon">&#x1F50D;</span><span class="btn-label">Index</span>
-      </button>
-      <button class="toolbar-btn" data-command="ai.copyContextBudgeted" title="Copy Context (Budgeted)">
-        <span class="btn-icon">&#x1F4CB;</span><span class="btn-label">Context</span>
-      </button>
       <button class="toolbar-btn" data-command="ai.copyReadabilityPrompt" title="Copy Readability Prompt">
-        <span class="btn-icon">&#x1F4DD;</span><span class="btn-label">Prompt</span>
+        <span class="btn-icon">&#x1F4DD;</span><span class="btn-label">Rewrite Prompt</span>
       </button>
     </div>
     <div class="toolbar-separator"></div>
@@ -62,6 +50,9 @@ export function buildPreviewHtml(params: HtmlTemplateParams): string {
       </button>
       <button class="toolbar-btn" data-command="history.createCheckpoint" title="Create Checkpoint">
         <span class="btn-icon">&#x1F516;</span><span class="btn-label">Checkpoint</span>
+      </button>
+      <button class="toolbar-btn" data-command="usage.open" title="Open Usage Guide">
+        <span class="btn-icon">&#x1F4D6;</span><span class="btn-label">Guide</span>
       </button>
     </div>
   </div>

@@ -4,8 +4,7 @@ import * as path from 'path';
 import { generateAiMap } from './aiMapGenerator';
 import { generateSectionPack } from './sectionPackGenerator';
 import { buildSearchIndex } from './searchIndexBuilder';
-import { exportWithBudget, PRESET_BUDGETS } from './tokenBudgetExporter';
-import { estimateTokens, TokenEstimationMode } from './tokenEstimator';
+import { TokenEstimationMode } from './tokenEstimator';
 import { getMarkdownEditor } from '../utils/editorUtils';
 
 // ── Debounce state ──────────────────────────────────────────────────
@@ -36,7 +35,7 @@ function getTokenMode(): TokenEstimationMode {
 }
 
 function getOutputDir(): string {
-  return getConfig().get<string>('ai.outputDir', '.ai');
+  return 'docs/MaraudersMap';
 }
 
 function getLargeDocThresholdBytes(): number {
@@ -47,8 +46,14 @@ function docIdFromPath(filePath: string): string {
   return path.basename(filePath, '.md');
 }
 
-function getWorkspaceRoot(): string | undefined {
-  return vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+function getWorkspaceRoot(filePath: string): string | undefined {
+  const folder = vscode.workspace.getWorkspaceFolder(vscode.Uri.file(filePath));
+  return folder?.uri.fsPath;
+}
+
+function getArtifactsBaseDir(workspaceRoot: string, filePath: string): string {
+  const docId = docIdFromPath(filePath);
+  return path.join(workspaceRoot, 'docs', 'MaraudersMap', docId);
 }
 
 // ── Core generation logic ───────────────────────────────────────────
@@ -63,13 +68,13 @@ async function generateArtifacts(options: GenerateOptions): Promise<void> {
   const { filePath, content, mapOnly } = options;
   const config = getConfig();
   const tokenMode = getTokenMode();
-  const workspaceRoot = getWorkspaceRoot();
+  const workspaceRoot = getWorkspaceRoot(filePath);
   if (!workspaceRoot) {
     return;
   }
 
   const docId = docIdFromPath(filePath);
-  const outputBase = path.join(workspaceRoot, getOutputDir(), docId);
+  const outputBase = getArtifactsBaseDir(workspaceRoot, filePath);
   const channel = getOutputChannel();
 
   await fs.mkdir(outputBase, { recursive: true });
@@ -147,7 +152,7 @@ async function handleDocumentSave(document: vscode.TextDocument): Promise<void> 
 
   try {
     await generateArtifacts({ filePath, content, mapOnly: isLargeDoc });
-    await handleGitPolicy();
+    await handleGitPolicy(filePath);
   } catch (err) {
     getOutputChannel().appendLine(`[AI] Error generating artifacts: ${String(err)}`);
   }
@@ -155,8 +160,8 @@ async function handleDocumentSave(document: vscode.TextDocument): Promise<void> 
 
 // ── Git policy ──────────────────────────────────────────────────────
 
-async function handleGitPolicy(): Promise<void> {
-  const workspaceRoot = getWorkspaceRoot();
+async function handleGitPolicy(filePath: string): Promise<void> {
+  const workspaceRoot = getWorkspaceRoot(filePath);
   if (!workspaceRoot) {
     return;
   }
@@ -236,14 +241,14 @@ async function cmdGenerateMap(): Promise<void> {
 
   const filePath = editor.document.uri.fsPath;
   const content = editor.document.getText();
-  const workspaceRoot = getWorkspaceRoot();
+  const workspaceRoot = getWorkspaceRoot(filePath);
   if (!workspaceRoot) {
     vscode.window.showErrorMessage('Open a workspace folder first');
     return;
   }
 
   const docId = docIdFromPath(filePath);
-  const outputBase = path.join(workspaceRoot, getOutputDir(), docId);
+  const outputBase = getArtifactsBaseDir(workspaceRoot, filePath);
   await fs.mkdir(outputBase, { recursive: true });
 
   const mapContent = generateAiMap({ filePath, content, tokenMode: getTokenMode() });
@@ -268,14 +273,14 @@ async function cmdExportSectionPack(): Promise<void> {
 
   const filePath = editor.document.uri.fsPath;
   const content = editor.document.getText();
-  const workspaceRoot = getWorkspaceRoot();
+  const workspaceRoot = getWorkspaceRoot(filePath);
   if (!workspaceRoot) {
     vscode.window.showErrorMessage('Open a workspace folder first');
     return;
   }
 
   const docId = docIdFromPath(filePath);
-  const sectionsDir = path.join(workspaceRoot, getOutputDir(), docId, 'sections');
+  const sectionsDir = path.join(getArtifactsBaseDir(workspaceRoot, filePath), 'sections');
   await fs.mkdir(sectionsDir, { recursive: true });
 
   const sections = generateSectionPack({ filePath, content });
@@ -302,14 +307,14 @@ async function cmdBuildIndex(): Promise<void> {
 
   const filePath = editor.document.uri.fsPath;
   const content = editor.document.getText();
-  const workspaceRoot = getWorkspaceRoot();
+  const workspaceRoot = getWorkspaceRoot(filePath);
   if (!workspaceRoot) {
     vscode.window.showErrorMessage('Open a workspace folder first');
     return;
   }
 
   const docId = docIdFromPath(filePath);
-  const outputBase = path.join(workspaceRoot, getOutputDir(), docId);
+  const outputBase = getArtifactsBaseDir(workspaceRoot, filePath);
   await fs.mkdir(outputBase, { recursive: true });
 
   const index = buildSearchIndex({ filePath, content, tokenMode: getTokenMode() });
@@ -321,87 +326,39 @@ async function cmdBuildIndex(): Promise<void> {
   vscode.window.showInformationMessage(`Search index built for ${docId}`);
 }
 
-async function cmdCopyContextBudgeted(): Promise<void> {
-  const editor = getMarkdownEditor();
-  if (!editor) {
-    vscode.window.showErrorMessage('Open a Markdown file first');
-    return;
-  }
-  if (!isAiEnabled()) {
-    vscode.window.showWarningMessage('AI features are disabled');
-    return;
-  }
 
-  const content = editor.document.getText();
-  const tokenMode = getTokenMode();
+function buildReadabilityPrompt(relativePath: string, fileName: string, docId: string): string {
+  const artifactDir = `docs/MaraudersMap/${docId}`;
+  const rewrittenName = fileName.replace(/\.md$/, '.rewritten.md');
 
-  const items: vscode.QuickPickItem[] = [
-    { label: '1k tokens', description: '~1,000 tokens' },
-    { label: '2k tokens', description: '~2,000 tokens' },
-    { label: '4k tokens', description: '~4,000 tokens' },
-    { label: '8k tokens', description: '~8,000 tokens' },
-    { label: 'Custom...', description: 'Enter a custom token budget' },
-  ];
+  return `Rewrite "${fileName}" for readability using the maraudersmapmd-readability-flow skill.
 
-  const picked = await vscode.window.showQuickPick(items, {
-    placeHolder: 'Select token budget for context export',
-  });
-  if (!picked) {
-    return;
-  }
+## Target
+- File: \`${relativePath}\`
+- Output to: \`${rewrittenName}\` (same directory — do not modify the original)
 
-  let budget: number;
-  if (picked.label === 'Custom...') {
-    const input = await vscode.window.showInputBox({
-      prompt: 'Enter token budget (number)',
-      placeHolder: '3000',
-      validateInput: (value) => {
-        const n = Number(value);
-        if (isNaN(n) || n <= 0 || !Number.isInteger(n)) {
-          return 'Please enter a positive integer';
-        }
-        return undefined;
-      },
-    });
-    if (!input) {
-      return;
-    }
-    budget = Number(input);
-  } else {
-    const key = picked.label.split(' ')[0] as keyof typeof PRESET_BUDGETS;
-    budget = PRESET_BUDGETS[key];
-  }
+## Pre-generated Artifacts (\`${artifactDir}/\`)
+| Artifact | Path | Content |
+|----------|------|---------|
+| AI Map | \`${artifactDir}/ai-map.md\` | Heading structure, line ranges, token counts |
+| Sections | \`${artifactDir}/sections/*.md\` | Heading-based document splits |
+| Index | \`${artifactDir}/index.json\` | Keywords, links, AI hints per section |
 
-  const exported = exportWithBudget({ content, budget, tokenMode });
-  const actualTokens = estimateTokens(exported, tokenMode);
+## Procedure
+1. **Baseline** — Read \`ai-map.md\` + \`index.json\` as ground truth. Do not edit yet.
+2. **Working copy** — Create \`${rewrittenName}\`. All edits go here only.
+3. **Skeleton** — Build heading hierarchy from AI Map. Fix level skips.
+4. **Rewrite** — Process each \`sections/*.md\`: short paragraphs, bullets for dense prose, tables for structured data.
+5. **Verify** — Every keyword, link, and AI hint from \`index.json\` must appear in output. Run the skill checklist.
 
-  await vscode.env.clipboard.writeText(exported);
-  vscode.window.showInformationMessage(`Copied ~${actualTokens} tokens to clipboard`);
-}
-
-function buildReadabilityPrompt(source: string): string {
-  return `You are an expert technical editor. Rewrite the Markdown to maximize readability and scan-ability while preserving meaning and intent.
-
-Core requirements:
-- Keep the final language the same as the original (do not translate). If mixed, use the dominant language.
-- Preserve all facts, constraints, and technical details. Do not add new information.
-- Keep Markdown semantics correct (headings, lists, tables, code fences, links).
-- Use the project's AI hint block format where it helps: "> [AI RULE]", "> [AI DECISION]", "> [AI TODO]", "> [AI CONTEXT]".
-- Prefer short paragraphs, clear headings, and consistent numbering.
-- Use tables for settings, options, or structured comparisons when helpful.
-- Keep code blocks and inline code exactly as-is.
-- Remove fluff and redundancy; keep only what's necessary.
-- Output ONLY the final Markdown. No commentary.
-
-Formatting guidance:
-- Ensure headings follow a clean hierarchy.
-- Convert dense prose into bullet lists where it improves readability.
-- Keep a concise top summary if the document is long.
-
-SOURCE MARKDOWN (do not omit any content):
-<<<BEGIN MARKDOWN
-${source}
-END MARKDOWN>>>`;
+## Core Rules
+- Same language as original (no translation)
+- Preserve all facts, constraints, technical details
+- Short paragraphs (2–4 lines), dense prose → bullet lists
+- Tables for settings, options, comparisons
+- AI hint blocks where warranted: \`> [AI RULE]\`, \`> [AI DECISION]\`, \`> [AI TODO]\`, \`> [AI CONTEXT]\`
+- Code blocks and inline code: unchanged
+- No fluff, no commentary — output ONLY the final Markdown`;
 }
 
 async function cmdCopyReadabilityPrompt(): Promise<void> {
@@ -411,8 +368,29 @@ async function cmdCopyReadabilityPrompt(): Promise<void> {
     return;
   }
 
-  const source = editor.document.getText();
-  const prompt = buildReadabilityPrompt(source);
+  const filePath = editor.document.uri.fsPath;
+  const workspaceRoot = getWorkspaceRoot(filePath);
+  if (!workspaceRoot) {
+    vscode.window.showErrorMessage('Open a workspace folder first');
+    return;
+  }
+
+  const artifactDir = getArtifactsBaseDir(workspaceRoot, filePath);
+  const aiMapPath = path.join(artifactDir, 'ai-map.md');
+  try {
+    await fs.access(aiMapPath);
+  } catch {
+    try {
+      await generateArtifacts({ filePath, content: editor.document.getText() });
+    } catch {
+      getOutputChannel().appendLine('[AI] Artifact generation failed — prompt will reference empty paths');
+    }
+  }
+
+  const fileName = path.basename(filePath);
+  const relativePath = path.relative(workspaceRoot, filePath);
+  const docId = docIdFromPath(filePath);
+  const prompt = buildReadabilityPrompt(relativePath, fileName, docId);
   await vscode.env.clipboard.writeText(prompt);
   vscode.window.showInformationMessage('Readability prompt copied to clipboard');
 }
@@ -442,12 +420,6 @@ export function registerAiListeners(context: vscode.ExtensionContext): void {
   context.subscriptions.push(
     vscode.commands.registerCommand('maraudersMapMd.ai.buildIndex', () => {
       void cmdBuildIndex();
-    }),
-  );
-
-  context.subscriptions.push(
-    vscode.commands.registerCommand('maraudersMapMd.ai.copyContextBudgeted', () => {
-      void cmdCopyContextBudgeted();
     }),
   );
 
