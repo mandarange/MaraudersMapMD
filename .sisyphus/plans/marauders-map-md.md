@@ -1029,7 +1029,7 @@ Wave 6 — Final Integration + Package:
 
 ---
 
-- [ ] 9. Image Drag-Drop (Webview-side)
+- [~] 9. Image Drag-Drop (Webview-side) **DEFERRED TO v1.0** (3 attempts failed - see issues.md)
 
   **What to do**:
   - Update `media/preview.js`:
