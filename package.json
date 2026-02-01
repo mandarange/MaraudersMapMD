@@ -402,7 +402,8 @@
     "compile": "npm run esbuild",
     "watch": "npm run esbuild-watch",
     "pretest": "npm run compile",
-    "test": "vitest",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "test:integration": "node ./test/runTest.js"
   },
   "devDependencies": {
