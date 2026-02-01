@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { PreviewManager } from './preview/previewManager';
 import { registerEditCommands } from './edit/editCommands';
+import { registerImageCommands } from './images/imageCommands';
 
 export function activate(context: vscode.ExtensionContext): void {
   const previewManager = new PreviewManager(context.extensionUri);
@@ -34,6 +35,7 @@ export function activate(context: vscode.ExtensionContext): void {
   );
 
   registerEditCommands(context);
+  registerImageCommands(context);
 
   // Toggle commands
   context.subscriptions.push(
@@ -42,13 +44,7 @@ export function activate(context: vscode.ExtensionContext): void {
     })
   );
 
-  // Image commands
-  context.subscriptions.push(
-    vscode.commands.registerCommand('maraudersMapMd.images.insertFromFile', () => {
-      vscode.window.showInformationMessage('Not implemented yet');
-    })
-  );
-
+  // Paste to assets (deferred to v1.0)
   context.subscriptions.push(
     vscode.commands.registerCommand('maraudersMapMd.images.pasteToAssets', () => {
       vscode.window.showInformationMessage('Not implemented yet');
