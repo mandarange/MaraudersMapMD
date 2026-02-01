@@ -331,34 +331,32 @@ function buildReadabilityPrompt(relativePath: string, fileName: string, docId: s
   const artifactDir = `docs/MaraudersMap/${docId}`;
   const rewrittenName = fileName.replace(/\.md$/, '.rewritten.md');
 
-  return `Rewrite "${fileName}" for readability using the maraudersmapmd-readability-flow skill.
+  const skillUrl = 'https://raw.githubusercontent.com/mandarange/MaraudersMapMD-skill/main/SKILL.md';
+  const skillPath = '.cursor/rules/maraudersmapmd-skill.mdc';
 
-## Target
+  return `## Step 1 — Install or update skill
+
+Check if \`${skillPath}\` exists in this project.
+
+1. Fetch ${skillUrl}.
+2. If \`${skillPath}\` does NOT exist, save the fetched content as \`${skillPath}\`.
+3. If \`${skillPath}\` already exists, compare the \`version\` in the YAML frontmatter of both. If the remote version is newer, overwrite \`${skillPath}\` with the fetched content. Otherwise skip.
+4. After saving, ensure the YAML frontmatter in \`${skillPath}\` is Cursor-compatible. It MUST contain these fields:
+   \`\`\`yaml
+   ---
+   description: "<keep the original description>"
+   alwaysApply: false
+   ---
+   \`\`\`
+   Remove any fields Cursor does not recognize (e.g. name, metadata, tags). Keep the rest of the file content unchanged.
+
+## Step 2 — Rewrite for readability
+
+Follow the maraudersmapmd-skill to rewrite "${fileName}".
+
 - File: \`${relativePath}\`
 - Output to: \`${rewrittenName}\` (same directory — do not modify the original)
-
-## Pre-generated Artifacts (\`${artifactDir}/\`)
-| Artifact | Path | Content |
-|----------|------|---------|
-| AI Map | \`${artifactDir}/ai-map.md\` | Heading structure, line ranges, token counts |
-| Sections | \`${artifactDir}/sections/*.md\` | Heading-based document splits |
-| Index | \`${artifactDir}/index.json\` | Keywords, links, AI hints per section |
-
-## Procedure
-1. **Baseline** — Read \`ai-map.md\` + \`index.json\` as ground truth. Do not edit yet.
-2. **Working copy** — Create \`${rewrittenName}\`. All edits go here only.
-3. **Skeleton** — Build heading hierarchy from AI Map. Fix level skips.
-4. **Rewrite** — Process each \`sections/*.md\`: short paragraphs, bullets for dense prose, tables for structured data.
-5. **Verify** — Every keyword, link, and AI hint from \`index.json\` must appear in output. Run the skill checklist.
-
-## Core Rules
-- Same language as original (no translation)
-- Preserve all facts, constraints, technical details
-- Short paragraphs (2–4 lines), dense prose → bullet lists
-- Tables for settings, options, comparisons
-- AI hint blocks where warranted: \`> [AI RULE]\`, \`> [AI DECISION]\`, \`> [AI TODO]\`, \`> [AI CONTEXT]\`
-- Code blocks and inline code: unchanged
-- No fluff, no commentary — output ONLY the final Markdown`;
+- Artifacts at \`${artifactDir}/\`: \`ai-map.md\`, \`sections/*.md\`, \`index.json\``;
 }
 
 async function cmdCopyReadabilityPrompt(): Promise<void> {

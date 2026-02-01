@@ -11,6 +11,7 @@ out/
 # IDE
 .vscode/
 .idea/
+.cursor/
 *.swp
 *.swo
 *~
