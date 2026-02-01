@@ -14,9 +14,31 @@ import {
 import { getSnapshotsToDelete, RetentionPolicy } from './retentionEngine';
 
 /**
- * Register history-related event listeners (onSave snapshots)
+ * TextDocumentContentProvider for snapshot URIs (maraudersMapMd: scheme)
+ */
+class SnapshotContentProvider implements vscode.TextDocumentContentProvider {
+  async provideTextDocumentContent(uri: vscode.Uri): Promise<string> {
+    try {
+      const snapshotPath = uri.fsPath;
+      const snapshotUri = vscode.Uri.file(snapshotPath);
+      const data = await vscode.workspace.fs.readFile(snapshotUri);
+      return decompressContent(Buffer.from(data));
+    } catch (error) {
+      return `Error reading snapshot: ${error}`;
+    }
+  }
+}
+
+/**
+ * Register history-related event listeners and providers
  */
 export function registerHistoryListeners(context: vscode.ExtensionContext): void {
+  // Register TextDocumentContentProvider for snapshot URIs
+  const snapshotProvider = new SnapshotContentProvider();
+  context.subscriptions.push(
+    vscode.workspace.registerTextDocumentContentProvider('maraudersMapMd', snapshotProvider)
+  );
+
   context.subscriptions.push(
     vscode.workspace.onDidSaveTextDocument(async (document) => {
       // Only process markdown files
@@ -310,6 +332,63 @@ async function restoreSnapshot(
 
     if (answer !== 'Restore') {
       return;
+    }
+
+    // Check if we should create a pre-restore snapshot
+    const config = vscode.workspace.getConfiguration('maraudersMapMd.history');
+    const createPreRestore = config.get<boolean>('createPreRestoreSnapshot', true);
+
+    if (createPreRestore) {
+      // Create a snapshot of current content before restoring
+      try {
+        const currentContent = currentDocument.getText();
+        const historyDir = getHistoryDirectory(context, workspaceFolder);
+        const relativePath = vscode.workspace.asRelativePath(currentDocument.uri, false);
+        const indexPath = buildIndexPath(historyDir, relativePath);
+        const indexUri = vscode.Uri.file(indexPath);
+
+        let index: SnapshotIndex;
+        try {
+          const indexData = await vscode.workspace.fs.readFile(indexUri);
+          index = JSON.parse(Buffer.from(indexData).toString('utf8'));
+        } catch {
+          index = { version: 1, snapshots: [] };
+        }
+
+        // Create pre-restore snapshot
+        const preRestoreId = createSnapshotId();
+        const hash = computeHash(currentContent);
+        const compressed = compressContent(currentContent);
+        const snapshotPath = buildSnapshotPath(historyDir, relativePath, preRestoreId);
+        const snapshotUri = vscode.Uri.file(snapshotPath);
+
+        // Ensure directory exists
+        const snapshotDir = vscode.Uri.file(snapshotPath.substring(0, snapshotPath.lastIndexOf('/')));
+        await vscode.workspace.fs.createDirectory(snapshotDir);
+
+        // Write snapshot file
+        await vscode.workspace.fs.writeFile(snapshotUri, compressed);
+
+        // Add to index with special label
+        const preRestoreSnapshot: Snapshot = {
+          id: preRestoreId,
+          filePath: relativePath,
+          timestamp: Date.now(),
+          label: 'pre-restore',
+          isCheckpoint: false,
+          hash,
+          sizeBytes: compressed.length,
+          compressed: currentContent.length >= 1024,
+        };
+        index.snapshots.push(preRestoreSnapshot);
+
+        // Write index
+        const indexContent = JSON.stringify(index, null, 2);
+        await vscode.workspace.fs.writeFile(indexUri, Buffer.from(indexContent, 'utf8'));
+      } catch (error) {
+        console.error('Failed to create pre-restore snapshot:', error);
+        // Continue with restore even if pre-restore snapshot fails
+      }
     }
 
     const historyDir = getHistoryDirectory(context, workspaceFolder);
