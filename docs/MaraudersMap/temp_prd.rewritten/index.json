@@ -1,0 +1,269 @@
+{
+  "version": 1,
+  "source": "/Users/weklem/Desktop/devs/MaraudersMapMD/docs/temp/temp_prd.rewritten.md",
+  "generated": "2026-02-02T03:32:08.185Z",
+  "totalTokens": 7975,
+  "entries": [
+    {
+      "section": "요약",
+      "slug": "요약",
+      "lineRange": [
+        5,
+        22
+      ],
+      "tokens": 400,
+      "keywords": [
+        "AI를 제공하지 않고"
+      ],
+      "links": [],
+      "summary": "MaraudersMapMD는 VS Code 확장으로, AI 시대의 문서 생산성을 최적화합니다. AI를 제공하지 않고",
+      "aiHints": []
+    },
+    {
+      "section": "문서 메타",
+      "slug": "문서-메타",
+      "lineRange": [
+        23,
+        33
+      ],
+      "tokens": 267,
+      "keywords": [
+        "제품명",
+        "형태",
+        "핵심 방향",
+        "중요한 원칙"
+      ],
+      "links": [],
+      "summary": "제품명 형태 핵심 방향 중요한 원칙",
+      "aiHints": []
+    },
+    {
+      "section": "배경 및 동기",
+      "slug": "배경-및-동기",
+      "lineRange": [
+        34,
+        62
+      ],
+      "tokens": 763,
+      "keywords": [
+        "Blazing-fast preview",
+        "Quick edits",
+        "Image workflow",
+        "PDF export",
+        "History",
+        "AI Readability Support",
+        "동기",
+        "핵심 가치 제안"
+      ],
+      "links": [],
+      "summary": "폭증했습니다. Blazing-fast preview Quick edits Image workflow PDF export History AI Readability Support",
+      "aiHints": []
+    },
+    {
+      "section": "목표 / 비목표",
+      "slug": "목표-비목표",
+      "lineRange": [
+        63,
+        81
+      ],
+      "tokens": 475,
+      "keywords": [
+        "목표 (Goals)",
+        "비목표 (Non-goals)"
+      ],
+      "links": [],
+      "summary": "1.",
+      "aiHints": []
+    },
+    {
+      "section": "타겟 사용자 / 페르소나",
+      "slug": "타겟-사용자-페르소나",
+      "lineRange": [
+        82,
+        90
+      ],
+      "tokens": 262,
+      "keywords": [],
+      "links": [],
+      "summary": "",
+      "aiHints": []
+    },
+    {
+      "section": "성공 지표 (SLO / KPI)",
+      "slug": "성공-지표-slo-kpi",
+      "lineRange": [
+        91,
+        108
+      ],
+      "tokens": 355,
+      "keywords": [
+        "성능 SLO",
+        "기능 KPI(정성/정량)"
+      ],
+      "links": [],
+      "summary": "",
+      "aiHints": []
+    },
+    {
+      "section": "제품 원칙 (Must-have)",
+      "slug": "제품-원칙-must-have",
+      "lineRange": [
+        109,
+        119
+      ],
+      "tokens": 271,
+      "keywords": [],
+      "links": [],
+      "summary": "1.",
+      "aiHints": []
+    },
+    {
+      "section": "기능 요구사항 (Feature Requirements)",
+      "slug": "기능-요구사항-feature-requirements",
+      "lineRange": [
+        120,
+        360
+      ],
+      "tokens": 2790,
+      "keywords": [
+        "기능",
+        "성능 정책",
+        "Commands",
+        "기능(필수)",
+        "Acceptance",
+        "목표",
+        "A) Insert Image from File",
+        "B) Drag & Drop into Preview",
+        "C) Paste Image in Preview",
+        "D) 원격 이미지(URL)",
+        "핵심 원칙",
+        "Failure UX",
+        "핵심",
+        "alt",
+        "Preview (초고속 프리뷰)",
+        "Quick Edit (VS Code 편집 보조)",
+        "Preview에서 가능한 \"초간단 편집\"",
+        "이미지 워크플로우 (Images)",
+        "Export (HTML / PDF)",
+        "History (이력관리)",
+        "AI Readability Support (Vendor-neutral / file-first)"
+      ],
+      "links": [
+        "./assets/..."
+      ],
+      "summary": "기능 성능 정책 Commands 기능(필수) Commands 기능(필수) Acceptance 목표 기능(필수) A) Insert Image from File B) Drag & Drop into Preview C) Paste Image in Preview D) 원격 이미지(URL) Commands 핵심 원칙 Failure UX Commands Commands",
+      "aiHints": [
+        "[AI RULE]`, `[AI DECISION]`, `[AI TODO]`, `[AI CONTEXT]`",
+        "[AI RULE] Section 4 schema is SSOT. Do not infer alternatives."
+      ]
+    },
+    {
+      "section": "설정(Settings) — 최종",
+      "slug": "설정settings-—-최종",
+      "lineRange": [
+        361,
+        423
+      ],
+      "tokens": 779,
+      "keywords": [
+        "Preview/Render",
+        "Images",
+        "PDF",
+        "History",
+        "AI Artifacts"
+      ],
+      "links": [],
+      "summary": "| `maraudersMapMd.",
+      "aiHints": []
+    },
+    {
+      "section": "기술 아키텍처 (경량/고성능)",
+      "slug": "기술-아키텍처-경량고성능",
+      "lineRange": [
+        424,
+        455
+      ],
+      "tokens": 387,
+      "keywords": [
+        "Editor Plane",
+        "Preview Plane",
+        "Storage Plane",
+        "스택",
+        "\"3-Plane Architecture\"",
+        "대량 변경(특히 AI paste) 최적화"
+      ],
+      "links": [],
+      "summary": "1. Editor Plane Preview Plane Storage Plane",
+      "aiHints": []
+    },
+    {
+      "section": "Acceptance Criteria (핵심)",
+      "slug": "acceptance-criteria-핵심",
+      "lineRange": [
+        456,
+        488
+      ],
+      "tokens": 551,
+      "keywords": [
+        "Preview/성능",
+        "이미지",
+        "Export",
+        "History",
+        "AI Readability Support"
+      ],
+      "links": [],
+      "summary": "- `.",
+      "aiHints": []
+    },
+    {
+      "section": "릴리즈 계획",
+      "slug": "릴리즈-계획",
+      "lineRange": [
+        489,
+        508
+      ],
+      "tokens": 230,
+      "keywords": [
+        "v0.1 (MVP)",
+        "v1.0"
+      ],
+      "links": [],
+      "summary": "",
+      "aiHints": []
+    },
+    {
+      "section": "리스크 & 대응",
+      "slug": "리스크-대응",
+      "lineRange": [
+        509,
+        524
+      ],
+      "tokens": 318,
+      "keywords": [
+        "PDF가 시스템 브라우저에 의존",
+        "대문서에서 생성물/히스토리 용량 증가",
+        "특정 AI 도구 특화 요구 증가",
+        "네이밍/브랜딩 리스크"
+      ],
+      "links": [],
+      "summary": "1. PDF가 시스템 브라우저에 의존 대문서에서 생성물/히스토리 용량 증가 특정 AI 도구 특화 요구 증가 네이밍/브랜딩 리스크",
+      "aiHints": []
+    },
+    {
+      "section": "GitHub/오픈소스 운영 가이드(권장)",
+      "slug": "github오픈소스-운영-가이드권장",
+      "lineRange": [
+        525,
+        535
+      ],
+      "tokens": 127,
+      "keywords": [
+        "기본 .gitignore 추천:",
+        "팀 공유가 필요하면:"
+      ],
+      "links": [],
+      "summary": "**기본 . 기본 .gitignore 추천: 팀 공유가 필요하면:",
+      "aiHints": []
+    }
+  ]
+}

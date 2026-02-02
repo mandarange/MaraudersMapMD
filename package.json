@@ -5,7 +5,7 @@
   "icon": "icon.png",
   "version": "1.0.0",
   "license": "MIT",
-  "publisher": "Manddarange",
+  "publisher": "mandarange",
   "homepage": "https://github.com/mandarange/MaraudersMapMD#readme",
   "repository": {
     "type": "git",
@@ -38,7 +38,11 @@
     "markdown-preview",
     "ai-native",
     "context-window",
-    "vendor-neutral"
+    "vendor-neutral",
+    "maraudersmapmd",
+    "marauders-map-md",
+    "marauders map",
+    "marauders"
   ],
   "activationEvents": [
     "onLanguage:markdown"

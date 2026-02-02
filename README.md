@@ -162,9 +162,11 @@ code --install-extension marauders-map-md-1.0.0.vsix
 
 Or: Command Palette → `Extensions: Install from VSIX...` → select file.
 
-### Install from Marketplace (Coming Soon)
+### Install from Marketplace
 
-Search **"MaraudersMapMD"** in the VS Code Extensions view.
+Search **"MaraudersMapMD"** or **"Marauders Map MD"** in the VS Code Extensions view.
+
+Direct link: https://marketplace.visualstudio.com/items?itemName=mandarange.marauders-map-md
 
 ### First Steps
 
@@ -440,6 +442,10 @@ npm run compile
 npm test
 npm run package    # Creates .vsix file
 ```
+
+### Publishing
+
+See `PUBLISHING.md` for Marketplace publish steps.
 
 ### Tech Stack
 
