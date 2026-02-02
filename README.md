@@ -166,7 +166,7 @@ Or: Command Palette → `Extensions: Install from VSIX...` → select file.
 
 Search **"MaraudersMapMD"** or **"Marauders Map MD"** in the VS Code Extensions view.
 
-Direct link: https://marketplace.visualstudio.com/items?itemName=mandarange.marauders-map-md
+Direct link: https://marketplace.visualstudio.com/items?itemName=mandarange-dev.marauders-map-md
 
 ### First Steps
 

@@ -3,9 +3,9 @@
   "displayName": "MaraudersMapMD",
   "description": "Ultra-fast Markdown preview with AI-native readability artifacts (AI Map, Section Pack, Token Budget), PDF/HTML export, document history, and GEO (Generative Engine Optimization) support for VS Code.",
   "icon": "icon.png",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "license": "MIT",
-  "publisher": "mandarange",
+  "publisher": "mandarange-dev",
   "homepage": "https://github.com/mandarange/MaraudersMapMD#readme",
   "repository": {
     "type": "git",
@@ -18,7 +18,7 @@
     "vscode": "^1.100.0"
   },
   "categories": [
-    "Markdown",
+    "Programming Languages",
     "Visualization",
     "Machine Learning",
     "Other"
