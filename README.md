@@ -36,7 +36,10 @@
   Repository: https://github.com/mandarange/MaraudersMapMD
 -->
 
-<script type="application/ld+json">
+<details>
+<summary><strong>Schema.org JSON-LD</strong></summary>
+
+```json
 {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
@@ -73,7 +76,9 @@
     "url": "https://github.com/mandarange"
   }
 }
-</script>
+```
+
+</details>
 
 ---
 
