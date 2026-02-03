@@ -30,7 +30,7 @@
 ## Marketplace Listing
 
 **MaraudersMapMD** on Visual Studio Marketplace (Free) —
-"Ultra-fast Markdown preview with AI-native readability artifacts (AI Map, Section Pack, Token Budget), PDF/HTML export, document history, and GEO (Generative Engine Optimization) support for VS Code."
+"Ultra-fast Markdown preview with AI-native readability artifacts (AI Map, Section Pack, Token Budget), PDF/HTML export, document history, and GEO (Generative Engine Optimization) support for Cursor, Antigravity."
 
 Marketplace link: https://marketplace.visualstudio.com/items?itemName=Mandarange.marauders-map-md
 
