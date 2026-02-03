@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import * as path from 'path';
 import { MarkdownEngine } from './markdownEngine';
 import { getNonce } from './getNonce';
 import { buildPreviewHtml } from './htmlTemplate';
@@ -15,13 +16,13 @@ export class PreviewManager implements vscode.Disposable {
   private suppressNextAutoOpen = false;
   private readonly disposables: vscode.Disposable[] = [];
   private readonly extensionUri: vscode.Uri;
+  private lastAllowHtml: boolean;
 
   constructor(extensionUri: vscode.Uri) {
     this.extensionUri = extensionUri;
     const config = vscode.workspace.getConfiguration('maraudersMapMd.render');
-    this.markdownEngine = new MarkdownEngine({
-      allowHtml: config.get<boolean>('allowHtml', false),
-    });
+    this.lastAllowHtml = config.get<boolean>('allowHtml', true);
+    this.markdownEngine = new MarkdownEngine({ allowHtml: this.lastAllowHtml });
   }
 
   openPreview(document: vscode.TextDocument): void {
@@ -280,18 +281,26 @@ export class PreviewManager implements vscode.Disposable {
       return;
     }
 
+    const renderConfig = vscode.workspace.getConfiguration('maraudersMapMd.render');
+    const allowHtml = renderConfig.get<boolean>('allowHtml', true);
+    if (allowHtml !== this.lastAllowHtml) {
+      this.lastAllowHtml = allowHtml;
+      this.markdownEngine = new MarkdownEngine({ allowHtml });
+    }
+
     this.currentDocument = document;
     this.version++;
     const currentVersion = this.version;
     const html = this.markdownEngine.render(document.getText());
+    const resolvedHtml = this.resolveImageSources(html, document, this.panel.webview);
 
     if (!this.webviewInitialized) {
-      this.setWebviewHtml(html);
+      this.setWebviewHtml(resolvedHtml);
       this.webviewInitialized = true;
     } else {
       this.panel.webview.postMessage({
         type: 'update',
-        html,
+        html: resolvedHtml,
         version: currentVersion,
       });
     }
@@ -324,6 +333,33 @@ export class PreviewManager implements vscode.Disposable {
       jsUri,
       themeClass,
     });
+  }
+
+  private resolveImageSources(
+    html: string,
+    document: vscode.TextDocument,
+    webview: vscode.Webview,
+  ): string {
+    const mdDir = path.dirname(document.uri.fsPath);
+    const imageRegex = /<img[^>]+src=["']([^"']+)["'][^>]*>/g;
+
+    return html.replace(imageRegex, (match, src) => {
+      if (this.isExternalOrDataSrc(src) || this.isWebviewUri(src)) {
+        return match;
+      }
+
+      const resolvedPath = path.isAbsolute(src) ? src : path.resolve(mdDir, src);
+      const webviewUri = webview.asWebviewUri(vscode.Uri.file(resolvedPath)).toString();
+      return match.replace(src, webviewUri);
+    });
+  }
+
+  private isExternalOrDataSrc(src: string): boolean {
+    return /^https?:\/\//.test(src) || /^data:/.test(src);
+  }
+
+  private isWebviewUri(src: string): boolean {
+    return src.startsWith('vscode-resource:') || src.startsWith('vscode-webview-resource:');
   }
 
   private getThemeClass(): string {

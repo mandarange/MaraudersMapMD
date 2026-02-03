@@ -34,6 +34,8 @@ MaraudersMapMD는 AI 시대의 문서 생산성을 위해:
 
 ⸻
 
+![icon-source.png](./brand/icon-source.png)
+
 2) 목표 / 비목표
 
 2.1 목표 (Goals)

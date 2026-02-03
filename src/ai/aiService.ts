@@ -340,8 +340,9 @@ Check if \`${skillPath}\` exists in this project.
 
 1. Fetch ${skillUrl}.
 2. If \`${skillPath}\` does NOT exist, save the fetched content as \`${skillPath}\`.
-3. If \`${skillPath}\` already exists, compare the \`version\` in the YAML frontmatter of both. If the remote version is newer, overwrite \`${skillPath}\` with the fetched content. Otherwise skip.
-4. After saving, ensure the YAML frontmatter in \`${skillPath}\` is Cursor-compatible. It MUST contain these fields:
+3. If \`${skillPath}\` already exists, compare the \`version\` in the YAML frontmatter of both. If the remote version is newer, overwrite \`${skillPath}\` with the fetched content. If the local version is older or missing, upgrade it. Otherwise keep the local file.
+4. Always use the newest available version of the skill before rewriting.
+5. After saving, ensure the YAML frontmatter in \`${skillPath}\` is Cursor-compatible. It MUST contain these fields:
    \`\`\`yaml
    ---
    description: "<keep the original description>"

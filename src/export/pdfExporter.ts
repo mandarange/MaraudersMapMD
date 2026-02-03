@@ -1,3 +1,8 @@
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
+import { pathToFileURL } from 'url';
+
 export interface PdfExportOptions {
   html: string;
   outputPath: string;
@@ -20,6 +25,7 @@ export async function exportToPdf(
   launch: BrowserLauncher
 ): Promise<void> {
   let browser: { close(): Promise<void> } | null = null;
+  const tmpHtmlPath = path.join(os.tmpdir(), `maraudersmapmd-export-${Date.now()}.html`);
 
   try {
     browser = await launch({
@@ -33,13 +39,17 @@ export async function exportToPdf(
   }
 
   try {
+    fs.writeFileSync(tmpHtmlPath, options.html, 'utf8');
+
     const browserInstance = browser as Awaited<ReturnType<BrowserLauncher>>;
     const page = await browserInstance.newPage();
 
-    await page.setContent(options.html, {
-      waitUntil: 'networkidle0',
+    await page.goto(pathToFileURL(tmpHtmlPath).toString(), {
+      waitUntil: 'load',
       timeout: 30000,
     });
+
+    await waitForImagesToLoad(page);
 
     const marginStr = `${options.marginMm}mm`;
     await page.pdf({
@@ -54,6 +64,40 @@ export async function exportToPdf(
       printBackground: options.printBackground,
     });
   } finally {
-    await browser.close();
+    try {
+      fs.unlinkSync(tmpHtmlPath);
+    } catch {
+      /* noop */
+    }
+    if (browser) {
+      await browser.close();
+    }
   }
 }
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+async function waitForImagesToLoad(page: any): Promise<void> {
+  await page.evaluate(`
+    new Promise((resolve) => {
+      const images = Array.from(document.images);
+      if (images.length === 0) {
+        resolve();
+        return;
+      }
+      let loaded = 0;
+      const checkDone = () => {
+        loaded++;
+        if (loaded >= images.length) resolve();
+      };
+      images.forEach((img) => {
+        if (img.complete) {
+          checkDone();
+        } else {
+          img.addEventListener('load', checkDone, { once: true });
+          img.addEventListener('error', checkDone, { once: true });
+        }
+      });
+    })
+  `);
+}
+/* eslint-enable @typescript-eslint/no-explicit-any */

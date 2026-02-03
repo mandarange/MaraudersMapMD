@@ -56,6 +56,23 @@ describe('MarkdownEngine', () => {
       expect(result).toContain('<div class="custom">');
     });
 
+    it('should highlight bash fences with command tokens', () => {
+      const engine = new MarkdownEngine({ allowHtml: false });
+      const markdown = '```bash\nnpm install --save\n```';
+      const result = engine.render(markdown);
+
+      expect(result).toContain('hljs-keyword');
+      expect(result).toContain('hljs-attr');
+    });
+
+    it('should highlight json fences with language tokens', () => {
+      const engine = new MarkdownEngine({ allowHtml: false });
+      const markdown = '```json\n{"name":"demo","count":2}\n```';
+      const result = engine.render(markdown);
+
+      expect(result).toContain('hljs');
+    });
+
     it('should handle empty input', () => {
       const engine = new MarkdownEngine({ allowHtml: false });
       const result = engine.render('');

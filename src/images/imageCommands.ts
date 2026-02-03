@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import * as path from 'path';
 import {
   generateImageFilename,
   buildRelativePath,
@@ -82,4 +83,48 @@ export function registerImageCommands(context: vscode.ExtensionContext): void {
       });
     })
   );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand('maraudersMapMd.images.copyForMaraudersMap', async (uri?: vscode.Uri) => {
+      if (!uri) {
+        vscode.window.showErrorMessage('Please right-click an image file in the Explorer');
+        return;
+      }
+
+      const extension = path.extname(uri.fsPath).toLowerCase();
+      const allowedExtensions = new Set(['.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg', '.bmp']);
+      if (!allowedExtensions.has(extension)) {
+        vscode.window.showErrorMessage('Unsupported image type');
+        return;
+      }
+
+      const editor = getMarkdownEditor();
+      if (!editor) {
+        vscode.window.showErrorMessage('Please open a markdown file first');
+        return;
+      }
+
+      const config = vscode.workspace.getConfiguration('maraudersMapMd.images');
+      const altTextSource = config.get<string>('altTextSource') || 'filename';
+      const normalizedAltTextSource = altTextSource === 'empty' ? 'prompt' : altTextSource;
+
+      const filename = path.basename(uri.fsPath);
+      const altText = getAltText(filename, normalizedAltTextSource as 'filename' | 'prompt');
+
+      const mdFileDirPath = path.dirname(editor.document.uri.fsPath);
+      const relativePath = buildRelativePathFromMd(mdFileDirPath, uri.fsPath);
+      const markdownLink = buildMarkdownImageLink(altText, relativePath);
+
+      await vscode.env.clipboard.writeText(markdownLink);
+      vscode.window.showInformationMessage('Image markdown copied to clipboard');
+    })
+  );
+}
+
+function buildRelativePathFromMd(mdFileDirPath: string, targetPath: string): string {
+  const relative = path.relative(mdFileDirPath, targetPath).replace(/\\/g, '/');
+  if (!relative.startsWith('.') && !relative.startsWith('/')) {
+    return `./${relative}`;
+  }
+  return relative;
 }

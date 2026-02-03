@@ -2,15 +2,18 @@ import { describe, it, expect, vi } from 'vitest';
 import { exportToPdf, PdfExportOptions, BrowserLauncher } from '../../src/export/pdfExporter';
 
 function createMockLauncher(overrides?: {
-  setContent?: ReturnType<typeof vi.fn>;
+  goto?: ReturnType<typeof vi.fn>;
+  evaluate?: ReturnType<typeof vi.fn>;
   pdf?: ReturnType<typeof vi.fn>;
   close?: ReturnType<typeof vi.fn>;
   newPage?: ReturnType<typeof vi.fn>;
 }) {
   const mockPdf = overrides?.pdf ?? vi.fn().mockResolvedValue(Buffer.from(''));
-  const mockSetContent = overrides?.setContent ?? vi.fn().mockResolvedValue(undefined);
+  const mockGoto = overrides?.goto ?? vi.fn().mockResolvedValue(undefined);
+  const mockEvaluate = overrides?.evaluate ?? vi.fn().mockResolvedValue(undefined);
   const mockPage = {
-    setContent: mockSetContent,
+    goto: mockGoto,
+    evaluate: mockEvaluate,
     pdf: mockPdf,
   };
   const mockClose = overrides?.close ?? vi.fn().mockResolvedValue(undefined);
@@ -21,7 +24,16 @@ function createMockLauncher(overrides?: {
   };
   const mockLaunch: BrowserLauncher = vi.fn().mockResolvedValue(mockBrowser);
 
-  return { mockLaunch, mockBrowser, mockPage, mockPdf, mockSetContent, mockClose, mockNewPage };
+  return {
+    mockLaunch,
+    mockBrowser,
+    mockPage,
+    mockPdf,
+    mockGoto,
+    mockEvaluate,
+    mockClose,
+    mockNewPage,
+  };
 }
 
 const defaultOptions: PdfExportOptions = {
@@ -47,14 +59,14 @@ describe('pdfExporter', () => {
       });
     });
 
-    it('sets page content with HTML and waits for networkidle0', async () => {
-      const { mockLaunch, mockSetContent } = createMockLauncher();
+    it('loads temp HTML file and waits for page load', async () => {
+      const { mockLaunch, mockGoto } = createMockLauncher();
 
       await exportToPdf(defaultOptions, mockLaunch);
 
-      expect(mockSetContent).toHaveBeenCalledWith(
-        defaultOptions.html,
-        { waitUntil: 'networkidle0', timeout: 30000 }
+      expect(mockGoto).toHaveBeenCalledWith(
+        expect.stringMatching(/^file:\/\//),
+        { waitUntil: 'load', timeout: 30000 }
       );
     });
 
@@ -113,9 +125,9 @@ describe('pdfExporter', () => {
       expect(mockClose).toHaveBeenCalled();
     });
 
-    it('closes browser even when setContent throws', async () => {
-      const mockSetContent = vi.fn().mockRejectedValue(new Error('Timeout'));
-      const { mockLaunch, mockClose } = createMockLauncher({ setContent: mockSetContent });
+    it('closes browser even when goto throws', async () => {
+      const mockGoto = vi.fn().mockRejectedValue(new Error('Timeout'));
+      const { mockLaunch, mockClose } = createMockLauncher({ goto: mockGoto });
 
       await expect(exportToPdf(defaultOptions, mockLaunch)).rejects.toThrow('Timeout');
       expect(mockClose).toHaveBeenCalled();

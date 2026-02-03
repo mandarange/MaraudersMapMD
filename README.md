@@ -23,6 +23,7 @@
   <a href="#commands">Commands</a> &middot;
   <a href="#settings">Settings</a> &middot;
   <a href="#faq">FAQ</a> &middot;
+  <a href="CHANGELOG.md">Changelog</a> &middot;
   <a href="llms.txt">llms.txt</a> &middot;
   <a href="llms-full.txt">llms-full.txt</a>
 </p>
@@ -32,7 +33,7 @@
 **MaraudersMapMD** on Visual Studio Marketplace (Free) —
 "Ultra-fast Markdown preview with AI-native readability artifacts (AI Map, Section Pack, Token Budget), PDF/HTML export, document history, and GEO (Generative Engine Optimization) support for Cursor, Antigravity."
 
-Marketplace link: https://marketplace.visualstudio.com/items?itemName=Mandarange.marauders-map-md
+Marketplace link: https://open-vsx.org/extension/mandarange/marauders-map-md
 
 <!--
   AI-Agent-Context: MaraudersMapMD is a Cursor/Antigravity extension for Markdown editing with AI-native
@@ -98,7 +99,7 @@ MaraudersMapMD solves this by generating **AI-native artifacts** that help LLMs 
 | Problem | MaraudersMapMD Solution |
 |---------|------------------------|
 | AI can't read the whole document | **AI Map** provides structure at a glance |
-| AI misses critical rules | **AI Hint Blocks** mark must-read content (`RULE`, `DECISION`, `NOTE`) |
+| AI misses critical rules | **AI Hint Blocks** mark must-read content (`RULE`, `DECISION`, `TODO`, `CONTEXT`) |
 | Long docs lose accuracy | **Section Pack** splits by heading for precise retrieval |
 | Keyword search fails for AI | **Search Index** enables semantic section discovery |
 | Rewriting docs is tedious | **Rewrite Prompt** generates a ready-to-paste AI prompt |
@@ -115,9 +116,10 @@ MaraudersMapMD solves this by generating **AI-native artifacts** that help LLMs 
 
 - Instant rendering with configurable debounce (default 200ms)
 - Scroll sync between editor and preview
-- Task list support with interactive checkbox toggle
+- Task list rendering support
 - Large document optimization with adaptive delay
 - Source line injection for accurate rendering
+- Contrast-tuned tables and code blocks for dark/light modes
 
 ### AI Readability & GEO Support
 
@@ -126,7 +128,7 @@ MaraudersMapMD solves this by generating **AI-native artifacts** that help LLMs 
 - **AI Map** (`ai-map.md`): Structure table with heading hierarchy, line ranges, and token estimates &mdash; lets AI understand your document without reading it entirely
 - **Section Pack** (`sections/*.md`): Heading-based document splits for precise LLM consumption
 - **Search Index** (`index.json`): Keywords, links, and AI hint extraction per section
-- **AI Hint Blocks**: Insert semantic markers (`RULE`, `DECISION`, `NOTE`) that AI agents prioritize
+- **AI Hint Blocks**: Insert semantic markers (`RULE`, `DECISION`, `TODO`, `CONTEXT`) that AI agents prioritize
 - **Rewrite Prompt**: One-click prompt generation for AI-powered readability rewriting ([skill](https://github.com/mandarange/MaraudersMapMD-skill))
 - **Build on Save**: Automatic AI artifact generation to `docs/MaraudersMap/` directory
 - **llms.txt & llms-full.txt**: Standard AI documentation files for Generative Engine Optimization
@@ -135,21 +137,26 @@ MaraudersMapMD solves this by generating **AI-native artifacts** that help LLMs 
 
 - **Format**: Bold (`**`), Italic (`*`), Inline Code (`` ` ``)
 - **Insert**: Link, Heading, Blockquote
-- **Toggle**: Task checkbox in both editor and preview
+- **Toggle**: Task checkbox in editor
 
 ### Image Workflow
 
 - Insert from file with automatic `assets/` directory management
-- Editor-side drag-and-drop support
-- Clipboard paste to assets
+- Drag & drop images into the editor to copy into `assets/`
+- Paste images from clipboard into the editor to save in `assets/`
 - Configurable filename patterns and alt text sources
+- Markdown image syntax renders in preview and exports (local paths, https URLs, data URIs)
+- Explorer context menu: Copy for MaraudersMap MD
 
 ### PDF & HTML Export
 
 - **PDF**: Export via system Chrome/Chromium (auto-detected, no bundled browser)
+- **PDF Images**: Local images render reliably using embedded data URIs (default) or file URLs
 - **HTML**: Standalone export with local image embedding
 - Configurable margins, paper format (A4/Letter/A3/A5), and background printing
 - Graceful fallback: if Chrome not found, guides to HTML print-to-PDF
+- Raw HTML is rendered when `render.allowHtml` is enabled (default on)
+- Code blocks highlight common languages; unknown languages fall back to TypeScript-style coloring
 
 ### Document History & Snapshots
 
@@ -178,7 +185,7 @@ Or: Command Palette → `Extensions: Install from VSIX...` → select file.
 
 Search **"MaraudersMapMD"** or **"Marauders Map MD"** in the Extensions view.
 
-Direct link: https://marketplace.visualstudio.com/items?itemName=Mandarange.marauders-map-md
+Direct link: https://open-vsx.org/extension/mandarange/marauders-map-md
 
 ### First Steps
 
@@ -212,7 +219,7 @@ Open the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`) and type **"MaraudersM
 | Command | Description |
 |---------|-------------|
 | `Images: Insert Image from File` | Pick image, copy to assets, insert link |
-| `Images: Paste Image to Assets` | Paste clipboard image to assets directory |
+| `Images: Copy for MaraudersMap MD` | Copy Markdown image link for selected file |
 | `Export: Export to HTML` | Export as standalone HTML file |
 | `Export: Export to PDF` | Export as PDF via Chrome/Chromium |
 
@@ -232,7 +239,7 @@ Open the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`) and type **"MaraudersM
 |---------|-------------|
 | `AI: Insert AI Rule Hint` | Insert `[AI RULE]` semantic marker |
 | `AI: Insert AI Decision Hint` | Insert `[AI DECISION]` semantic marker |
-| `AI: Insert AI Note Hint` | Insert `[AI NOTE]` semantic marker |
+| `AI: Insert AI Context Hint` | Insert `[AI CONTEXT]` semantic marker |
 | `AI: Copy Readability Prompt` | Copy prompt for readability-focused rewriting |
 
 ### Help
@@ -254,7 +261,7 @@ Open the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`) and type **"MaraudersM
 - Use AI Hint Blocks for must-read content:
   - `> [AI RULE]` constraints
   - `> [AI DECISION]` key decisions
-  - `> [AI TODO]` follow-up actions
+  - `> [AI TODO]` follow-up actions (type manually)
   - `> [AI CONTEXT]` essential background
 
 ### Visual Emphasis (Preview)
@@ -286,7 +293,7 @@ All settings use the `maraudersMapMd.*` namespace. Configure via Settings UI or 
 | `preview.largeDocThresholdKb` | `512` | Size threshold (KB) for large document handling |
 | `preview.largeDocUpdateDelayMs` | `700` | Debounce delay (ms) for large documents |
 | `preview.scrollSync` | `true` | Synchronize scroll between editor and preview |
-| `render.allowHtml` | `false` | Allow raw HTML rendering in Markdown |
+| `render.allowHtml` | `true` | Allow raw HTML rendering in Markdown |
 
 </details>
 
@@ -296,7 +303,7 @@ All settings use the `maraudersMapMd.*` namespace. Configure via Settings UI or 
 | Setting | Default | Description |
 |---------|---------|-------------|
 | `images.assetsDir` | `"assets"` | Asset directory name relative to Markdown file |
-| `images.allowRemote` | `false` | Allow embedding remote image URLs |
+| `images.allowRemote` | `false` | Reserved for remote image policy (preview/export currently render https URLs if present) |
 | `images.filenamePattern` | `"{basename}-{yyyyMMdd-HHmmss}"` | Pattern for generated image filenames |
 | `images.altTextSource` | `"filename"` | Source for alt text (`filename`, `prompt`, `empty`) |
 
@@ -311,7 +318,7 @@ All settings use the `maraudersMapMd.*` namespace. Configure via Settings UI or 
 | `pdf.format` | `"A4"` | Paper format (`A4`, `Letter`, `A3`, `A5`) |
 | `pdf.marginMm` | `12` | Margin size in millimeters |
 | `pdf.printBackground` | `true` | Include background colors/images |
-| `pdf.embedImages` | `"fileUrl"` | Image embedding method (`fileUrl`, `dataUri`) |
+| `pdf.embedImages` | `"dataUri"` | Image embedding method (`dataUri`, `fileUrl`) |
 | `pdf.outputDirectory` | `"${workspaceFolder}/exports"` | Output directory for PDFs |
 | `pdf.openAfterExport` | `true` | Open PDF after export |
 

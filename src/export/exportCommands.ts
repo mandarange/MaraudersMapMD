@@ -84,7 +84,7 @@ code {
 }
 
 pre {
-  background-color: var(--vscode-textCodeBlock-background, #f6f8fa);
+  background-color: var(--vscode-textCodeBlock-background, #f1f5f9);
   border-radius: 4px;
   padding: 12px;
   overflow-x: auto;
@@ -101,6 +101,81 @@ pre code {
   padding: 0;
   overflow: visible;
   word-wrap: normal;
+}
+
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-title,
+.hljs-section {
+  color: var(--vscode-charts-purple, #c586c0);
+}
+
+.hljs-built_in,
+.hljs-type,
+.hljs-title.class_ {
+  color: var(--vscode-charts-blue, #569cd6);
+}
+
+.hljs-number,
+.hljs-literal {
+  color: var(--vscode-charts-green, #4ec9b0);
+}
+
+.hljs-string {
+  color: var(--vscode-charts-orange, #ce9178);
+}
+
+.hljs-attr,
+.hljs-property {
+  color: var(--vscode-charts-lightBlue, #9cdcfe);
+}
+
+.hljs-function,
+.hljs-params {
+  color: var(--vscode-charts-yellow, #dcdcaa);
+}
+
+.hljs-comment,
+.hljs-quote {
+  color: var(--vscode-descriptionForeground, #9da5b4);
+}
+
+body.vscode-dark pre code .hljs-keyword,
+body.vscode-dark pre code .hljs-selector-tag,
+body.vscode-dark pre code .hljs-title,
+body.vscode-dark pre code .hljs-section {
+  color: #d2a8ff;
+}
+
+body.vscode-dark pre code .hljs-built_in,
+body.vscode-dark pre code .hljs-type,
+body.vscode-dark pre code .hljs-title.class_ {
+  color: #79c0ff;
+}
+
+body.vscode-dark pre code .hljs-number,
+body.vscode-dark pre code .hljs-literal {
+  color: #7ee787;
+}
+
+body.vscode-dark pre code .hljs-string {
+  color: #ffa657;
+}
+
+body.vscode-dark pre code .hljs-attr,
+body.vscode-dark pre code .hljs-property {
+  color: #a5d6ff;
+}
+
+body.vscode-dark pre code .hljs-function,
+body.vscode-dark pre code .hljs-params {
+  color: #f2cc60;
+}
+
+body.vscode-dark pre code .hljs-comment,
+body.vscode-dark pre code .hljs-quote {
+  color: #8b949e;
 }
 
 /* Blockquotes */
@@ -130,22 +205,22 @@ table {
 
 table th {
   font-weight: 600;
-  background-color: var(--vscode-editor-inactiveSelectionBackground, #f6f8fa);
+  background-color: var(--vscode-editor-inactiveSelectionBackground, #e2e8f0);
 }
 
 table th,
 table td {
-  border: 1px solid var(--vscode-panel-border, #dfe2e5);
+  border: 1px solid var(--vscode-panel-border, #cbd5e1);
   padding: 6px 13px;
 }
 
 table tr {
   background-color: var(--vscode-editor-background);
-  border-top: 1px solid var(--vscode-panel-border, #c6cbd1);
+  border-top: 1px solid var(--vscode-panel-border, #cbd5e1);
 }
 
 table tr:nth-child(2n) {
-  background-color: var(--vscode-editor-inactiveSelectionBackground, #f6f8fa);
+  background-color: var(--vscode-editor-inactiveSelectionBackground, #f8fafc);
 }
 
 /* Horizontal Rule */
@@ -176,13 +251,43 @@ img {
   }
   
   pre, code {
-    background: #f6f8fa;
-    border: 1px solid #e1e4e8;
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+  }
+  pre code {
+    color: #111827;
   }
   
   table th,
   table td {
-    border: 1px solid #dfe2e5;
+    border: 1px solid #cbd5e1;
+  }
+  table th {
+    background: #e2e8f0;
+    color: #0f172a;
+  }
+  table tr {
+    background: white;
+  }
+  table tr:nth-child(2n) {
+    background: #f8fafc;
+  }
+  .hljs-keyword,
+  .hljs-selector-tag,
+  .hljs-title,
+  .hljs-section { color: #7c3aed; }
+  .hljs-built_in,
+  .hljs-type,
+  .hljs-title.class_ { color: #1d4ed8; }
+  .hljs-number,
+  .hljs-literal { color: #16a34a; }
+  .hljs-string { color: #c2410c; }
+  .hljs-attr,
+  .hljs-property { color: #1f6feb; }
+  .hljs-function,
+  .hljs-params { color: #b45309; }
+  .hljs-comment,
+  .hljs-quote { color: #6b7280; }
   }
 }`;
 
@@ -302,12 +407,14 @@ async function exportHtml(): Promise<void> {
   }
 
   try {
+    const renderConfig = vscode.workspace.getConfiguration('maraudersMapMd.render');
+    const allowHtml = renderConfig.get<boolean>('allowHtml', true);
     const mdContent = editor.document.getText();
     const mdFileUri = editor.document.uri;
     const mdFileDir = path.dirname(mdFileUri.fsPath);
     const mdFileName = path.basename(mdFileUri.fsPath, '.md');
 
-    const engine = new MarkdownEngine({ allowHtml: false });
+    const engine = new MarkdownEngine({ allowHtml });
     const rendered = engine.render(mdContent);
 
     let htmlContent = buildExportHtml({
@@ -350,6 +457,8 @@ async function exportPdf(): Promise<void> {
     return;
   }
 
+  const renderConfig = vscode.workspace.getConfiguration('maraudersMapMd.render');
+  const allowHtml = renderConfig.get<boolean>('allowHtml', true);
   const config = vscode.workspace.getConfiguration('maraudersMapMd.pdf');
   const userBrowserPath = config.get<string>('browserPath', 'auto');
   const format = config.get<string>('format', 'A4');
@@ -400,7 +509,7 @@ async function exportPdf(): Promise<void> {
     },
     async () => {
       try {
-        const engine = new MarkdownEngine({ allowHtml: false });
+        const engine = new MarkdownEngine({ allowHtml });
         const rendered = engine.render(mdContent);
 
         let htmlContent = buildExportHtml({

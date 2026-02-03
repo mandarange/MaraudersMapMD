@@ -3,7 +3,7 @@
   "displayName": "MaraudersMapMD",
   "description": "Ultra-fast Markdown preview with AI-native readability artifacts (AI Map, Section Pack, Token Budget), PDF/HTML export, document history, and GEO (Generative Engine Optimization) support for Cursor, Antigravity.",
   "icon": "icon.png",
-  "version": "1.0.6",
+  "version": "1.1.15",
   "license": "MIT",
   "publisher": "Mandarange",
   "homepage": "https://github.com/mandarange/MaraudersMapMD#readme",
@@ -121,6 +121,12 @@
         "icon": "$(clippy)"
       },
       {
+        "command": "maraudersMapMd.images.copyForMaraudersMap",
+        "title": "Copy for MaraudersMap MD",
+        "category": "MaraudersMapMD: Images",
+        "icon": "$(copy)"
+      },
+      {
         "command": "maraudersMapMd.export.html",
         "title": "Export to HTML",
         "category": "MaraudersMapMD: Export",
@@ -219,7 +225,7 @@
       "editor/context": [
         {
           "submenu": "maraudersMapMd.formatMenu",
-          "group": "marauders@1",
+          "group": "navigation@0",
           "when": "resourceLangId == markdown"
         },
         {
@@ -233,22 +239,62 @@
           "when": "resourceLangId == markdown"
         }
       ],
+      "explorer/context": [
+        {
+          "command": "maraudersMapMd.images.copyForMaraudersMap",
+          "group": "marauders@1",
+          "when": "explorerResourceIsFolder == false && (resourceExtname =~ /\\.(png|jpg|jpeg|gif|webp|svg|bmp)$/ || resourceExtname =~ /\\.(PNG|JPG|JPEG|GIF|WEBP|SVG|BMP)$/)"
+        }
+      ],
       "maraudersMapMd.formatMenu": [
-        { "command": "maraudersMapMd.format.bold", "group": "1_format@1" },
-        { "command": "maraudersMapMd.format.italic", "group": "1_format@2" },
-        { "command": "maraudersMapMd.format.inlineCode", "group": "1_format@3" },
-        { "command": "maraudersMapMd.toggle.task", "group": "2_toggle@1" }
+        {
+          "command": "maraudersMapMd.format.bold",
+          "group": "1_format@1"
+        },
+        {
+          "command": "maraudersMapMd.format.italic",
+          "group": "1_format@2"
+        },
+        {
+          "command": "maraudersMapMd.format.inlineCode",
+          "group": "1_format@3"
+        },
+        {
+          "command": "maraudersMapMd.toggle.task",
+          "group": "2_toggle@1"
+        }
       ],
       "maraudersMapMd.insertMenu": [
-        { "command": "maraudersMapMd.insert.link", "group": "1_insert@1" },
-        { "command": "maraudersMapMd.insert.heading", "group": "1_insert@2" },
-        { "command": "maraudersMapMd.insert.quote", "group": "1_insert@3" },
-        { "command": "maraudersMapMd.images.insertFromFile", "group": "2_images@1" }
+        {
+          "command": "maraudersMapMd.insert.link",
+          "group": "1_insert@1"
+        },
+        {
+          "command": "maraudersMapMd.insert.heading",
+          "group": "1_insert@2"
+        },
+        {
+          "command": "maraudersMapMd.insert.quote",
+          "group": "1_insert@3"
+        },
+        {
+          "command": "maraudersMapMd.images.insertFromFile",
+          "group": "2_images@1"
+        }
       ],
       "maraudersMapMd.aiMenu": [
-        { "command": "maraudersMapMd.ai.insertHintRule", "group": "1_hints@1" },
-        { "command": "maraudersMapMd.ai.insertHintDecision", "group": "1_hints@2" },
-        { "command": "maraudersMapMd.ai.insertHintNote", "group": "1_hints@3" }
+        {
+          "command": "maraudersMapMd.ai.insertHintRule",
+          "group": "1_hints@1"
+        },
+        {
+          "command": "maraudersMapMd.ai.insertHintDecision",
+          "group": "1_hints@2"
+        },
+        {
+          "command": "maraudersMapMd.ai.insertHintNote",
+          "group": "1_hints@3"
+        }
       ]
     },
     "submenus": [
@@ -322,7 +368,7 @@
         },
         "maraudersMapMd.render.allowHtml": {
           "type": "boolean",
-          "default": false,
+          "default": true,
           "description": "Allow rendering of raw HTML in markdown"
         },
         "maraudersMapMd.images.assetsDir": {
@@ -381,11 +427,11 @@
         "maraudersMapMd.pdf.embedImages": {
           "type": "string",
           "enum": [
-            "fileUrl",
-            "dataUri"
+            "dataUri",
+            "fileUrl"
           ],
-          "default": "fileUrl",
-          "description": "Method for embedding images in PDF"
+          "default": "dataUri",
+          "description": "Method for embedding images in PDF (dataUri recommended for reliable rendering)"
         },
         "maraudersMapMd.pdf.outputDirectory": {
           "type": "string",
@@ -550,6 +596,7 @@
   },
   "dependencies": {
     "@types/markdown-it": "^14.1.2",
+    "highlight.js": "^11.11.1",
     "markdown-it": "^14.1.0",
     "markdown-it-task-lists": "^2.1.1",
     "puppeteer-core": "^24.36.1"
