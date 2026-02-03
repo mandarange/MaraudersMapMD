@@ -11,7 +11,7 @@
 <p align="center">
   <a href="https://github.com/mandarange/MaraudersMapMD/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License" /></a>
   <a href="https://github.com/mandarange/MaraudersMapMD/releases"><img src="https://img.shields.io/github/v/release/mandarange/MaraudersMapMD" alt="Latest Release" /></a>
-  <img src="https://img.shields.io/badge/Cursor%20%7C%20Antigravity-%5E1.100.0-blue?logo=visual-studio-code" alt="Cursor | Antigravity ^1.100.0" />
+  <img src="https://img.shields.io/badge/Cursor%20%7C%20Antigravity-%5E1.75.0-blue?logo=visual-studio-code" alt="Cursor | Antigravity ^1.75.0" />
   <img src="https://img.shields.io/badge/AI--native-GEO%20Ready-green" alt="GEO Ready" />
 </p>
 
