@@ -192,10 +192,10 @@ Each module is designed to be independent and testable.
 
 The extension uses a two-tier testing approach:
 
-1. **Unit Tests (vitest)**: Test pure logic modules without VS Code dependencies
-2. **Integration Tests (@vscode/test-electron)**: Test VS Code API integration
+1. **Unit Tests (vitest)**: Test pure logic modules without editor dependencies
+2. **Integration Tests (@vscode/test-electron)**: Test editor API integration
 
-This separation ensures that most logic can be tested quickly without the overhead of the VS Code test environment.
+This separation ensures that most logic can be tested quickly without the overhead of the editor test environment.
 
 ### Architecture 5.3: Performance Optimization
 
@@ -315,9 +315,9 @@ npm run package      # Create .vsix package
 
 ## Section 10: Conclusion
 
-The MaraudersMapMD extension provides a comprehensive solution for markdown editing in VS Code. With features for preview, quick editing, image management, export, history, and AI readability support, it enables developers to work with markdown more efficiently.
+The MaraudersMapMD extension provides a comprehensive solution for markdown editing in Cursor, Antigravity. With features for preview, quick editing, image management, export, history, and AI readability support, it enables developers to work with markdown more efficiently.
 
-The extension is designed with performance, reliability, and user experience in mind. It uses modern VS Code APIs and best practices to provide a seamless editing experience.
+The extension is designed with performance, reliability, and user experience in mind. It uses modern editor APIs and best practices to provide a seamless editing experience.
 
 For more information, visit the project repository or documentation.
 
@@ -497,10 +497,10 @@ Each module is designed to be independent and testable.
 
 The extension uses a two-tier testing approach:
 
-1. **Unit Tests (vitest)**: Test pure logic modules without VS Code dependencies
-2. **Integration Tests (@vscode/test-electron)**: Test VS Code API integration
+1. **Unit Tests (vitest)**: Test pure logic modules without editor dependencies
+2. **Integration Tests (@vscode/test-electron)**: Test editor API integration
 
-This separation ensures that most logic can be tested quickly without the overhead of the VS Code test environment.
+This separation ensures that most logic can be tested quickly without the overhead of the editor test environment.
 
 ### Architecture 5.3: Performance Optimization
 
@@ -789,10 +789,10 @@ Each module is designed to be independent and testable.
 
 The extension uses a two-tier testing approach:
 
-1. **Unit Tests (vitest)**: Test pure logic modules without VS Code dependencies
-2. **Integration Tests (@vscode/test-electron)**: Test VS Code API integration
+1. **Unit Tests (vitest)**: Test pure logic modules without editor dependencies
+2. **Integration Tests (@vscode/test-electron)**: Test editor API integration
 
-This separation ensures that most logic can be tested quickly without the overhead of the VS Code test environment.
+This separation ensures that most logic can be tested quickly without the overhead of the editor test environment.
 
 ### Architecture 5.3: Performance Optimization
 
@@ -1081,10 +1081,10 @@ Each module is designed to be independent and testable.
 
 The extension uses a two-tier testing approach:
 
-1. **Unit Tests (vitest)**: Test pure logic modules without VS Code dependencies
-2. **Integration Tests (@vscode/test-electron)**: Test VS Code API integration
+1. **Unit Tests (vitest)**: Test pure logic modules without editor dependencies
+2. **Integration Tests (@vscode/test-electron)**: Test editor API integration
 
-This separation ensures that most logic can be tested quickly without the overhead of the VS Code test environment.
+This separation ensures that most logic can be tested quickly without the overhead of the editor test environment.
 
 ### Architecture 5.3: Performance Optimization
 
@@ -1373,10 +1373,10 @@ Each module is designed to be independent and testable.
 
 The extension uses a two-tier testing approach:
 
-1. **Unit Tests (vitest)**: Test pure logic modules without VS Code dependencies
-2. **Integration Tests (@vscode/test-electron)**: Test VS Code API integration
+1. **Unit Tests (vitest)**: Test pure logic modules without editor dependencies
+2. **Integration Tests (@vscode/test-electron)**: Test editor API integration
 
-This separation ensures that most logic can be tested quickly without the overhead of the VS Code test environment.
+This separation ensures that most logic can be tested quickly without the overhead of the editor test environment.
 
 ### Architecture 5.3: Performance Optimization
 
@@ -1665,10 +1665,10 @@ Each module is designed to be independent and testable.
 
 The extension uses a two-tier testing approach:
 
-1. **Unit Tests (vitest)**: Test pure logic modules without VS Code dependencies
-2. **Integration Tests (@vscode/test-electron)**: Test VS Code API integration
+1. **Unit Tests (vitest)**: Test pure logic modules without editor dependencies
+2. **Integration Tests (@vscode/test-electron)**: Test editor API integration
 
-This separation ensures that most logic can be tested quickly without the overhead of the VS Code test environment.
+This separation ensures that most logic can be tested quickly without the overhead of the editor test environment.
 
 ### Architecture 5.3: Performance Optimization
 
@@ -1957,10 +1957,10 @@ Each module is designed to be independent and testable.
 
 The extension uses a two-tier testing approach:
 
-1. **Unit Tests (vitest)**: Test pure logic modules without VS Code dependencies
-2. **Integration Tests (@vscode/test-electron)**: Test VS Code API integration
+1. **Unit Tests (vitest)**: Test pure logic modules without editor dependencies
+2. **Integration Tests (@vscode/test-electron)**: Test editor API integration
 
-This separation ensures that most logic can be tested quickly without the overhead of the VS Code test environment.
+This separation ensures that most logic can be tested quickly without the overhead of the editor test environment.
 
 ### Architecture 5.3: Performance Optimization
 

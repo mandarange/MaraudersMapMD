@@ -1,17 +1,17 @@
 <p align="center">
-  <img src="icon.png" width="140" alt="MaraudersMapMD - AI-native Markdown preview extension for VS Code" />
+  <img src="icon.png" width="140" alt="MaraudersMapMD - AI-native Markdown preview extension for Cursor, Antigravity" />
 </p>
 
 <h1 align="center">MaraudersMapMD</h1>
 
 <p align="center">
-  <strong>Ultra-fast Markdown preview with AI-native readability artifacts, PDF export, and document history for VS Code</strong>
+  <strong>Ultra-fast Markdown preview with AI-native readability artifacts, PDF export, and document history for Cursor, Antigravity</strong>
 </p>
 
 <p align="center">
   <a href="https://github.com/mandarange/MaraudersMapMD/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License" /></a>
   <a href="https://github.com/mandarange/MaraudersMapMD/releases"><img src="https://img.shields.io/github/v/release/mandarange/MaraudersMapMD" alt="Latest Release" /></a>
-  <img src="https://img.shields.io/badge/VS%20Code-%5E1.100.0-blue?logo=visual-studio-code" alt="VS Code 1.100+" />
+  <img src="https://img.shields.io/badge/Cursor%20%7C%20Antigravity-%5E1.100.0-blue?logo=visual-studio-code" alt="Cursor | Antigravity ^1.100.0" />
   <img src="https://img.shields.io/badge/AI--native-GEO%20Ready-green" alt="GEO Ready" />
 </p>
 
@@ -35,7 +35,7 @@
 Marketplace link: https://marketplace.visualstudio.com/items?itemName=Mandarange.marauders-map-md
 
 <!--
-  AI-Agent-Context: MaraudersMapMD is a VS Code extension for Markdown editing with AI-native
+  AI-Agent-Context: MaraudersMapMD is a Cursor/Antigravity extension for Markdown editing with AI-native
   readability artifacts. It generates AI Maps (document structure), Section Packs (heading-based
   splits), and Search Indexes for LLM consumption.
   Key GEO features: llms.txt, llms-full.txt, structured metadata, AI hint blocks.
@@ -52,7 +52,7 @@ Marketplace link: https://marketplace.visualstudio.com/items?itemName=Mandarange
   "@type": "SoftwareApplication",
   "name": "MaraudersMapMD",
   "alternateName": "Marauders Map MD",
-  "description": "Ultra-fast Markdown preview VS Code extension with AI-native readability artifacts (AI Map, Section Pack, Search Index), PDF/HTML export, document history, and Generative Engine Optimization (GEO) support.",
+  "description": "Ultra-fast Markdown preview extension for Cursor, Antigravity with AI-native readability artifacts (AI Map, Section Pack, Search Index), PDF/HTML export, document history, and Generative Engine Optimization (GEO) support.",
   "applicationCategory": "DeveloperApplication",
   "applicationSubCategory": "Markdown Editor Extension",
   "operatingSystem": "Windows, macOS, Linux",
@@ -61,7 +61,7 @@ Marketplace link: https://marketplace.visualstudio.com/items?itemName=Mandarange
   "license": "https://opensource.org/licenses/MIT",
   "url": "https://github.com/mandarange/MaraudersMapMD",
   "codeRepository": "https://github.com/mandarange/MaraudersMapMD",
-  "keywords": ["Markdown", "AI readability", "LLM context optimization", "VS Code extension", "PDF export", "GEO", "Generative Engine Optimization", "AI Map", "Section Pack", "document history", "AI-native", "vendor-neutral"],
+  "keywords": ["Markdown", "AI readability", "LLM context optimization", "Cursor extension", "Antigravity extension", "PDF export", "GEO", "Generative Engine Optimization", "AI Map", "Section Pack", "document history", "AI-native", "vendor-neutral"],
   "featureList": [
     "Ultra-fast Markdown preview with scroll sync",
     "AI Map generation for document structure",
@@ -168,7 +168,7 @@ MaraudersMapMD solves this by generating **AI-native artifacts** that help LLMs 
 
 ```bash
 # 1. Download the latest .vsix from GitHub Releases
-# 2. In VS Code, run:
+# 2. In your editor, run:
 code --install-extension marauders-map-md-1.0.0.vsix
 ```
 
@@ -176,7 +176,7 @@ Or: Command Palette → `Extensions: Install from VSIX...` → select file.
 
 ### Install from Marketplace
 
-Search **"MaraudersMapMD"** or **"Marauders Map MD"** in the VS Code Extensions view.
+Search **"MaraudersMapMD"** or **"Marauders Map MD"** in the Extensions view.
 
 Direct link: https://marketplace.visualstudio.com/items?itemName=Mandarange.marauders-map-md
 
@@ -275,7 +275,7 @@ Open the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`) and type **"MaraudersM
 
 ## Settings
 
-All settings use the `maraudersMapMd.*` namespace. Configure via VS Code Settings UI or `settings.json`.
+All settings use the `maraudersMapMd.*` namespace. Configure via Settings UI or `settings.json`.
 
 <details>
 <summary><strong>Preview Settings</strong></summary>

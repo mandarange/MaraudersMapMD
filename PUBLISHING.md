@@ -1,6 +1,6 @@
 # Publishing Guide
 
-This project is a VS Code extension published to both VS Code Marketplace and OpenVSX.
+This project is a Cursor/Antigravity extension published to both VS Code Marketplace and OpenVSX.
 
 ## VS Code Marketplace
 

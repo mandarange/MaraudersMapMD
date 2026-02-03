@@ -5,7 +5,7 @@
 ## Identity
 
 - Name: MaraudersMapMD
-- Type: Visual Studio Code Extension
+- Type: Cursor/Antigravity Extension
 - Version: 0.1.0
 - License: MIT
 - Repository: https://github.com/mandarange/MaraudersMapMD
@@ -34,7 +34,7 @@ MaraudersMapMD does NOT call any external AI API. It is completely vendor-neutra
 
 ### Three-Plane Design
 
-1. **Editor Plane**: VS Code native editing + WorkspaceEdit API for programmatic changes
+1. **Editor Plane**: Native editing + WorkspaceEdit API for programmatic changes
 2. **Preview Plane**: Webview rendering with click/drop/paste event handling
 3. **Storage Plane**: History snapshot storage/indexing and AI artifact generation
 
@@ -100,7 +100,7 @@ These blocks receive priority weighting during Token Budget context construction
 
 ## Complete Command Reference
 
-All commands are prefixed with `maraudersMapMd.` in the VS Code command system.
+All commands are prefixed with `maraudersMapMd.` in the command system.
 
 ### Preview Commands
 | Command ID | Title | Description |
@@ -144,7 +144,7 @@ All commands are prefixed with `maraudersMapMd.` in the VS Code command system.
 |------------|-------|-------------|
 | `maraudersMapMd.history.open` | Open History | Shows QuickPick list of snapshots for current file |
 | `maraudersMapMd.history.createCheckpoint` | Create Checkpoint | Creates a labeled checkpoint snapshot |
-| `maraudersMapMd.history.diffWithCurrent` | Diff with Current | Opens VS Code diff view comparing snapshot with current |
+| `maraudersMapMd.history.diffWithCurrent` | Diff with Current | Opens diff view comparing snapshot with current |
 | `maraudersMapMd.history.restoreSnapshot` | Restore Snapshot | Restores file content from selected snapshot |
 | `maraudersMapMd.history.pruneNow` | Prune History Now | Runs retention cleanup immediately |
 

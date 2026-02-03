@@ -6,7 +6,7 @@ PRD (Final) — MaraudersMapMD
 
 0) 문서 메타
 	•	제품명: MaraudersMapMD
-	•	형태: Visual Studio Code Extension (MIT License, GitHub 공개)
+	•	형태: Cursor/Antigravity Extension (MIT License, GitHub 공개)
 	•	핵심 방향: 가볍고 빠름 + AI-first 문서 워크플로우 최적화
 	•	중요한 원칙: 우리는 AI(LLM)를 제공하지 않는다. 대신 Cursor/Claude/기타 AI 환경이 레포를 읽을 때 더 정확히/더 적은 토큰으로 이해하게 만드는 “파일 기반 산출물”을 제공한다.
 
@@ -38,7 +38,7 @@ MaraudersMapMD는 AI 시대의 문서 생산성을 위해:
 
 2.1 목표 (Goals)
 	1.	성능 최우선: 프리뷰/편집 흐름에서 프리징 최소화
-	2.	편집은 VS Code가 주인공: 확장은 “보조 기능” 중심
+	2.	편집은 에디터가 주인공: 확장은 “보조 기능” 중심
 	3.	이미지/Export/History를 끊김 없는 흐름으로 통합
 	4.	AI가 잘 읽는 문서 구조 제공: 문서가 커져도 정확도 유지
 	5.	벤더 중립: 특정 AI API/SDK 연동 없이 “파일/클립보드/규칙”만으로 AI 성능 개선
@@ -105,9 +105,9 @@ Commands
 
 ⸻
 
-6.2 Quick Edit (VS Code 편집 보조)
+6.2 Quick Edit (편집 보조)
 
-편집은 VS Code 본체, 확장은 “삽입/토글/정리”만.
+편집은 에디터 본체, 확장은 “삽입/토글/정리”만.
 
 기능(필수)
 	•	Bold / Italic / Inline Code
@@ -200,7 +200,7 @@ Commands
 	•	History: Open for Current File → QuickPick으로 최근 스냅샷 목록
 	•	액션:
 	•	View (읽기)
-	•	Diff with Current (VS Code diff)
+	•	Diff with Current (diff)
 	•	Restore
 	•	Copy Snapshot Text
 	•	restore 전 보호 옵션:
@@ -347,7 +347,7 @@ AI Artifacts
 8.2 “3-Plane Architecture”
 	1.	Editor Plane
 
-	•	VS Code native 편집 + WorkspaceEdit로 조작
+	•	native 편집 + WorkspaceEdit로 조작
 
 	2.	Preview Plane
 

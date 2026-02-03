@@ -1,10 +1,10 @@
 # MaraudersMapMD
 
-> Ultra-fast Markdown preview VS Code extension with AI-native readability artifacts, PDF/HTML export, and document history. Vendor-neutral, zero AI API dependencies.
+> Ultra-fast Markdown preview extension for Cursor, Antigravity with AI-native readability artifacts, PDF/HTML export, and document history. Vendor-neutral, zero AI API dependencies.
 
 ## Overview
 
-MaraudersMapMD is a Visual Studio Code extension that bridges human Markdown authoring and AI comprehension. It generates file-based AI artifacts (AI Map, Section Pack, Search Index, Token Budget Context) so that LLMs can understand large documents within token limits without any external API calls.
+MaraudersMapMD is a Cursor/Antigravity extension that bridges human Markdown authoring and AI comprehension. It generates file-based AI artifacts (AI Map, Section Pack, Search Index, Token Budget Context) so that LLMs can understand large documents within token limits without any external API calls.
 
 ## Core Problem Solved
 
