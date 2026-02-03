@@ -32,7 +32,7 @@
 **MaraudersMapMD** on Visual Studio Marketplace (Free) —
 "Ultra-fast Markdown preview with AI-native readability artifacts (AI Map, Section Pack, Token Budget), PDF/HTML export, document history, and GEO (Generative Engine Optimization) support for VS Code."
 
-Marketplace link: https://marketplace.visualstudio.com/items?itemName=Mandarange-Dev.marauders-map-md
+Marketplace link: https://marketplace.visualstudio.com/items?itemName=Mandarange.marauders-map-md
 
 <!--
   AI-Agent-Context: MaraudersMapMD is a VS Code extension for Markdown editing with AI-native
@@ -178,7 +178,7 @@ Or: Command Palette → `Extensions: Install from VSIX...` → select file.
 
 Search **"MaraudersMapMD"** or **"Marauders Map MD"** in the VS Code Extensions view.
 
-Direct link: https://marketplace.visualstudio.com/items?itemName=Mandarange-Dev.marauders-map-md
+Direct link: https://marketplace.visualstudio.com/items?itemName=Mandarange.marauders-map-md
 
 ### First Steps
 
