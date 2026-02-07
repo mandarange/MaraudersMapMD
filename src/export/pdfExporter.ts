@@ -45,11 +45,12 @@ export async function exportToPdf(
     const page = await browserInstance.newPage();
 
     await page.goto(pathToFileURL(tmpHtmlPath).toString(), {
-      waitUntil: 'load',
+      waitUntil: 'networkidle0',
       timeout: 30000,
     });
 
     await waitForImagesToLoad(page);
+    await waitForMermaidRender(page);
 
     const marginStr = `${options.marginMm}mm`;
     await page.pdf({
@@ -76,6 +77,21 @@ export async function exportToPdf(
 }
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
+async function waitForMermaidRender(page: any): Promise<void> {
+  try {
+    await page.waitForFunction(
+      `(function() {
+        var blocks = document.querySelectorAll('pre.mermaid');
+        if (blocks.length === 0) return true;
+        return window.__mermaidDone === true;
+      })()`,
+      { timeout: 15000 }
+    );
+  } catch {
+    // If mermaid didn't render in time, continue with PDF generation anyway
+  }
+}
+
 async function waitForImagesToLoad(page: any): Promise<void> {
   await page.evaluate(`
     new Promise((resolve) => {

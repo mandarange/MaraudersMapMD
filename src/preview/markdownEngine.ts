@@ -39,6 +39,9 @@ export class MarkdownEngine {
         if (!normalized) {
           return '';
         }
+        if (normalized === 'mermaid') {
+          return `<pre class="mermaid">${escapeHtml(code)}</pre>`;
+        }
         let language = normalized;
         if (normalized === 'sh' || normalized === 'shell' || normalized === 'shellscript') {
           language = 'bash';

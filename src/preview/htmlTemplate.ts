@@ -9,25 +9,23 @@ export interface HtmlTemplateParams {
 }
 
 export function buildPreviewHtml(params: HtmlTemplateParams): string {
-  const { body, nonce, cspSource, cssUri, jsUri, codiconsUri, themeClass } = params;
+  const { body, nonce, cspSource, cssUri, jsUri, codiconsUri } = params;
   const codiconsLink = codiconsUri
     ? `<link rel="stylesheet" href="${codiconsUri}">`
     : '';
-  const bodyClass = themeClass ? ` class="${themeClass}"` : '';
-  const themeAttr = themeClass ? ` data-vscode-theme-kind="${themeClass}"` : '';
 
   return `<!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="vscode-light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="Content-Security-Policy"
-    content="default-src 'none'; style-src ${cspSource} 'unsafe-inline'; img-src ${cspSource} https: data: file:; script-src 'nonce-${nonce}'; font-src ${cspSource};">
+    content="default-src 'none'; style-src ${cspSource} 'unsafe-inline'; img-src ${cspSource} https: data: file:; script-src 'nonce-${nonce}' https://cdn.jsdelivr.net; font-src ${cspSource};">
   <link rel="stylesheet" href="${cssUri}">
   ${codiconsLink}
   <title>MaraudersMapMD Preview</title>
 </head>
-<body${bodyClass}${themeAttr}>
+<body class="vscode-light" data-vscode-theme-kind="vscode-light">
   <div id="toolbar">
     <div class="toolbar-group">
       <button class="toolbar-btn" data-command="export.html" title="Export to HTML">
@@ -57,6 +55,19 @@ export function buildPreviewHtml(params: HtmlTemplateParams): string {
     </div>
   </div>
   <div id="preview-root">${body}</div>
+  <script nonce="${nonce}" type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: 'default',
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
+      flowchart: { useMaxWidth: true, htmlLabels: true },
+      sequence: { useMaxWidth: true },
+      gantt: { useMaxWidth: true }
+    });
+    window.__mermaid = mermaid;
+    window.dispatchEvent(new Event('mermaid-ready'));
+  </script>
   <script nonce="${nonce}" src="${jsUri}"></script>
 </body>
 </html>`;

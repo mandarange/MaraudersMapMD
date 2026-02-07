@@ -66,7 +66,7 @@ describe('pdfExporter', () => {
 
       expect(mockGoto).toHaveBeenCalledWith(
         expect.stringMatching(/^file:\/\//),
-        { waitUntil: 'load', timeout: 30000 }
+        { waitUntil: 'networkidle0', timeout: 30000 }
       );
     });
 

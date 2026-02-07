@@ -8,11 +8,13 @@ export interface ExportHtmlOptions {
   css: string;
   embedImages?: boolean;
   bodyClass?: string;
+  scripts?: string;
 }
 
 export function buildExportHtml(options: ExportHtmlOptions): string {
-  const { title, body, css, bodyClass } = options;
+  const { title, body, css, bodyClass, scripts } = options;
   const classAttr = bodyClass ? ` class="${bodyClass}"` : '';
+  const scriptBlock = scripts || '';
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -26,6 +28,7 @@ ${css}
 </head>
 <body${classAttr}>
 ${body}
+${scriptBlock}
 </body>
 </html>`;
 }

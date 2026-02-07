@@ -239,55 +239,33 @@ img {
   margin: 16px 0;
 }
 
+/* Mermaid Diagrams */
+pre.mermaid {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 8px !important;
+  padding: 24px 16px !important;
+  text-align: center;
+  overflow-x: auto;
+}
+
+pre.mermaid svg {
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+  display: block;
+}
+
 /* Print Styles */
 @media print {
   body {
-    background: white;
-    color: black;
+    background: white !important;
+    color: #1f2328 !important;
   }
-  
-  a {
-    color: #0366d6;
-  }
-  
-  pre, code {
-    background: #f1f5f9;
-    border: 1px solid #cbd5e1;
-  }
-  pre code {
-    color: #111827;
-  }
-  
-  table th,
-  table td {
-    border: 1px solid #cbd5e1;
-  }
-  table th {
-    background: #e2e8f0;
-    color: #0f172a;
-  }
-  table tr {
-    background: white;
-  }
-  table tr:nth-child(2n) {
-    background: #f8fafc;
-  }
-  .hljs-keyword,
-  .hljs-selector-tag,
-  .hljs-title,
-  .hljs-section { color: #7c3aed; }
-  .hljs-built_in,
-  .hljs-type,
-  .hljs-title.class_ { color: #1d4ed8; }
-  .hljs-number,
-  .hljs-literal { color: #16a34a; }
-  .hljs-string { color: #c2410c; }
-  .hljs-attr,
-  .hljs-property { color: #1f6feb; }
-  .hljs-function,
-  .hljs-params { color: #b45309; }
-  .hljs-comment,
-  .hljs-quote { color: #6b7280; }
+
+  pre.mermaid {
+    break-inside: avoid;
+    border: 1px solid #e2e8f0 !important;
   }
 }`;
 
@@ -321,19 +299,26 @@ function getExportDir(mdFileUri: vscode.Uri, mdFileName: string): string {
 }
 
 function getThemeClass(): string {
-  const kind = vscode.window.activeColorTheme.kind;
-  switch (kind) {
-    case vscode.ColorThemeKind.Light:
-      return 'vscode-light';
-    case vscode.ColorThemeKind.HighContrastLight:
-      return 'vscode-high-contrast-light';
-    case vscode.ColorThemeKind.HighContrast:
-      return 'vscode-high-contrast';
-    case vscode.ColorThemeKind.Dark:
-    default:
-      return 'vscode-dark';
-  }
+  // Always use light mode for consistent white-background rendering
+  return 'vscode-light';
 }
+
+const mermaidExportScript = `<script type="module">
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+mermaid.initialize({
+  startOnLoad: false,
+  theme: 'default',
+  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
+  flowchart: { useMaxWidth: true, htmlLabels: true },
+  sequence: { useMaxWidth: true },
+  gantt: { useMaxWidth: true }
+});
+const blocks = document.querySelectorAll('pre.mermaid');
+if (blocks.length > 0) {
+  await mermaid.run({ nodes: Array.from(blocks) });
+}
+window.__mermaidDone = true;
+</script>`;
 
 function getThemeVars(themeClass: string): string {
   if (themeClass === 'vscode-light') {
@@ -422,6 +407,7 @@ async function exportHtml(): Promise<void> {
       body: rendered,
       css: getExportCss(),
       bodyClass: getThemeClass(),
+      scripts: mermaidExportScript,
     });
 
     htmlContent = resolveLocalImages(htmlContent, mdFileDir, 'fileUrl');
@@ -517,6 +503,7 @@ async function exportPdf(): Promise<void> {
           body: rendered,
           css: getExportCss(),
           bodyClass: getThemeClass(),
+          scripts: mermaidExportScript,
         });
 
         htmlContent = resolveLocalImages(htmlContent, mdFileDir, embedMode);

@@ -363,18 +363,8 @@ export class PreviewManager implements vscode.Disposable {
   }
 
   private getThemeClass(): string {
-    const kind = vscode.window.activeColorTheme.kind;
-    switch (kind) {
-      case vscode.ColorThemeKind.Light:
-        return 'vscode-light';
-      case vscode.ColorThemeKind.HighContrastLight:
-        return 'vscode-high-contrast-light';
-      case vscode.ColorThemeKind.HighContrast:
-        return 'vscode-high-contrast';
-      case vscode.ColorThemeKind.Dark:
-      default:
-        return 'vscode-dark';
-    }
+    // Always use light mode for consistent white-background rendering
+    return 'vscode-light';
   }
 
   private getDebounceDelay(document: vscode.TextDocument): number {

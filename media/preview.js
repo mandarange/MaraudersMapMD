@@ -1,60 +1,128 @@
 const vscode = acquireVsCodeApi();
 
-function applyThemeClass(cls) {
-  const themeClasses = ['vscode-dark', 'vscode-light', 'vscode-high-contrast', 'vscode-high-contrast-light'];
-  const root = document.documentElement;
-  themeClasses.forEach((name) => {
-    document.body.classList.remove(name);
-    root.classList.remove(name);
-  });
-  if (cls) {
-    document.body.classList.add(cls);
-    root.classList.add(cls);
+/* ── Force Light Mode ── */
+
+const LIGHT_VARS = {
+  '--vscode-editor-background': '#ffffff',
+  '--vscode-editor-foreground': '#1f2328',
+  '--vscode-panel-border': '#d0d7de',
+  '--vscode-descriptionForeground': '#57606a',
+  '--vscode-textLink-foreground': '#0969da',
+  '--vscode-textLink-activeForeground': '#0550ae',
+  '--vscode-focusBorder': '#0969da',
+  '--vscode-input-background': '#ffffff',
+  '--vscode-input-foreground': '#1f2328',
+  '--vscode-charts-blue': '#0550ae',
+  '--vscode-charts-green': '#116329',
+  '--vscode-charts-yellow': '#6f3800',
+  '--vscode-charts-purple': '#8250df',
+  '--vscode-charts-lightBlue': '#0969da',
+  '--vscode-charts-orange': '#c4432b',
+  '--vscode-toolbar-hoverBackground': 'rgba(175, 184, 193, 0.3)',
+  '--vscode-toolbar-activeBackground': 'rgba(175, 184, 193, 0.5)',
+  '--vscode-editor-inactiveSelectionBackground': '#e2e8f0',
+  '--vscode-textCodeBlock-background': '#f6f8fa',
+  '--vscode-font-family': '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+};
+
+let isApplyingLightMode = false;
+
+function forceLightMode() {
+  if (isApplyingLightMode) return;
+  isApplyingLightMode = true;
+
+  try {
+    const root = document.documentElement;
+    const body = document.body;
+
+    // Remove dark/HC theme classes
+    ['vscode-dark', 'vscode-high-contrast', 'vscode-high-contrast-light'].forEach((cls) => {
+      body.classList.remove(cls);
+      root.classList.remove(cls);
+    });
+
+    // Force light mode class
+    body.classList.add('vscode-light');
+    root.classList.add('vscode-light');
+
+    // Override all VS Code CSS variables with light mode values
+    Object.entries(LIGHT_VARS).forEach(([key, value]) => {
+      root.style.setProperty(key, value, 'important');
+    });
+
+    // Force white background directly on html and body
+    root.style.setProperty('background-color', '#ffffff', 'important');
+    root.style.setProperty('color', '#1f2328', 'important');
+    body.style.setProperty('background-color', '#ffffff', 'important');
+    body.style.setProperty('color', '#1f2328', 'important');
+  } finally {
+    isApplyingLightMode = false;
   }
 }
 
-function ensureThemeClass() {
-  const themeClasses = ['vscode-dark', 'vscode-light', 'vscode-high-contrast', 'vscode-high-contrast-light'];
-  const root = document.documentElement;
+// Apply immediately
+forceLightMode();
 
-  const existing = themeClasses.find((cls) =>
-    document.body.classList.contains(cls) || root.classList.contains(cls)
-  );
+// Watch for VS Code re-injecting dark theme styles/classes
+const observer = new MutationObserver((mutations) => {
+  if (isApplyingLightMode) return;
+  for (const m of mutations) {
+    if (m.type === 'attributes') {
+      const target = m.target;
+      if (target === document.documentElement || target === document.body) {
+        // VS Code changed style or class — re-force light mode
+        forceLightMode();
+        return;
+      }
+    }
+  }
+});
 
-  const kind = document.body.dataset.vscodeThemeKind || root.dataset.vscodeThemeKind;
-  const kindClass = kind && themeClasses.includes(kind) ? kind : undefined;
+observer.observe(document.documentElement, {
+  attributes: true,
+  attributeFilter: ['style', 'class', 'data-vscode-theme-kind', 'data-vscode-theme-name'],
+});
+observer.observe(document.body, {
+  attributes: true,
+  attributeFilter: ['style', 'class', 'data-vscode-theme-kind', 'data-vscode-theme-name'],
+});
 
-  if (existing) {
-    applyThemeClass(existing);
+/* ── Mermaid Rendering ── */
+
+let mermaidLoaded = false;
+let pendingMermaidRender = false;
+
+window.addEventListener('mermaid-ready', () => {
+  mermaidLoaded = true;
+  if (pendingMermaidRender) {
+    pendingMermaidRender = false;
+    renderMermaid();
+  }
+});
+
+async function renderMermaid() {
+  if (!window.__mermaid) {
+    pendingMermaidRender = true;
     return;
   }
-
-  if (kindClass) {
-    applyThemeClass(kindClass);
-    return;
+  const blocks = document.querySelectorAll('pre.mermaid:not([data-processed])');
+  if (blocks.length === 0) return;
+  try {
+    await window.__mermaid.run({ nodes: Array.from(blocks) });
+  } catch (e) {
+    console.error('Mermaid render error:', e);
   }
-
-  const bg = getComputedStyle(document.body).backgroundColor;
-  const match = bg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/i);
-  if (!match) {
-    applyThemeClass('vscode-dark');
-    return;
-  }
-
-  const r = Number(match[1]);
-  const g = Number(match[2]);
-  const b = Number(match[3]);
-  const luminance = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
-  applyThemeClass(luminance > 0.6 ? 'vscode-light' : 'vscode-dark');
 }
 
-ensureThemeClass();
+/* ── State ── */
 
 let currentVersion = 0;
 let activeEditor = null;
 let suppressNextUpdate = false;
 
-window.addEventListener('message', event => {
+/* ── Message Handling ── */
+
+window.addEventListener('message', (event) => {
   const message = event.data;
 
   switch (message.type) {
@@ -67,15 +135,15 @@ window.addEventListener('message', event => {
       }
       if (activeEditor) closeInlineEditor(true);
       const root = document.getElementById('preview-root');
-      if (root) root.innerHTML = message.html;
+      if (root) {
+        root.innerHTML = message.html;
+        renderMermaid();
+      }
       break;
 
     case 'theme':
-      if (message.className) {
-        applyThemeClass(message.className);
-      } else {
-        ensureThemeClass();
-      }
+      // Always force light mode regardless of VS Code theme changes
+      forceLightMode();
       break;
 
     case 'rawText':
@@ -90,7 +158,9 @@ window.addEventListener('message', event => {
   }
 });
 
-document.addEventListener('click', event => {
+/* ── Toolbar ── */
+
+document.addEventListener('click', (event) => {
   const btn = event.target.closest('.toolbar-btn');
   if (btn) {
     const command = btn.getAttribute('data-command');
@@ -99,7 +169,9 @@ document.addEventListener('click', event => {
   }
 });
 
-document.addEventListener('click', event => {
+/* ── Checkbox Toggle ── */
+
+document.addEventListener('click', (event) => {
   const target = event.target;
   if (target.type === 'checkbox' && target.closest('.task-list-item')) {
     let parent = target.parentElement;
@@ -114,6 +186,8 @@ document.addEventListener('click', event => {
     }
   }
 });
+
+/* ── Inline Editor ── */
 
 function findSourceBlock(el) {
   let node = el;
@@ -176,7 +250,7 @@ function openInlineEditor(block) {
     wrapper: wrapper,
     textarea: textarea,
     startLine: sourceLine,
-    endLine: endLine
+    endLine: endLine,
   };
 
   textarea.addEventListener('input', () => autoResizeTextarea(textarea));
@@ -203,7 +277,7 @@ function openInlineEditor(block) {
   vscode.postMessage({
     type: 'requestRawText',
     startLine: sourceLine,
-    endLine: endLine
+    endLine: endLine,
   });
 }
 
@@ -217,7 +291,7 @@ function saveAndClose() {
     type: 'applyEdit',
     startLine: activeEditor.startLine,
     endLine: activeEditor.endLine,
-    newText: newText
+    newText: newText,
   });
 
   closeInlineEditor(false);
@@ -233,10 +307,12 @@ function closeInlineEditor(cancel) {
   activeEditor = null;
 }
 
-document.addEventListener('dblclick', event => {
+document.addEventListener('dblclick', (event) => {
   if (event.target.closest('#toolbar')) return;
   if (event.target.closest('.inline-editor-wrapper')) return;
   if (event.target.type === 'checkbox') return;
+  // Don't open inline editor for mermaid diagrams
+  if (event.target.closest('.mermaid')) return;
 
   const block = findSourceBlock(event.target);
   if (block) {
@@ -244,6 +320,8 @@ document.addEventListener('dblclick', event => {
     openInlineEditor(block);
   }
 });
+
+/* ── Scroll Sync ── */
 
 let scrollTimeout;
 window.addEventListener('scroll', () => {
@@ -258,3 +336,7 @@ if (previousState) {
   currentVersion = previousState.version || 0;
   if (previousState.scrollTop) window.scrollTo(0, previousState.scrollTop);
 }
+
+/* ── Initial Mermaid Render ── */
+
+renderMermaid();

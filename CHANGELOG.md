@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.16 - 2026-02-08
+- Add Mermaid diagram rendering support via CDN (mermaid@11).
+- Force light mode (white background) for all preview, HTML export, and PDF export.
+- Remove dark/high-contrast theme dependencies; all colors hardcoded to light palette.
+- Add MutationObserver to prevent VS Code from re-injecting dark theme styles.
+- Wait for Mermaid SVG rendering before PDF generation.
+
 ## 1.1.14 - 2026-02-04
 - Fix PDF export table row backgrounds for light print output.
 - Improve JSON token contrast in PDF exports.
