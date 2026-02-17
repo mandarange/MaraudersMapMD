@@ -16,7 +16,7 @@
 </p>
 
 <p align="center">
-  <a href="#-new-in-v1124">New</a> &middot;
+  <a href="#-new-in-v1125">New</a> &middot;
   <a href="#why-maraudersmapmd">Why?</a> &middot;
   <a href="#features">Features</a> &middot;
   <a href="#quick-start">Quick Start</a> &middot;
@@ -31,7 +31,7 @@
 
 ---
 
-## New in v1.1.24
+## New in v1.1.25
 
 **Fact Check Prompt** &mdash; One-click fact-checking for quantitative claims in your Markdown. Numbers, dates, percentages, version strings &mdash; the [Fact Check skill](https://github.com/mandarange/Marauders_FactCheck_Skill) validates them against live web evidence and adds transparent source citations.
 

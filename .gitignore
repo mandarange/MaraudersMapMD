@@ -42,5 +42,9 @@ coverage/
 ehthumbs.db
 Desktop.ini
 
+# Internal docs
+docs/
+PUBLISHING.md
+
 # Sisyphus (AI agent workspace)
 .sisyphus/

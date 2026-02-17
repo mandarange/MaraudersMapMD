@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.25 - 2026-02-18
+- Rename "RC Check" → "Fact Check" across all UI labels, commands, docs, and internal identifiers.
+- Update skill repo URL from `Marauders_RealityCheck_Skill` → `Marauders_FactCheck_Skill`.
+- Remove internal dev docs (`docs/`, `PUBLISHING.md`) from repository.
+- Clean up stale build artifacts.
+
 ## 1.1.24 - 2026-02-18
 - Add Fact Check skill integration: `AI: Copy Fact Check Prompt` command and preview toolbar button for validating quantitative claims in Markdown via [Marauders_FactCheck_Skill](https://github.com/mandarange/Marauders_FactCheck_Skill).
 - Add explicit companion file manifests to all three skill prompts (Readability, PPT, Fact Check) — each prompt now lists required Python scripts, reference docs, and templates with an incomplete-install guard.
