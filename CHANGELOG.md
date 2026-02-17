@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.1.24 - 2026-02-18
+- Add RealityCheck skill integration: `AI: Copy RC Check Prompt` command and preview toolbar button for validating quantitative claims in Markdown via [Marauders_RealityCheck_Skill](https://github.com/mandarange/Marauders_RealityCheck_Skill).
+- Add explicit companion file manifests to all three skill prompts (Readability, PPT, RealityCheck) — each prompt now lists required Python scripts, reference docs, and templates with an incomplete-install guard.
+- Add `npm run skill:install:rc` installer script for RealityCheck skill.
+- Remove stale integration tests (wrong extension ID, outdated command list) and unused `large-sample.md` fixture.
+- Remove `@vscode/test-electron` devDependency and `test:integration` script.
+
+## 1.1.23 - 2026-02-17
+- Add PPT Prompt functionality for generating presentation PDFs via MaraudersPPT skill.
+- Update README with skill installation instructions and trigger reliability notes.
+
 ## 1.1.22 - 2026-02-17
 - Clarify PPT prompt invocation: `MaraudersMD2PPT` is an AI chat keyword (Cursor/Antigravity), not a terminal command.
 - Keep Activation Guard and SKILL_ONLY execution contract while reducing user confusion around invocation context.

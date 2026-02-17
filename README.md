@@ -68,6 +68,9 @@ Marketplace link: https://open-vsx.org/extension/mandarange/marauders-map-md
     "AI Map generation for document structure",
     "Section Pack for heading-based document splits",
     "AI Hint Blocks (RULE, DECISION, NOTE)",
+    "Rewrite Prompt for AI-powered readability rewriting",
+    "PPT Prompt for presentation PDF generation",
+    "RC Check Prompt for fact-checking quantitative claims",
     "PDF export via Chrome/Chromium",
     "HTML export with local image embedding",
     "Document history with snapshots and diff",
@@ -104,6 +107,7 @@ MaraudersMapMD solves this by generating **AI-native artifacts** that help LLMs 
 | Keyword search fails for AI | **Search Index** enables semantic section discovery |
 | Rewriting docs is tedious | **Rewrite Prompt** generates a ready-to-paste AI prompt |
 | Turning docs into slide-ready outputs is manual | **PPT Prompt** generates a ready-to-paste PDF-slide conversion prompt |
+| Numbers in docs go stale | **RC Check Prompt** fact-checks quantitative claims against live web evidence |
 
 **Plus**: blazing-fast preview, PDF/HTML export, document history with diff/restore &mdash; all in one lightweight extension.
 
@@ -132,6 +136,7 @@ MaraudersMapMD solves this by generating **AI-native artifacts** that help LLMs 
 - **AI Hint Blocks**: Insert semantic markers (`RULE`, `DECISION`, `TODO`, `CONTEXT`) that AI agents prioritize
 - **Rewrite Prompt**: One-click prompt generation for AI-powered readability rewriting ([skill](https://github.com/mandarange/MaraudersMapMD-skill))
 - **PPT Prompt**: One-click prompt generation for presentation PDF conversion ([skill](https://github.com/mandarange/MaraudersPPT-Skill))
+- **RC Check Prompt**: One-click prompt generation for fact-checking quantitative claims against web evidence ([skill](https://github.com/mandarange/Marauders_RealityCheck_Skill))
 - **Build on Save**: Automatic AI artifact generation to `docs/MaraudersMap/` directory
 - **llms.txt & llms-full.txt**: Standard AI documentation files for Generative Engine Optimization
 
@@ -200,39 +205,50 @@ Direct link: https://open-vsx.org/extension/mandarange/marauders-map-md
 
 ## Skill Installation & Trigger Reliability
 
-If you use the external readability skill (`MaraudersMapMD-skill`), there are two install modes with different outcomes:
+MaraudersMapMD integrates with three external AI skills. Each skill is a standalone repository with a `SKILL.md` definition and companion implementation files (Python scripts, reference docs, templates).
 
-### Install Mode A: Prompt/rule-only install (default)
+| Skill | Purpose | Repository |
+|-------|---------|------------|
+| **Readability Rewrite** | AI-powered readability rewriting | [MaraudersMapMD-skill](https://github.com/mandarange/MaraudersMapMD-skill) |
+| **PPT Prompt** | Presentation PDF generation | [MaraudersPPT-Skill](https://github.com/mandarange/MaraudersPPT-Skill) |
+| **RC Check** | Fact-check quantitative claims | [Marauders_RealityCheck_Skill](https://github.com/mandarange/Marauders_RealityCheck_Skill) |
 
-- Installs only the skill definition file (for Cursor: `.cursor/rules/maraudersmapmd-skill.mdc`)
-- This mode does **not** include repository helper files such as `shards_db.py`, `shards_search.py`, and `shards_to_json.py`
-- Best when you only need the rewrite behavior
+### Install Mode A: Prompt button (recommended)
 
-### Install Mode B: Full repository clone (includes Python helpers)
+Click the corresponding button in the preview toolbar (**Rewrite Prompt**, **PPT Prompt**, or **RC Check Prompt**). The copied prompt instructs the AI agent to:
 
-Use this when you want all files from the skill repository:
+1. Fetch the latest skill archive from GitHub
+2. Install/update the full skill bundle into `.cursor/skills/`
+3. Verify all companion files are present (Python scripts, references, templates)
+4. Execute the skill workflow
+
+No manual installation needed — the prompt handles everything.
+
+### Install Mode B: CLI installer scripts
+
+For convenience, installer scripts are included:
+
+```bash
+npm run skill:install:mmd          # Readability — rule file only
+npm run skill:install:mmd:full     # Readability — full repo clone
+npm run skill:install:rc           # RealityCheck — rule file only
+npm run skill:install:rc:full      # RealityCheck — full repo clone
+```
+
+### Install Mode C: Manual full clone
 
 ```bash
 git clone https://github.com/mandarange/MaraudersMapMD-skill.git .maraudersmapmd-skill
+git clone https://github.com/mandarange/Marauders_RealityCheck_Skill.git .marauders-realitycheck-skill
 ```
-
-This clone contains the full source tree, including Python utilities.
 
 ### Trigger Reliability (Practical vs Absolute)
 
 Agent skill triggering is pattern-based and not mathematically guaranteed for all phrasings. In practice, reliability becomes very high if you do all three:
 
 1. Use explicit invocation text in the request, for example: `Use MaraudersMapMD skill`
-2. Keep the local rule file at `.cursor/rules/maraudersmapmd-skill.mdc` present and up to date
+2. Keep the local rule file at `.cursor/rules/<skill-name>.mdc` present and up to date
 3. Use a standard request template consistently (avoid vague prompts)
-
-For convenience, this repository includes an installer script:
-
-```bash
-npm run skill:install:mmd
-```
-
-It installs the local rule file and can optionally clone the full repository (`--full`) for Python helpers.
 
 ---
 
@@ -282,6 +298,7 @@ Open the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`) and type **"MaraudersM
 | `AI: Insert AI Context Hint` | Insert `[AI CONTEXT]` semantic marker |
 | `AI: Copy Readability Prompt` | Copy prompt for readability-focused rewriting |
 | `AI: Copy PPT Prompt` | Copy prompt for MaraudersPPT-based presentation PDF generation |
+| `AI: Copy RC Check Prompt` | Copy prompt for fact-checking quantitative claims via RealityCheck skill |
 
 ### Help
 
@@ -317,9 +334,10 @@ Open the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`) and type **"MaraudersM
 
 ### Prompt Workflow
 - Use **Rewrite Prompt** button to copy a rewrite prompt.
-- Paste into Cursor/Antigravity and apply to a copy of the document.
 - Use **PPT Prompt** button to copy a MaraudersPPT conversion prompt.
-- The copied prompt updates the skill to the newest version before conversion.
+- Use **RC Check Prompt** button to copy a RealityCheck fact-checking prompt.
+- Paste any prompt into Cursor/Antigravity AI chat to execute.
+- Each prompt auto-installs/updates the skill to the newest version before running.
 
 ---
 
