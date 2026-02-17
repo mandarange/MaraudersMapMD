@@ -3,7 +3,7 @@
   "displayName": "MaraudersMapMD",
   "description": "Ultra-fast Markdown preview with AI-native readability artifacts (AI Map, Section Pack, Token Budget), PDF/HTML export, document history, and GEO (Generative Engine Optimization) support for Cursor, Antigravity.",
   "icon": "icon.png",
-  "version": "1.1.16",
+  "version": "1.1.23",
   "license": "MIT",
   "publisher": "Mandarange",
   "homepage": "https://github.com/mandarange/MaraudersMapMD#readme",
@@ -175,6 +175,12 @@
         "icon": "$(comment-discussion)"
       },
       {
+        "command": "maraudersMapMd.ai.copyPptPrompt",
+        "title": "Copy PPT Prompt",
+        "category": "MaraudersMapMD: AI",
+        "icon": "$(file-media)"
+      },
+      {
         "command": "maraudersMapMd.ai.insertHintRule",
         "title": "Insert AI Rule Hint",
         "category": "MaraudersMapMD: AI",
@@ -283,6 +289,14 @@
         }
       ],
       "maraudersMapMd.aiMenu": [
+        {
+          "command": "maraudersMapMd.ai.copyReadabilityPrompt",
+          "group": "0_prompts@1"
+        },
+        {
+          "command": "maraudersMapMd.ai.copyPptPrompt",
+          "group": "0_prompts@2"
+        },
         {
           "command": "maraudersMapMd.ai.insertHintRule",
           "group": "1_hints@1"
@@ -584,7 +598,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:integration": "tsc -p test/integration/tsconfig.json && node out/test/integration/runTests.js",
-    "package": "npm run esbuild-base -- --minify"
+    "package": "npm run esbuild-base -- --minify",
+    "skill:install:mmd": "bash ./scripts/install-maraudersmapmd-skill.sh",
+    "skill:install:mmd:full": "bash ./scripts/install-maraudersmapmd-skill.sh --full"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

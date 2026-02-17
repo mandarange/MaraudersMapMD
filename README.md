@@ -103,6 +103,7 @@ MaraudersMapMD solves this by generating **AI-native artifacts** that help LLMs 
 | Long docs lose accuracy | **Section Pack** splits by heading for precise retrieval |
 | Keyword search fails for AI | **Search Index** enables semantic section discovery |
 | Rewriting docs is tedious | **Rewrite Prompt** generates a ready-to-paste AI prompt |
+| Turning docs into slide-ready outputs is manual | **PPT Prompt** generates a ready-to-paste PDF-slide conversion prompt |
 
 **Plus**: blazing-fast preview, PDF/HTML export, document history with diff/restore &mdash; all in one lightweight extension.
 
@@ -130,6 +131,7 @@ MaraudersMapMD solves this by generating **AI-native artifacts** that help LLMs 
 - **Search Index** (`index.json`): Keywords, links, and AI hint extraction per section
 - **AI Hint Blocks**: Insert semantic markers (`RULE`, `DECISION`, `TODO`, `CONTEXT`) that AI agents prioritize
 - **Rewrite Prompt**: One-click prompt generation for AI-powered readability rewriting ([skill](https://github.com/mandarange/MaraudersMapMD-skill))
+- **PPT Prompt**: One-click prompt generation for presentation PDF conversion ([skill](https://github.com/mandarange/MaraudersPPT-Skill))
 - **Build on Save**: Automatic AI artifact generation to `docs/MaraudersMap/` directory
 - **llms.txt & llms-full.txt**: Standard AI documentation files for Generative Engine Optimization
 
@@ -196,6 +198,44 @@ Direct link: https://open-vsx.org/extension/mandarange/marauders-map-md
 
 ---
 
+## Skill Installation & Trigger Reliability
+
+If you use the external readability skill (`MaraudersMapMD-skill`), there are two install modes with different outcomes:
+
+### Install Mode A: Prompt/rule-only install (default)
+
+- Installs only the skill definition file (for Cursor: `.cursor/rules/maraudersmapmd-skill.mdc`)
+- This mode does **not** include repository helper files such as `shards_db.py`, `shards_search.py`, and `shards_to_json.py`
+- Best when you only need the rewrite behavior
+
+### Install Mode B: Full repository clone (includes Python helpers)
+
+Use this when you want all files from the skill repository:
+
+```bash
+git clone https://github.com/mandarange/MaraudersMapMD-skill.git .maraudersmapmd-skill
+```
+
+This clone contains the full source tree, including Python utilities.
+
+### Trigger Reliability (Practical vs Absolute)
+
+Agent skill triggering is pattern-based and not mathematically guaranteed for all phrasings. In practice, reliability becomes very high if you do all three:
+
+1. Use explicit invocation text in the request, for example: `Use MaraudersMapMD skill`
+2. Keep the local rule file at `.cursor/rules/maraudersmapmd-skill.mdc` present and up to date
+3. Use a standard request template consistently (avoid vague prompts)
+
+For convenience, this repository includes an installer script:
+
+```bash
+npm run skill:install:mmd
+```
+
+It installs the local rule file and can optionally clone the full repository (`--full`) for Python helpers.
+
+---
+
 ## Commands
 
 Open the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`) and type **"MaraudersMapMD"**:
@@ -241,6 +281,7 @@ Open the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`) and type **"MaraudersM
 | `AI: Insert AI Decision Hint` | Insert `[AI DECISION]` semantic marker |
 | `AI: Insert AI Context Hint` | Insert `[AI CONTEXT]` semantic marker |
 | `AI: Copy Readability Prompt` | Copy prompt for readability-focused rewriting |
+| `AI: Copy PPT Prompt` | Copy prompt for MaraudersPPT-based presentation PDF generation |
 
 ### Help
 
@@ -277,6 +318,8 @@ Open the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`) and type **"MaraudersM
 ### Prompt Workflow
 - Use **Rewrite Prompt** button to copy a rewrite prompt.
 - Paste into Cursor/Antigravity and apply to a copy of the document.
+- Use **PPT Prompt** button to copy a MaraudersPPT conversion prompt.
+- The copied prompt updates the skill to the newest version before conversion.
 
 ---
 

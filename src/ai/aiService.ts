@@ -331,18 +331,24 @@ function buildReadabilityPrompt(relativePath: string, fileName: string, docId: s
   const artifactDir = `docs/MaraudersMap/${docId}`;
   const rewrittenName = fileName.replace(/\.md$/, '.rewritten.md');
 
-  const skillUrl = 'https://raw.githubusercontent.com/mandarange/MaraudersMapMD-skill/main/SKILL.md';
+  const skillRepoUrl = 'https://github.com/mandarange/MaraudersMapMD-skill';
+  const skillArchiveUrl = 'https://github.com/mandarange/MaraudersMapMD-skill/archive/refs/heads/main.zip';
   const skillPath = '.cursor/rules/maraudersmapmd-skill.mdc';
+  const skillBundleDir = '.cursor/skills/maraudersmapmd-skill';
 
   return `## Step 1 — Install or update skill
 
-Check if \`${skillPath}\` exists in this project.
+Check if \`${skillPath}\` and \`${skillBundleDir}/\` exist in this project.
 
-1. Fetch ${skillUrl}.
-2. If \`${skillPath}\` does NOT exist, save the fetched content as \`${skillPath}\`.
-3. If \`${skillPath}\` already exists, compare the \`version\` in the YAML frontmatter of both. If the remote version is newer, overwrite \`${skillPath}\` with the fetched content. If the local version is older or missing, upgrade it. Otherwise keep the local file.
-4. Always use the newest available version of the skill before rewriting.
-5. After saving, ensure the YAML frontmatter in \`${skillPath}\` is Cursor-compatible. It MUST contain these fields:
+1. Fetch the latest skill repo archive from ${skillArchiveUrl} (repo: ${skillRepoUrl}).
+2. Compare local vs remote \`version\` from YAML frontmatter.
+3. If remote is newer (or local is missing), DELETE the existing \`${skillBundleDir}/\` completely first (full clean reset).
+4. After cleanup, extract and sync the FULL repository contents into \`${skillBundleDir}/\`. Do not sync only \`SKILL.md\`.
+5. Ensure every companion file is available from the synced bundle (templates, scripts, python code, docs, examples, etc.).
+6. Never keep legacy files from previous versions. Old python/templates/scripts must not remain after update.
+7. Read \`${skillBundleDir}/SKILL.md\`, then write/refresh \`${skillPath}\` with that content.
+8. Always use the newest available version of the skill bundle before rewriting.
+9. After saving, ensure the YAML frontmatter in \`${skillPath}\` is Cursor-compatible. It MUST contain these fields:
    \`\`\`yaml
    ---
    description: "<keep the original description>"
@@ -351,6 +357,12 @@ Check if \`${skillPath}\` exists in this project.
    \`\`\`
    Remove any fields Cursor does not recognize (e.g. name, metadata, tags). Keep the rest of the file content unchanged.
 
+Execution rule:
+- Do NOT stop after Step 1.
+- Continue immediately to Step 2 in the same run.
+- Do NOT ask for confirmation like "continue?" between steps.
+- Ask questions only if truly blocked (e.g., missing file permission, missing network access, unrecoverable error).
+
 ## Step 2 — Rewrite for readability
 
 Follow the maraudersmapmd-skill to rewrite "${fileName}".
@@ -358,6 +370,68 @@ Follow the maraudersmapmd-skill to rewrite "${fileName}".
 - File: \`${relativePath}\`
 - Output to: \`${rewrittenName}\` (same directory — do not modify the original)
 - Artifacts at \`${artifactDir}/\`: \`ai-map.md\`, \`sections/*.md\`, \`index.json\``;
+}
+
+function buildPptPrompt(relativePath: string): string {
+  const skillRepoUrl = 'https://github.com/mandarange/MaraudersPPT-Skill';
+  const skillArchiveUrl = 'https://github.com/mandarange/MaraudersPPT-Skill/archive/refs/heads/main.zip';
+  const skillPath = '.cursor/rules/maraudersppt-skill.mdc';
+  const skillBundleDir = '.cursor/skills/maraudersppt-skill';
+
+  return `## Step 1 — Install or update skill
+
+Check if \`${skillPath}\` and \`${skillBundleDir}/\` exist in this project.
+
+1. Fetch the latest skill repo archive from ${skillArchiveUrl} (repo: ${skillRepoUrl}).
+2. Compare local vs remote \`version\` from YAML frontmatter.
+3. If remote is newer (or local is missing), DELETE the existing \`${skillBundleDir}/\` completely first (full clean reset).
+4. After cleanup, extract and sync the FULL repository contents into \`${skillBundleDir}/\`. Do not sync only \`SKILL.md\`.
+5. Ensure companion implementation files are present, including python chart templates (e.g. \`templates/charts/*.py\`) and related docs/assets used by the skill.
+6. Never keep legacy files from previous versions. Old python/templates/scripts must not remain after update.
+7. Read \`${skillBundleDir}/SKILL.md\`, then write/refresh \`${skillPath}\` with that content.
+8. Always use the newest available version of the full skill bundle before generating slides.
+9. After saving, ensure the YAML frontmatter in \`${skillPath}\` is Cursor-compatible. It MUST contain these fields:
+   \`\`\`yaml
+   ---
+   description: "<keep the original description>"
+   alwaysApply: false
+   ---
+   \`\`\`
+   Remove any fields Cursor does not recognize (e.g. name, metadata, tags). Keep the rest of the file content unchanged.
+
+Execution rule:
+- Do NOT stop after Step 1.
+- Continue immediately to Step 2 in the same run.
+- Do NOT ask for confirmation like "continue?" between steps.
+- Do not require any model-switch guidance or confirmation prompt.
+- Detect environment and proceed immediately using the skill's built-in image generation strategy/fallbacks.
+- Ask questions only if truly blocked (e.g., missing file permission, missing network access, unrecoverable error).
+
+Activation Guard (MUST):
+- If the invocation keyword \`MaraudersMD2PPT\` is missing, HARD FAIL immediately and do not perform any conversion step.
+- Never fall back to generic markdown-to-slides/pdf logic without the explicit \`MaraudersMD2PPT\` activation.
+- After activation, keep \`activation_status=ACTIVE\` and \`pipeline_mode=SKILL_ONLY\` throughout the run.
+
+## Step 2 — Generate presentation PDF
+
+Follow the maraudersppt-skill and invoke it explicitly with \`MaraudersMD2PPT\`.
+Important: \`MaraudersMD2PPT\` is an AI chat invocation keyword, not a terminal/shell command.
+Run this in Cursor/Antigravity AI chat, not in terminal.
+
+- Source Markdown: \`${relativePath}\`
+- Invocation: \`MaraudersMD2PPT ${relativePath}\`
+- Keep source language as-is (no translation).
+- Generate only presentation-ready \`.pdf\` for slides.
+- Do not generate \`.pptx\`.
+
+## Step 3 — Diagnostic report (required)
+
+Print a concise report at the end:
+- Activation: OK/FAIL
+- Invocation keyword detected: \`MaraudersMD2PPT\`
+- Pipeline mode: SKILL_ONLY
+- Step execution: Step1=done, Step2=done
+- Output files: list generated \`.pdf\` path(s) only`;
 }
 
 async function cmdCopyReadabilityPrompt(): Promise<void> {
@@ -394,6 +468,26 @@ async function cmdCopyReadabilityPrompt(): Promise<void> {
   vscode.window.showInformationMessage('Readability prompt copied to clipboard');
 }
 
+async function cmdCopyPptPrompt(): Promise<void> {
+  const editor = getMarkdownEditor();
+  if (!editor) {
+    vscode.window.showErrorMessage('Open a Markdown file first');
+    return;
+  }
+
+  const filePath = editor.document.uri.fsPath;
+  const workspaceRoot = getWorkspaceRoot(filePath);
+  if (!workspaceRoot) {
+    vscode.window.showErrorMessage('Open a workspace folder first');
+    return;
+  }
+
+  const relativePath = path.relative(workspaceRoot, filePath);
+  const prompt = buildPptPrompt(relativePath);
+  await vscode.env.clipboard.writeText(prompt);
+  vscode.window.showInformationMessage('PPT prompt copied to clipboard');
+}
+
 // ── Registration ────────────────────────────────────────────────────
 
 export function registerAiListeners(context: vscode.ExtensionContext): void {
@@ -425,6 +519,12 @@ export function registerAiListeners(context: vscode.ExtensionContext): void {
   context.subscriptions.push(
     vscode.commands.registerCommand('maraudersMapMd.ai.copyReadabilityPrompt', () => {
       void cmdCopyReadabilityPrompt();
+    }),
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand('maraudersMapMd.ai.copyPptPrompt', () => {
+      void cmdCopyPptPrompt();
     }),
   );
 }

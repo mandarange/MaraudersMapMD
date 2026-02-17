@@ -113,6 +113,10 @@ export class UsagePanel implements vscode.Disposable {
         Tip: Use the Rewrite Prompt button in the preview toolbar to copy the readability prompt.
         <button data-action="copy-readability-prompt">Copy Prompt</button>
       </div>
+      <div class="tip">
+        Tip: Use the PPT Prompt button to copy a prompt for generating presentation PDF via MaraudersPPT skill.
+        <button data-action="copy-ppt-prompt">Copy PPT Prompt</button>
+      </div>
     </section>
 
     <section>

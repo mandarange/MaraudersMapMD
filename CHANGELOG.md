@@ -1,5 +1,33 @@
 # Changelog
 
+## 1.1.22 - 2026-02-17
+- Clarify PPT prompt invocation: `MaraudersMD2PPT` is an AI chat keyword (Cursor/Antigravity), not a terminal command.
+- Keep Activation Guard and SKILL_ONLY execution contract while reducing user confusion around invocation context.
+
+## 1.1.21 - 2026-02-17
+- Sync MaraudersPPT skill bundle to v1.3.0 with full clean reset and refreshed `.mdc` rule content.
+- Update PPT prompt execution contract to remove model-switch confirmation and run immediately with environment-aware image generation/fallback behavior.
+
+## 1.1.20 - 2026-02-17
+- Update PPT prompt contract to enforce Activation Guard (`MaraudersMD2PPT` required), forbid generic fallback, and require diagnostic execution report output.
+- Refresh MaraudersPPT skill bundle to latest (v1.2) with clean reset and synchronized reference/template assets.
+
+## 1.1.19 - 2026-02-17
+- Improve PPT prompt workflow: continuous execution from Step 1 to Step 2 without interruption.
+- Add explicit model switch guidance step before execution starts (single confirmation).
+- Enforce best-effort execution in current environment unless blocked by critical errors.
+
+## 1.1.18 - 2026-02-17
+- Update Rewrite/PPT prompt workflows to sync full skill repositories (not only `SKILL.md`).
+- Require full clean reset on skill upgrade: delete existing `.cursor/skills/...` bundle before reinstall.
+- Enforce companion code/template sync (including Python files) for both MaraudersMapMD and MaraudersPPT skills.
+
+## 1.1.17 - 2026-02-17
+- Add `AI: Copy PPT Prompt` command and preview toolbar `PPT Prompt` button.
+- Add MaraudersPPT prompt workflow that enforces latest skill update before use (`.cursor/rules/maraudersppt-skill.mdc`).
+- Define PPT prompt output as PDF-only slides (no `.pptx` generation).
+- Update usage guide and README/docs command references for the new PPT prompt flow.
+
 ## 1.1.16 - 2026-02-08
 - Add Mermaid diagram rendering support via CDN (mermaid@11).
 - Force light mode (white background) for all preview, HTML export, and PDF export.

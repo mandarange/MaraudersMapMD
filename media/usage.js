@@ -7,5 +7,7 @@ document.addEventListener('click', (event) => {
   const type = action.getAttribute('data-action');
   if (type === 'copy-readability-prompt') {
     vscode.postMessage({ type: 'command', command: 'maraudersMapMd.ai.copyReadabilityPrompt' });
+  } else if (type === 'copy-ppt-prompt') {
+    vscode.postMessage({ type: 'command', command: 'maraudersMapMd.ai.copyPptPrompt' });
   }
 });

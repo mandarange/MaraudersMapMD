@@ -1,6 +1,7 @@
 .git
 .gitignore
 .vscode
+.cursor
 .vscode-test
 .vscodeignore
 .DS_Store
@@ -25,3 +26,5 @@ prd.md
 coverage
 .nyc_output
 docs
+scripts
+PUBLISHING.md
