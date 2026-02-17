@@ -16,6 +16,7 @@
 </p>
 
 <p align="center">
+  <a href="#-new-in-v1124">New</a> &middot;
   <a href="#why-maraudersmapmd">Why?</a> &middot;
   <a href="#features">Features</a> &middot;
   <a href="#quick-start">Quick Start</a> &middot;
@@ -27,6 +28,23 @@
   <a href="llms.txt">llms.txt</a> &middot;
   <a href="llms-full.txt">llms-full.txt</a>
 </p>
+
+---
+
+## New in v1.1.24
+
+**RC Check Prompt** &mdash; One-click fact-checking for quantitative claims in your Markdown. Numbers, dates, percentages, version strings &mdash; the [RealityCheck skill](https://github.com/mandarange/Marauders_RealityCheck_Skill) validates them against live web evidence and adds transparent source citations.
+
+| What's new | Details |
+|------------|---------|
+| **RC Check Prompt** button | Preview toolbar &rarr; copies a ready-to-paste prompt that installs the skill + runs the check |
+| **Explicit companion file manifests** | All three skill prompts (Rewrite, PPT, RC Check) now list every required Python script, reference doc, and template &mdash; incomplete installs are caught automatically |
+| **`npm run skill:install:rc`** | CLI installer for the RealityCheck skill (rule-only or `--full` clone) |
+| **Housekeeping** | Removed stale integration tests, unused fixture, and `@vscode/test-electron` dependency |
+
+> **Three AI skills, one toolbar**: Rewrite Prompt &middot; PPT Prompt &middot; RC Check Prompt &mdash; each button copies a self-contained prompt that auto-installs the latest skill before executing.
+
+---
 
 ## Marketplace Listing
 
