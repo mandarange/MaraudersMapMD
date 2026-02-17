@@ -499,21 +499,21 @@ async function cmdCopyPptPrompt(): Promise<void> {
   vscode.window.showInformationMessage('PPT prompt copied to clipboard');
 }
 
-function buildRcCheckPrompt(relativePath: string): string {
-  const skillRepoUrl = 'https://github.com/mandarange/Marauders_RealityCheck_Skill';
-  const skillArchiveUrl = 'https://github.com/mandarange/Marauders_RealityCheck_Skill/archive/refs/heads/main.zip';
-  const skillPath = '.cursor/rules/marauders-realitycheck-skill.mdc';
-  const skillBundleDir = '.cursor/skills/marauders-realitycheck-skill';
+function buildFactCheckPrompt(relativePath: string): string {
+  const skillRepoUrl = 'https://github.com/mandarange/Marauders_FactCheck_Skill';
+  const skillArchiveUrl = 'https://github.com/mandarange/Marauders_FactCheck_Skill/archive/refs/heads/main.zip';
+  const skillPath = '.cursor/rules/marauders-factcheck-skill.mdc';
+  const skillBundleDir = '.cursor/skills/marauders-factcheck-skill';
 
   return `## Step 1 — Install or update skill
 
 Check if \`${skillPath}\` and \`${skillBundleDir}/\` exist in this project.
 
 1. Fetch the latest skill repo archive from ${skillArchiveUrl} (repo: ${skillRepoUrl}).
-2. The skill files live under \`skills/marauders-realitycheck-skill/\` inside the archive. Extract that subdirectory's contents into \`${skillBundleDir}/\`.
+2. The skill files live under \`skills/marauders-factcheck-skill/\` inside the archive. Extract that subdirectory's contents into \`${skillBundleDir}/\`.
 3. Compare local vs remote \`version\` from YAML frontmatter in \`SKILL.md\`.
 4. If remote is newer (or local is missing), DELETE the existing \`${skillBundleDir}/\` completely first (full clean reset).
-5. After cleanup, extract and sync the contents of \`skills/marauders-realitycheck-skill/\` from the archive into \`${skillBundleDir}/\`. Do not sync only \`SKILL.md\`.
+5. After cleanup, extract and sync the contents of \`skills/marauders-factcheck-skill/\` from the archive into \`${skillBundleDir}/\`. Do not sync only \`SKILL.md\`.
 6. Ensure every companion file is present in the synced bundle. The skill requires these implementation files:
    - \`scripts/extract_metrics.py\` — metric candidate extractor (Python)
    - \`scripts/apply_citations.py\` — value replacement and source insertion (Python)
@@ -526,13 +526,13 @@ Check if \`${skillPath}\` and \`${skillBundleDir}/\` exist in this project.
 8. Read \`${skillBundleDir}/SKILL.md\`, then write/refresh \`${skillPath}\` with that content.
 9. Always use the newest available version of the skill bundle before running the check.
 10. After saving, ensure the YAML frontmatter in \`${skillPath}\` is Cursor-compatible. It MUST contain these fields:
-   \`\`\`yaml
-   ---
-   description: "<keep the original description>"
-   alwaysApply: false
-   ---
-   \`\`\`
-   Remove any fields Cursor does not recognize (e.g. name, metadata, tags). Keep the rest of the file content unchanged.
+    \`\`\`yaml
+    ---
+    description: "<keep the original description>"
+    alwaysApply: false
+    ---
+    \`\`\`
+    Remove any fields Cursor does not recognize (e.g. name, metadata, tags). Keep the rest of the file content unchanged.
 
 Execution rule:
 - Do NOT stop after Step 1.
@@ -540,9 +540,9 @@ Execution rule:
 - Do NOT ask for confirmation like "continue?" between steps.
 - Ask questions only if truly blocked (e.g., missing file permission, missing network access, unrecoverable error).
 
-## Step 2 — Reality-check quantitative claims
+## Step 2 — Fact-check quantitative claims
 
-Follow the marauders-realitycheck-skill to validate numeric claims in "${relativePath}".
+Follow the marauders-factcheck-skill to validate numeric claims in "${relativePath}".
 
 - Source Markdown: \`${relativePath}\`
 - Read the full skill workflow from \`${skillBundleDir}/SKILL.md\` and reference docs from \`${skillBundleDir}/references/\`.
@@ -550,10 +550,10 @@ Follow the marauders-realitycheck-skill to validate numeric claims in "${relativ
 - Use \`${skillBundleDir}/scripts/apply_citations.py\` to apply verified values and insert source citation lines.
 - Apply the hybrid decision policy: replace only when Tier 1 evidence is clear and timestamped; otherwise flag with \`<!-- verification-needed -->\`.
 - Add source citation lines directly under updated statements.
-- Do not modify the original file. Output to a new file with \`.rc-checked.md\` suffix in the same directory.`;
+- Do not modify the original file. Output to a new file with \`.fact-checked.md\` suffix in the same directory.`;
 }
 
-async function cmdCopyRcCheckPrompt(): Promise<void> {
+async function cmdCopyFactCheckPrompt(): Promise<void> {
   const editor = getMarkdownEditor();
   if (!editor) {
     vscode.window.showErrorMessage('Open a Markdown file first');
@@ -568,9 +568,9 @@ async function cmdCopyRcCheckPrompt(): Promise<void> {
   }
 
   const relativePath = path.relative(workspaceRoot, filePath);
-  const prompt = buildRcCheckPrompt(relativePath);
+  const prompt = buildFactCheckPrompt(relativePath);
   await vscode.env.clipboard.writeText(prompt);
-  vscode.window.showInformationMessage('RC Check prompt copied to clipboard');
+  vscode.window.showInformationMessage('Fact Check prompt copied to clipboard');
 }
 
 // ── Registration ────────────────────────────────────────────────────
@@ -614,8 +614,8 @@ export function registerAiListeners(context: vscode.ExtensionContext): void {
   );
 
   context.subscriptions.push(
-    vscode.commands.registerCommand('maraudersMapMd.ai.copyRcCheckPrompt', () => {
-      void cmdCopyRcCheckPrompt();
+    vscode.commands.registerCommand('maraudersMapMd.ai.copyFactCheckPrompt', () => {
+      void cmdCopyFactCheckPrompt();
     }),
   );
 }

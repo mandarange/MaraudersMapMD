@@ -118,8 +118,8 @@ export class UsagePanel implements vscode.Disposable {
         <button data-action="copy-ppt-prompt">Copy PPT Prompt</button>
       </div>
       <div class="tip">
-        Tip: Use the RC Check Prompt button to copy a prompt for validating quantitative claims via RealityCheck skill.
-        <button data-action="copy-rc-check-prompt">Copy RC Check Prompt</button>
+        Tip: Use the Fact Check Prompt button to copy a prompt for validating quantitative claims via Fact Check skill.
+        <button data-action="copy-fact-check-prompt">Copy Fact Check Prompt</button>
       </div>
     </section>
 

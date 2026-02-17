@@ -33,16 +33,16 @@
 
 ## New in v1.1.24
 
-**RC Check Prompt** &mdash; One-click fact-checking for quantitative claims in your Markdown. Numbers, dates, percentages, version strings &mdash; the [RealityCheck skill](https://github.com/mandarange/Marauders_RealityCheck_Skill) validates them against live web evidence and adds transparent source citations.
+**Fact Check Prompt** &mdash; One-click fact-checking for quantitative claims in your Markdown. Numbers, dates, percentages, version strings &mdash; the [Fact Check skill](https://github.com/mandarange/Marauders_FactCheck_Skill) validates them against live web evidence and adds transparent source citations.
 
 | What's new | Details |
 |------------|---------|
-| **RC Check Prompt** button | Preview toolbar &rarr; copies a ready-to-paste prompt that installs the skill + runs the check |
-| **Explicit companion file manifests** | All three skill prompts (Rewrite, PPT, RC Check) now list every required Python script, reference doc, and template &mdash; incomplete installs are caught automatically |
-| **`npm run skill:install:rc`** | CLI installer for the RealityCheck skill (rule-only or `--full` clone) |
+| **Fact Check Prompt** button | Preview toolbar &rarr; copies a ready-to-paste prompt that installs the skill + runs the check |
+| **Explicit companion file manifests** | All three skill prompts (Rewrite, PPT, Fact Check) now list every required Python script, reference doc, and template &mdash; incomplete installs are caught automatically |
+| **`npm run skill:install:fc`** | CLI installer for the Fact Check skill (rule-only or `--full` clone) |
 | **Housekeeping** | Removed stale integration tests, unused fixture, and `@vscode/test-electron` dependency |
 
-> **Three AI skills, one toolbar**: Rewrite Prompt &middot; PPT Prompt &middot; RC Check Prompt &mdash; each button copies a self-contained prompt that auto-installs the latest skill before executing.
+> **Three AI skills, one toolbar**: Rewrite Prompt &middot; PPT Prompt &middot; Fact Check Prompt &mdash; each button copies a self-contained prompt that auto-installs the latest skill before executing.
 
 ---
 
@@ -88,7 +88,7 @@ Marketplace link: https://open-vsx.org/extension/mandarange/marauders-map-md
     "AI Hint Blocks (RULE, DECISION, NOTE)",
     "Rewrite Prompt for AI-powered readability rewriting",
     "PPT Prompt for presentation PDF generation",
-    "RC Check Prompt for fact-checking quantitative claims",
+    "Fact Check Prompt for fact-checking quantitative claims",
     "PDF export via Chrome/Chromium",
     "HTML export with local image embedding",
     "Document history with snapshots and diff",
@@ -125,7 +125,7 @@ MaraudersMapMD solves this by generating **AI-native artifacts** that help LLMs 
 | Keyword search fails for AI | **Search Index** enables semantic section discovery |
 | Rewriting docs is tedious | **Rewrite Prompt** generates a ready-to-paste AI prompt |
 | Turning docs into slide-ready outputs is manual | **PPT Prompt** generates a ready-to-paste PDF-slide conversion prompt |
-| Numbers in docs go stale | **RC Check Prompt** fact-checks quantitative claims against live web evidence |
+| Numbers in docs go stale | **Fact Check Prompt** fact-checks quantitative claims against live web evidence |
 
 **Plus**: blazing-fast preview, PDF/HTML export, document history with diff/restore &mdash; all in one lightweight extension.
 
@@ -154,7 +154,7 @@ MaraudersMapMD solves this by generating **AI-native artifacts** that help LLMs 
 - **AI Hint Blocks**: Insert semantic markers (`RULE`, `DECISION`, `TODO`, `CONTEXT`) that AI agents prioritize
 - **Rewrite Prompt**: One-click prompt generation for AI-powered readability rewriting ([skill](https://github.com/mandarange/MaraudersMapMD-skill))
 - **PPT Prompt**: One-click prompt generation for presentation PDF conversion ([skill](https://github.com/mandarange/MaraudersPPT-Skill))
-- **RC Check Prompt**: One-click prompt generation for fact-checking quantitative claims against web evidence ([skill](https://github.com/mandarange/Marauders_RealityCheck_Skill))
+- **Fact Check Prompt**: One-click prompt generation for fact-checking quantitative claims against web evidence ([skill](https://github.com/mandarange/Marauders_FactCheck_Skill))
 - **Build on Save**: Automatic AI artifact generation to `docs/MaraudersMap/` directory
 - **llms.txt & llms-full.txt**: Standard AI documentation files for Generative Engine Optimization
 
@@ -229,11 +229,11 @@ MaraudersMapMD integrates with three external AI skills. Each skill is a standal
 |-------|---------|------------|
 | **Readability Rewrite** | AI-powered readability rewriting | [MaraudersMapMD-skill](https://github.com/mandarange/MaraudersMapMD-skill) |
 | **PPT Prompt** | Presentation PDF generation | [MaraudersPPT-Skill](https://github.com/mandarange/MaraudersPPT-Skill) |
-| **RC Check** | Fact-check quantitative claims | [Marauders_RealityCheck_Skill](https://github.com/mandarange/Marauders_RealityCheck_Skill) |
+| **Fact Check** | Fact-check quantitative claims | [Marauders_FactCheck_Skill](https://github.com/mandarange/Marauders_FactCheck_Skill) |
 
 ### Install Mode A: Prompt button (recommended)
 
-Click the corresponding button in the preview toolbar (**Rewrite Prompt**, **PPT Prompt**, or **RC Check Prompt**). The copied prompt instructs the AI agent to:
+Click the corresponding button in the preview toolbar (**Rewrite Prompt**, **PPT Prompt**, or **Fact Check Prompt**). The copied prompt instructs the AI agent to:
 
 1. Fetch the latest skill archive from GitHub
 2. Install/update the full skill bundle into `.cursor/skills/`
@@ -249,15 +249,15 @@ For convenience, installer scripts are included:
 ```bash
 npm run skill:install:mmd          # Readability — rule file only
 npm run skill:install:mmd:full     # Readability — full repo clone
-npm run skill:install:rc           # RealityCheck — rule file only
-npm run skill:install:rc:full      # RealityCheck — full repo clone
+npm run skill:install:fc           # Fact Check — rule file only
+npm run skill:install:fc:full      # Fact Check — full repo clone
 ```
 
 ### Install Mode C: Manual full clone
 
 ```bash
 git clone https://github.com/mandarange/MaraudersMapMD-skill.git .maraudersmapmd-skill
-git clone https://github.com/mandarange/Marauders_RealityCheck_Skill.git .marauders-realitycheck-skill
+git clone https://github.com/mandarange/Marauders_FactCheck_Skill.git .marauders-factcheck-skill
 ```
 
 ### Trigger Reliability (Practical vs Absolute)
@@ -316,7 +316,7 @@ Open the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`) and type **"MaraudersM
 | `AI: Insert AI Context Hint` | Insert `[AI CONTEXT]` semantic marker |
 | `AI: Copy Readability Prompt` | Copy prompt for readability-focused rewriting |
 | `AI: Copy PPT Prompt` | Copy prompt for MaraudersPPT-based presentation PDF generation |
-| `AI: Copy RC Check Prompt` | Copy prompt for fact-checking quantitative claims via RealityCheck skill |
+| `AI: Copy Fact Check Prompt` | Copy prompt for fact-checking quantitative claims via Fact Check skill |
 
 ### Help
 
@@ -353,7 +353,7 @@ Open the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`) and type **"MaraudersM
 ### Prompt Workflow
 - Use **Rewrite Prompt** button to copy a rewrite prompt.
 - Use **PPT Prompt** button to copy a MaraudersPPT conversion prompt.
-- Use **RC Check Prompt** button to copy a RealityCheck fact-checking prompt.
+- Use **Fact Check Prompt** button to copy a Fact Check prompt.
 - Paste any prompt into Cursor/Antigravity AI chat to execute.
 - Each prompt auto-installs/updates the skill to the newest version before running.
 

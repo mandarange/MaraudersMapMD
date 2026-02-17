@@ -2,9 +2,9 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-RULE_PATH="${ROOT_DIR}/.cursor/rules/marauders-realitycheck-skill.mdc"
-RULE_URL="https://raw.githubusercontent.com/mandarange/Marauders_RealityCheck_Skill/main/skills/marauders-realitycheck-skill/SKILL.md"
-FULL_REPO_DIR="${ROOT_DIR}/.marauders-realitycheck-skill"
+RULE_PATH="${ROOT_DIR}/.cursor/rules/marauders-factcheck-skill.mdc"
+RULE_URL="https://raw.githubusercontent.com/mandarange/Marauders_FactCheck_Skill/main/skills/marauders-factcheck-skill/SKILL.md"
+FULL_REPO_DIR="${ROOT_DIR}/.marauders-factcheck-skill"
 
 WITH_FULL_REPO=0
 
@@ -22,13 +22,13 @@ if [[ ${WITH_FULL_REPO} -eq 1 ]]; then
     git -C "${FULL_REPO_DIR}" pull --ff-only
     echo "[ok] Updated full skill repo: ${FULL_REPO_DIR}"
   else
-    git clone https://github.com/mandarange/Marauders_RealityCheck_Skill.git "${FULL_REPO_DIR}"
+    git clone https://github.com/mandarange/Marauders_FactCheck_Skill.git "${FULL_REPO_DIR}"
     echo "[ok] Cloned full skill repo: ${FULL_REPO_DIR}"
   fi
-  echo "[ok] Python helper files are available under: ${FULL_REPO_DIR}/skills/marauders-realitycheck-skill/scripts/"
+  echo "[ok] Python helper files are available under: ${FULL_REPO_DIR}/skills/marauders-factcheck-skill/scripts/"
 fi
 
 cat <<'EOF'
 [next] Recommended prompt prefix for high trigger reliability:
-Use marauders-realitycheck-skill. Validate numeric claims in this Markdown and add citations.
+Use marauders-factcheck-skill. Validate numeric claims in this Markdown and add citations.
 EOF

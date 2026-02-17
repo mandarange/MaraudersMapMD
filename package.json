@@ -181,8 +181,8 @@
         "icon": "$(file-media)"
       },
       {
-        "command": "maraudersMapMd.ai.copyRcCheckPrompt",
-        "title": "Copy RC Check Prompt",
+        "command": "maraudersMapMd.ai.copyFactCheckPrompt",
+        "title": "Copy Fact Check Prompt",
         "category": "MaraudersMapMD: AI",
         "icon": "$(check-all)"
       },
@@ -304,7 +304,7 @@
           "group": "0_prompts@2"
         },
         {
-          "command": "maraudersMapMd.ai.copyRcCheckPrompt",
+          "command": "maraudersMapMd.ai.copyFactCheckPrompt",
           "group": "0_prompts@3"
         },
         {
@@ -610,8 +610,8 @@
     "package": "npm run esbuild-base -- --minify",
     "skill:install:mmd": "bash ./scripts/install-maraudersmapmd-skill.sh",
     "skill:install:mmd:full": "bash ./scripts/install-maraudersmapmd-skill.sh --full",
-    "skill:install:rc": "bash ./scripts/install-realitycheck-skill.sh",
-    "skill:install:rc:full": "bash ./scripts/install-realitycheck-skill.sh --full"
+    "skill:install:fc": "bash ./scripts/install-factcheck-skill.sh",
+    "skill:install:fc:full": "bash ./scripts/install-factcheck-skill.sh --full"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
