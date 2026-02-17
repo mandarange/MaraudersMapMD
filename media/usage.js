@@ -9,5 +9,7 @@ document.addEventListener('click', (event) => {
     vscode.postMessage({ type: 'command', command: 'maraudersMapMd.ai.copyReadabilityPrompt' });
   } else if (type === 'copy-ppt-prompt') {
     vscode.postMessage({ type: 'command', command: 'maraudersMapMd.ai.copyPptPrompt' });
+  } else if (type === 'copy-rc-check-prompt') {
+    vscode.postMessage({ type: 'command', command: 'maraudersMapMd.ai.copyRcCheckPrompt' });
   }
 });

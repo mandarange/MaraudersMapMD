@@ -117,6 +117,10 @@ export class UsagePanel implements vscode.Disposable {
         Tip: Use the PPT Prompt button to copy a prompt for generating presentation PDF via MaraudersPPT skill.
         <button data-action="copy-ppt-prompt">Copy PPT Prompt</button>
       </div>
+      <div class="tip">
+        Tip: Use the RC Check Prompt button to copy a prompt for validating quantitative claims via RealityCheck skill.
+        <button data-action="copy-rc-check-prompt">Copy RC Check Prompt</button>
+      </div>
     </section>
 
     <section>

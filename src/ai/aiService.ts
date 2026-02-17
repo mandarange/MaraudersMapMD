@@ -344,7 +344,13 @@ Check if \`${skillPath}\` and \`${skillBundleDir}/\` exist in this project.
 2. Compare local vs remote \`version\` from YAML frontmatter.
 3. If remote is newer (or local is missing), DELETE the existing \`${skillBundleDir}/\` completely first (full clean reset).
 4. After cleanup, extract and sync the FULL repository contents into \`${skillBundleDir}/\`. Do not sync only \`SKILL.md\`.
-5. Ensure every companion file is available from the synced bundle (templates, scripts, python code, docs, examples, etc.).
+5. Ensure every companion file is present in the synced bundle. The skill requires these implementation files:
+   - \`shards_db.py\` — shard database builder (Python)
+   - \`shards_search.py\` — shard search utility (Python)
+   - \`shards_to_json.py\` — shard-to-JSON converter (Python)
+   - \`docs/MaraudersMap/\` — AI artifact examples and shard index
+   - \`tests/\` — test fixtures and validation scripts
+   If any of these are missing after sync, the installation is incomplete — re-fetch.
 6. Never keep legacy files from previous versions. Old python/templates/scripts must not remain after update.
 7. Read \`${skillBundleDir}/SKILL.md\`, then write/refresh \`${skillPath}\` with that content.
 8. Always use the newest available version of the skill bundle before rewriting.
@@ -386,7 +392,12 @@ Check if \`${skillPath}\` and \`${skillBundleDir}/\` exist in this project.
 2. Compare local vs remote \`version\` from YAML frontmatter.
 3. If remote is newer (or local is missing), DELETE the existing \`${skillBundleDir}/\` completely first (full clean reset).
 4. After cleanup, extract and sync the FULL repository contents into \`${skillBundleDir}/\`. Do not sync only \`SKILL.md\`.
-5. Ensure companion implementation files are present, including python chart templates (e.g. \`templates/charts/*.py\`) and related docs/assets used by the skill.
+5. Ensure every companion file is present in the synced bundle. The skill requires these implementation files:
+   - \`templates/charts/*.py\` — Python chart generators (bar, donut, funnel, icon_grid, kpi_cards, comparison, process_flow, timeline)
+   - \`templates/__init__.py\`, \`templates/charts/__init__.py\` — package init files
+   - \`references/*.md\` — content-distillation, image-generation, keyword-extraction, layout-integrity, parallel-execution, visual-qa
+   - \`docs/\` — design specs and PRD
+   If any of these are missing after sync, the installation is incomplete — re-fetch.
 6. Never keep legacy files from previous versions. Old python/templates/scripts must not remain after update.
 7. Read \`${skillBundleDir}/SKILL.md\`, then write/refresh \`${skillPath}\` with that content.
 8. Always use the newest available version of the full skill bundle before generating slides.
@@ -488,6 +499,80 @@ async function cmdCopyPptPrompt(): Promise<void> {
   vscode.window.showInformationMessage('PPT prompt copied to clipboard');
 }
 
+function buildRcCheckPrompt(relativePath: string): string {
+  const skillRepoUrl = 'https://github.com/mandarange/Marauders_RealityCheck_Skill';
+  const skillArchiveUrl = 'https://github.com/mandarange/Marauders_RealityCheck_Skill/archive/refs/heads/main.zip';
+  const skillPath = '.cursor/rules/marauders-realitycheck-skill.mdc';
+  const skillBundleDir = '.cursor/skills/marauders-realitycheck-skill';
+
+  return `## Step 1 — Install or update skill
+
+Check if \`${skillPath}\` and \`${skillBundleDir}/\` exist in this project.
+
+1. Fetch the latest skill repo archive from ${skillArchiveUrl} (repo: ${skillRepoUrl}).
+2. The skill files live under \`skills/marauders-realitycheck-skill/\` inside the archive. Extract that subdirectory's contents into \`${skillBundleDir}/\`.
+3. Compare local vs remote \`version\` from YAML frontmatter in \`SKILL.md\`.
+4. If remote is newer (or local is missing), DELETE the existing \`${skillBundleDir}/\` completely first (full clean reset).
+5. After cleanup, extract and sync the contents of \`skills/marauders-realitycheck-skill/\` from the archive into \`${skillBundleDir}/\`. Do not sync only \`SKILL.md\`.
+6. Ensure every companion file is present in the synced bundle. The skill requires these implementation files:
+   - \`scripts/extract_metrics.py\` — metric candidate extractor (Python)
+   - \`scripts/apply_citations.py\` — value replacement and source insertion (Python)
+   - \`references/source-priority.md\` — Tier 1/2/3 source trust rules
+   - \`references/metric-rules.md\` — number parsing and normalization rules
+   - \`references/output-format.md\` — citation and log format templates
+   - \`agents/openai.yaml\` — agent interface config
+   If any of these are missing after sync, the installation is incomplete — re-fetch.
+7. Never keep legacy files from previous versions. Old scripts/references must not remain after update.
+8. Read \`${skillBundleDir}/SKILL.md\`, then write/refresh \`${skillPath}\` with that content.
+9. Always use the newest available version of the skill bundle before running the check.
+10. After saving, ensure the YAML frontmatter in \`${skillPath}\` is Cursor-compatible. It MUST contain these fields:
+   \`\`\`yaml
+   ---
+   description: "<keep the original description>"
+   alwaysApply: false
+   ---
+   \`\`\`
+   Remove any fields Cursor does not recognize (e.g. name, metadata, tags). Keep the rest of the file content unchanged.
+
+Execution rule:
+- Do NOT stop after Step 1.
+- Continue immediately to Step 2 in the same run.
+- Do NOT ask for confirmation like "continue?" between steps.
+- Ask questions only if truly blocked (e.g., missing file permission, missing network access, unrecoverable error).
+
+## Step 2 — Reality-check quantitative claims
+
+Follow the marauders-realitycheck-skill to validate numeric claims in "${relativePath}".
+
+- Source Markdown: \`${relativePath}\`
+- Read the full skill workflow from \`${skillBundleDir}/SKILL.md\` and reference docs from \`${skillBundleDir}/references/\`.
+- Use \`${skillBundleDir}/scripts/extract_metrics.py\` to extract metric candidates, then verify against live web evidence using the source-priority tiers.
+- Use \`${skillBundleDir}/scripts/apply_citations.py\` to apply verified values and insert source citation lines.
+- Apply the hybrid decision policy: replace only when Tier 1 evidence is clear and timestamped; otherwise flag with \`<!-- verification-needed -->\`.
+- Add source citation lines directly under updated statements.
+- Do not modify the original file. Output to a new file with \`.rc-checked.md\` suffix in the same directory.`;
+}
+
+async function cmdCopyRcCheckPrompt(): Promise<void> {
+  const editor = getMarkdownEditor();
+  if (!editor) {
+    vscode.window.showErrorMessage('Open a Markdown file first');
+    return;
+  }
+
+  const filePath = editor.document.uri.fsPath;
+  const workspaceRoot = getWorkspaceRoot(filePath);
+  if (!workspaceRoot) {
+    vscode.window.showErrorMessage('Open a workspace folder first');
+    return;
+  }
+
+  const relativePath = path.relative(workspaceRoot, filePath);
+  const prompt = buildRcCheckPrompt(relativePath);
+  await vscode.env.clipboard.writeText(prompt);
+  vscode.window.showInformationMessage('RC Check prompt copied to clipboard');
+}
+
 // ── Registration ────────────────────────────────────────────────────
 
 export function registerAiListeners(context: vscode.ExtensionContext): void {
@@ -525,6 +610,12 @@ export function registerAiListeners(context: vscode.ExtensionContext): void {
   context.subscriptions.push(
     vscode.commands.registerCommand('maraudersMapMd.ai.copyPptPrompt', () => {
       void cmdCopyPptPrompt();
+    }),
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand('maraudersMapMd.ai.copyRcCheckPrompt', () => {
+      void cmdCopyRcCheckPrompt();
     }),
   );
 }

@@ -173,7 +173,7 @@ export class PreviewManager implements vscode.Disposable {
   }
 
   private async handleToolbarCommand(command: string): Promise<void> {
-    if (command !== 'ai.copyReadabilityPrompt' && command !== 'ai.copyPptPrompt') {
+    if (command !== 'ai.copyReadabilityPrompt' && command !== 'ai.copyPptPrompt' && command !== 'ai.copyRcCheckPrompt') {
       // Ensure the markdown editor is active so command handlers can find activeTextEditor
       const mdEditor = vscode.window.visibleTextEditors.find(
         (e) => e.document.languageId === 'markdown',

@@ -18,9 +18,10 @@ out/
 .DS_Store
 Thumbs.db
 
-# Test coverage
+# Test coverage & runtime
 coverage/
 .nyc_output/
+.vscode-test/
 
 # Environment
 .env

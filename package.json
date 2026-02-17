@@ -3,7 +3,7 @@
   "displayName": "MaraudersMapMD",
   "description": "Ultra-fast Markdown preview with AI-native readability artifacts (AI Map, Section Pack, Token Budget), PDF/HTML export, document history, and GEO (Generative Engine Optimization) support for Cursor, Antigravity.",
   "icon": "icon.png",
-  "version": "1.1.23",
+  "version": "1.1.24",
   "license": "MIT",
   "publisher": "Mandarange",
   "homepage": "https://github.com/mandarange/MaraudersMapMD#readme",
@@ -181,6 +181,12 @@
         "icon": "$(file-media)"
       },
       {
+        "command": "maraudersMapMd.ai.copyRcCheckPrompt",
+        "title": "Copy RC Check Prompt",
+        "category": "MaraudersMapMD: AI",
+        "icon": "$(check-all)"
+      },
+      {
         "command": "maraudersMapMd.ai.insertHintRule",
         "title": "Insert AI Rule Hint",
         "category": "MaraudersMapMD: AI",
@@ -296,6 +302,10 @@
         {
           "command": "maraudersMapMd.ai.copyPptPrompt",
           "group": "0_prompts@2"
+        },
+        {
+          "command": "maraudersMapMd.ai.copyRcCheckPrompt",
+          "group": "0_prompts@3"
         },
         {
           "command": "maraudersMapMd.ai.insertHintRule",
@@ -597,15 +607,15 @@
     "pretest": "npm run compile",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:integration": "tsc -p test/integration/tsconfig.json && node out/test/integration/runTests.js",
     "package": "npm run esbuild-base -- --minify",
     "skill:install:mmd": "bash ./scripts/install-maraudersmapmd-skill.sh",
-    "skill:install:mmd:full": "bash ./scripts/install-maraudersmapmd-skill.sh --full"
+    "skill:install:mmd:full": "bash ./scripts/install-maraudersmapmd-skill.sh --full",
+    "skill:install:rc": "bash ./scripts/install-realitycheck-skill.sh",
+    "skill:install:rc:full": "bash ./scripts/install-realitycheck-skill.sh --full"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
     "@types/vscode": "^1.75.0",
-    "@vscode/test-electron": "^2.4.0",
     "esbuild": "^0.21.0",
     "typescript": "^5.3.0",
     "vitest": "^1.0.0"
