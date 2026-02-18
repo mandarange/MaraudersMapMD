@@ -3,7 +3,8 @@ import { getSnapshotsToDelete, RetentionPolicy } from '../../src/history/retenti
 import { Snapshot } from '../../src/history/snapshotStore';
 
 describe('retentionEngine', () => {
-  const now = 1000000000; // Fixed timestamp for testing
+  const now = 1700000000000; // Fixed timestamp in milliseconds
+  const DAY_MS = 86400 * 1000;
 
   // Helper to create test snapshots
   const createSnapshot = (
@@ -24,8 +25,8 @@ describe('retentionEngine', () => {
 
   it('keeps all snapshots when under limits', () => {
     const snapshots = [
-      createSnapshot('snap1', 'file.md', now - 86400 * 5, 1000), // 5 days old
-      createSnapshot('snap2', 'file.md', now - 86400 * 10, 1000), // 10 days old
+      createSnapshot('snap1', 'file.md', now - DAY_MS * 5, 1000), // 5 days old
+      createSnapshot('snap2', 'file.md', now - DAY_MS * 10, 1000), // 10 days old
       createSnapshot('snap3', 'file.md', now, 1000), // current
     ];
 
@@ -42,10 +43,10 @@ describe('retentionEngine', () => {
 
   it('removes snapshots exceeding maxSnapshotsPerFile', () => {
     const snapshots = [
-      createSnapshot('snap1', 'file.md', now - 86400 * 20, 1000),
-      createSnapshot('snap2', 'file.md', now - 86400 * 15, 1000),
-      createSnapshot('snap3', 'file.md', now - 86400 * 10, 1000),
-      createSnapshot('snap4', 'file.md', now - 86400 * 5, 1000),
+      createSnapshot('snap1', 'file.md', now - DAY_MS * 20, 1000),
+      createSnapshot('snap2', 'file.md', now - DAY_MS * 15, 1000),
+      createSnapshot('snap3', 'file.md', now - DAY_MS * 10, 1000),
+      createSnapshot('snap4', 'file.md', now - DAY_MS * 5, 1000),
       createSnapshot('snap5', 'file.md', now, 1000),
     ];
 
@@ -63,9 +64,9 @@ describe('retentionEngine', () => {
 
   it('removes snapshots older than retentionDays', () => {
     const snapshots = [
-      createSnapshot('snap1', 'file.md', now - 86400 * 40, 1000), // 40 days old
-      createSnapshot('snap2', 'file.md', now - 86400 * 35, 1000), // 35 days old
-      createSnapshot('snap3', 'file.md', now - 86400 * 20, 1000), // 20 days old
+      createSnapshot('snap1', 'file.md', now - DAY_MS * 40, 1000), // 40 days old
+      createSnapshot('snap2', 'file.md', now - DAY_MS * 35, 1000), // 35 days old
+      createSnapshot('snap3', 'file.md', now - DAY_MS * 20, 1000), // 20 days old
       createSnapshot('snap4', 'file.md', now, 1000), // current
     ];
 
@@ -83,9 +84,9 @@ describe('retentionEngine', () => {
 
   it('protects manual checkpoints from retention', () => {
     const snapshots = [
-      createSnapshot('snap1', 'file.md', now - 86400 * 40, 1000, false), // 40 days old, not checkpoint
-      createSnapshot('snap2', 'file.md', now - 86400 * 35, 1000, true), // 35 days old, IS checkpoint
-      createSnapshot('snap3', 'file.md', now - 86400 * 20, 1000, false), // 20 days old
+      createSnapshot('snap1', 'file.md', now - DAY_MS * 40, 1000, false), // 40 days old, not checkpoint
+      createSnapshot('snap2', 'file.md', now - DAY_MS * 35, 1000, true), // 35 days old, IS checkpoint
+      createSnapshot('snap3', 'file.md', now - DAY_MS * 20, 1000, false), // 20 days old
       createSnapshot('snap4', 'file.md', now, 1000, false), // current
     ];
 
@@ -104,9 +105,9 @@ describe('retentionEngine', () => {
 
   it('removes oldest snapshots when storage limit exceeded', () => {
     const snapshots = [
-      createSnapshot('snap1', 'file.md', now - 86400 * 20, 60 * 1024 * 1024), // 60 MB, 20 days old
-      createSnapshot('snap2', 'file.md', now - 86400 * 10, 60 * 1024 * 1024), // 60 MB, 10 days old
-      createSnapshot('snap3', 'file.md', now - 86400 * 5, 60 * 1024 * 1024), // 60 MB, 5 days old
+      createSnapshot('snap1', 'file.md', now - DAY_MS * 20, 60 * 1024 * 1024), // 60 MB, 20 days old
+      createSnapshot('snap2', 'file.md', now - DAY_MS * 10, 60 * 1024 * 1024), // 60 MB, 10 days old
+      createSnapshot('snap3', 'file.md', now - DAY_MS * 5, 60 * 1024 * 1024), // 60 MB, 5 days old
       createSnapshot('snap4', 'file.md', now, 60 * 1024 * 1024), // 60 MB, current
     ];
 
@@ -126,10 +127,10 @@ describe('retentionEngine', () => {
 
   it('applies combined policies correctly', () => {
     const snapshots = [
-      createSnapshot('snap1', 'file.md', now - 86400 * 40, 50 * 1024 * 1024), // 40 days old, 50 MB
-      createSnapshot('snap2', 'file.md', now - 86400 * 35, 50 * 1024 * 1024), // 35 days old, 50 MB
-      createSnapshot('snap3', 'file.md', now - 86400 * 20, 50 * 1024 * 1024), // 20 days old, 50 MB
-      createSnapshot('snap4', 'file.md', now - 86400 * 10, 50 * 1024 * 1024), // 10 days old, 50 MB
+      createSnapshot('snap1', 'file.md', now - DAY_MS * 40, 50 * 1024 * 1024), // 40 days old, 50 MB
+      createSnapshot('snap2', 'file.md', now - DAY_MS * 35, 50 * 1024 * 1024), // 35 days old, 50 MB
+      createSnapshot('snap3', 'file.md', now - DAY_MS * 20, 50 * 1024 * 1024), // 20 days old, 50 MB
+      createSnapshot('snap4', 'file.md', now - DAY_MS * 10, 50 * 1024 * 1024), // 10 days old, 50 MB
       createSnapshot('snap5', 'file.md', now, 50 * 1024 * 1024), // current, 50 MB
     ];
 
@@ -147,6 +148,25 @@ describe('retentionEngine', () => {
     // Combined: snap1 and snap2 should be deleted
     expect(toDelete).toHaveLength(2);
     expect(toDelete.map((s) => s.id)).toEqual(['snap1', 'snap2']);
+  });
+
+  it('protects checkpoints from count and size pruning', () => {
+    const snapshots = [
+      createSnapshot('old-checkpoint', 'file.md', now - DAY_MS * 60, 40 * 1024 * 1024, true),
+      createSnapshot('old-auto-1', 'file.md', now - DAY_MS * 20, 40 * 1024 * 1024, false),
+      createSnapshot('old-auto-2', 'file.md', now - DAY_MS * 10, 40 * 1024 * 1024, false),
+      createSnapshot('new-auto', 'file.md', now, 40 * 1024 * 1024, false),
+    ];
+
+    const policy: RetentionPolicy = {
+      maxSnapshotsPerFile: 2,
+      maxTotalStorageMb: 80,
+      retentionDays: 365,
+      protectManualCheckpoints: true,
+    };
+
+    const toDelete = getSnapshotsToDelete(snapshots, policy, now);
+    expect(toDelete.map((s) => s.id)).not.toContain('old-checkpoint');
   });
 
   it('returns empty list for empty snapshot array', () => {

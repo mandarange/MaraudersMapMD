@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import {
   Snapshot,
   SnapshotIndex,
+  SnapshotCompression,
   buildIndexPath,
   buildSnapshotPath,
   compressContent,
@@ -10,6 +11,12 @@ import {
   decompressContent,
 } from './snapshotStore';
 import { getHistoryDirectory } from './historyPaths';
+
+function getSnapshotCompressionMode(): SnapshotCompression {
+  const config = vscode.workspace.getConfiguration('maraudersMapMd.history');
+  const mode = config.get<string>('snapshotCompression', 'gzip');
+  return mode === 'none' ? 'none' : 'gzip';
+}
 
 export async function viewSnapshot(
   context: vscode.ExtensionContext,
@@ -88,6 +95,7 @@ export async function restoreSnapshot(
         const currentContent = currentDocument.getText();
         const historyDir = getHistoryDirectory(context, workspaceFolder);
         const relativePath = vscode.workspace.asRelativePath(currentDocument.uri, false);
+        const compressionMode = getSnapshotCompressionMode();
         const indexPath = buildIndexPath(historyDir, relativePath);
         const indexUri = vscode.Uri.file(indexPath);
 
@@ -101,7 +109,7 @@ export async function restoreSnapshot(
 
         const preRestoreId = createSnapshotId();
         const hash = computeHash(currentContent);
-        const compressed = compressContent(currentContent);
+        const compressed = compressContent(currentContent, compressionMode);
         const snapshotPath = buildSnapshotPath(historyDir, relativePath, preRestoreId);
         const snapshotUri = vscode.Uri.file(snapshotPath);
 
@@ -118,7 +126,7 @@ export async function restoreSnapshot(
           isCheckpoint: false,
           hash,
           sizeBytes: compressed.length,
-          compressed: currentContent.length >= 1024,
+          compressed: compressionMode === 'gzip' && currentContent.length >= 1024,
         };
         index.snapshots.push(preRestoreSnapshot);
 

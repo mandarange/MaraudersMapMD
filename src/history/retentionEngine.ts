@@ -21,10 +21,18 @@ export function getSnapshotsToDelete(
   const tooOld = filterByAge(snapshots, policy.retentionDays, now, policy.protectManualCheckpoints);
   tooOld.forEach((s) => toDelete.add(s));
 
-  const tooMany = filterByCount(snapshots, policy.maxSnapshotsPerFile);
+  const tooMany = filterByCount(
+    snapshots,
+    policy.maxSnapshotsPerFile,
+    policy.protectManualCheckpoints
+  );
   tooMany.forEach((s) => toDelete.add(s));
 
-  const tooLarge = filterBySize(snapshots, policy.maxTotalStorageMb);
+  const tooLarge = filterBySize(
+    snapshots,
+    policy.maxTotalStorageMb,
+    policy.protectManualCheckpoints
+  );
   tooLarge.forEach((s) => toDelete.add(s));
 
   return Array.from(toDelete).sort((a, b) => a.timestamp - b.timestamp);
@@ -36,8 +44,8 @@ function filterByAge(
   now: number,
   protectManualCheckpoints: boolean
 ): Snapshot[] {
-  const retentionSeconds = retentionDays * 86400;
-  const cutoffTime = now - retentionSeconds;
+  const retentionMs = retentionDays * 24 * 60 * 60 * 1000;
+  const cutoffTime = now - retentionMs;
 
   return snapshots.filter((s) => {
     const isTooOld = s.timestamp < cutoffTime;
@@ -46,7 +54,11 @@ function filterByAge(
   });
 }
 
-function filterByCount(snapshots: Snapshot[], maxSnapshotsPerFile: number): Snapshot[] {
+function filterByCount(
+  snapshots: Snapshot[],
+  maxSnapshotsPerFile: number,
+  protectManualCheckpoints: boolean
+): Snapshot[] {
   const grouped = groupByFile(snapshots);
   const toDelete: Snapshot[] = [];
 
@@ -54,29 +66,42 @@ function filterByCount(snapshots: Snapshot[], maxSnapshotsPerFile: number): Snap
     if (fileSnapshots.length > maxSnapshotsPerFile) {
       const sortedByTime = fileSnapshots.sort((a, b) => a.timestamp - b.timestamp);
       const excess = sortedByTime.length - maxSnapshotsPerFile;
-      toDelete.push(...sortedByTime.slice(0, excess));
+      const candidates = protectManualCheckpoints
+        ? sortedByTime.filter((s) => !s.isCheckpoint)
+        : sortedByTime;
+      toDelete.push(...candidates.slice(0, excess));
     }
   }
 
   return toDelete;
 }
 
-function filterBySize(snapshots: Snapshot[], maxTotalStorageMb: number): Snapshot[] {
+function filterBySize(
+  snapshots: Snapshot[],
+  maxTotalStorageMb: number,
+  protectManualCheckpoints: boolean
+): Snapshot[] {
   const maxBytes = maxTotalStorageMb * 1024 * 1024;
   const sortedByTime = snapshots.sort((a, b) => a.timestamp - b.timestamp);
-
-  let totalSize = 0;
-  const toKeep: Snapshot[] = [];
-
-  for (let i = sortedByTime.length - 1; i >= 0; i--) {
-    const snapshot = sortedByTime[i];
-    if (totalSize + snapshot.sizeBytes <= maxBytes) {
-      toKeep.push(snapshot);
-      totalSize += snapshot.sizeBytes;
-    }
+  let totalSize = sortedByTime.reduce((acc, s) => acc + s.sizeBytes, 0);
+  if (totalSize <= maxBytes) {
+    return [];
   }
 
-  return sortedByTime.filter((s) => !toKeep.includes(s));
+  const candidates = protectManualCheckpoints
+    ? sortedByTime.filter((s) => !s.isCheckpoint)
+    : sortedByTime;
+
+  const toDelete: Snapshot[] = [];
+  for (const snapshot of candidates) {
+    if (totalSize <= maxBytes) {
+      break;
+    }
+    toDelete.push(snapshot);
+    totalSize -= snapshot.sizeBytes;
+  }
+
+  return toDelete;
 }
 
 function groupByFile(snapshots: Snapshot[]): Record<string, Snapshot[]> {

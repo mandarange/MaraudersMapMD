@@ -49,6 +49,12 @@ function renderSnapshots(data) {
 }
 
 document.addEventListener('click', (event) => {
+  const refresh = event.target.closest('button[data-action="refresh"]');
+  if (refresh) {
+    vscode.postMessage({ type: 'refresh' });
+    return;
+  }
+
   const button = event.target.closest('button[data-action]');
   if (button) {
     const action = button.getAttribute('data-action');
@@ -57,11 +63,6 @@ document.addEventListener('click', (event) => {
       vscode.postMessage({ type: 'action', action, id });
     }
     return;
-  }
-
-  const refresh = event.target.closest('button[data-action="refresh"]');
-  if (refresh) {
-    vscode.postMessage({ type: 'refresh' });
   }
 });
 

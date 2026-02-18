@@ -185,11 +185,11 @@ MaraudersMapMD solves this by generating **AI-native artifacts** that help LLMs 
 
 ### Document History & Snapshots
 
-- Automatic snapshots on save (configurable: `onSave`, `interval`, `manual`)
+- Automatic snapshots on save (`onSave`) or after edit inactivity (`interval`), plus manual mode
 - Manual checkpoints with labels
 - Visual diff viewer and one-click restore
-- Configurable retention (days, max snapshots, storage limits)
-- gzip compression for efficient storage
+- Configurable retention (days, per-file count, global storage limits)
+- Optional snapshot compression (`gzip` or `none`)
 - Pre-restore safety snapshots (never lose data)
 
 ---
@@ -349,6 +349,7 @@ Open the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`) and type **"MaraudersM
 ### History Workflow
 - Use **History** to browse snapshots and restore when needed.
 - Create a **Checkpoint** before major edits.
+- Use **Prune History Now** to clean old/excess snapshots across all tracked markdown files.
 
 ### Prompt Workflow
 - Use **Rewrite Prompt** button to copy a rewrite prompt.
@@ -410,13 +411,13 @@ All settings use the `maraudersMapMd.*` namespace. Configure via Settings UI or 
 |---------|---------|-------------|
 | `history.enabled` | `true` | Enable history snapshots |
 | `history.storageLocation` | `"workspace"` | Storage location (`workspace`, `globalStorage`) |
-| `history.mode` | `"onSave"` | Snapshot trigger (`onSave`, `interval`, `manual`) |
-| `history.intervalMinutes` | `10` | Auto-snapshot interval (minutes) |
+| `history.mode` | `"onSave"` | Snapshot trigger: on save (`onSave`), after edit inactivity (`interval`), or manual only (`manual`) |
+| `history.intervalMinutes` | `10` | Inactivity delay (minutes) before creating an interval snapshot |
 | `history.maxSnapshotsPerFile` | `100` | Max snapshots per file |
-| `history.maxTotalStorageMb` | `200` | Max total storage (MB) |
+| `history.maxTotalStorageMb` | `200` | Max total storage (MB) across all history snapshots |
 | `history.retentionDays` | `30` | Retention period (days) |
-| `history.protectManualCheckpoints` | `true` | Protect checkpoints from auto-pruning |
-| `history.snapshotCompression` | `"gzip"` | Compression (`none`, `gzip`) |
+| `history.protectManualCheckpoints` | `true` | Protect manual checkpoints from retention/count/size pruning when possible |
+| `history.snapshotCompression` | `"gzip"` | Snapshot compression mode (`none`, `gzip`) |
 | `history.createPreRestoreSnapshot` | `true` | Create safety snapshot before restore |
 
 </details>

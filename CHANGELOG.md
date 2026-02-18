@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.27 - 2026-02-18
+- Fix history retention time math to use millisecond-based day windows, preventing premature snapshot pruning.
+- Implement real `history.mode = interval` behavior with inactivity-based snapshot scheduling and timer cleanup.
+- Expand `History: Prune History Now` to apply retention policies across all indexed history files (global storage cap included).
+- Honor `history.snapshotCompression` (`gzip` or `none`) for regular, checkpoint, and pre-restore snapshots.
+- Fix History panel `Refresh` action wiring and strengthen checkpoint protection during count/size pruning.
+- Update retention tests to millisecond fixtures and refresh README history documentation to match runtime behavior.
+
 ## 1.1.26 - 2026-02-18
 - Restore Rewrite Prompt full-skill installation guard for `MaraudersMapMD-skill`, including companion file validation for Python scripts (`shards_db.py`, `shards_search.py`, `shards_to_json.py`) plus docs/tests directories.
 - Keep the newer readability output naming contract: `<filename>.rewritten_vN.md` with explicit ban on chained names like `rewritten.rewritten.md`.

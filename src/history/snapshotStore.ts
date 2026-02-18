@@ -19,12 +19,16 @@ export interface SnapshotIndex {
 }
 
 const COMPRESSION_THRESHOLD = 1024;
+export type SnapshotCompression = 'none' | 'gzip';
 
 export function computeHash(content: string): string {
   return createHash('sha256').update(content, 'utf8').digest('hex');
 }
 
-export function compressContent(content: string): Buffer {
+export function compressContent(content: string, mode: SnapshotCompression = 'gzip'): Buffer {
+  if (mode === 'none') {
+    return Buffer.from(content, 'utf8');
+  }
   if (content.length < COMPRESSION_THRESHOLD) {
     return Buffer.from(content, 'utf8');
   }
