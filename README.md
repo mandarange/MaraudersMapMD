@@ -16,7 +16,7 @@
 </p>
 
 <p align="center">
-  <a href="#-new-in-v1126">New</a> &middot;
+  <a href="#-new-in-v1127">New</a> &middot;
   <a href="#why-maraudersmapmd">Why?</a> &middot;
   <a href="#features">Features</a> &middot;
   <a href="#quick-start">Quick Start</a> &middot;
@@ -31,16 +31,18 @@
 
 ---
 
-## New in v1.1.26
+## New in v1.1.27
 
-**Rewrite Prompt Reliability Update** &mdash; Rewrite prompt now enforces full skill-bundle sync checks (including companion Python files), while preserving the newer versioned rewrite filename rule.
+**History & Checkpoint Reliability Update** &mdash; history retention, interval snapshots, and pruning behavior are now aligned with runtime settings and documentation.
 
 | What's new | Details |
 |------------|---------|
-| **Rewrite Prompt installation guard restored** | Prompt now requires full `MaraudersMapMD-skill` bundle sync and companion file validation (`shards_*.py`, docs, tests) before rewrite |
-| **Versioned output naming preserved** | Rewrite output remains `<file>.rewritten_vN.md` and blocks chained names like `rewritten.rewritten.md` |
-| **Skill invocation clarity** | Prompt explicitly requires `Use MaraudersMapMD skill` and runs Step 1 → Step 2 continuously |
-| **Release packaging** | Version bump and refreshed release artifacts for VSIX distribution |
+| **Retention time fix** | `history.retentionDays` now uses correct millisecond-based day windows |
+| **Interval snapshots implemented** | `history.mode = interval` now creates snapshots after edit inactivity (`history.intervalMinutes`) |
+| **Global prune behavior** | `History: Prune History Now` now applies retention across all history index files |
+| **Compression setting honored** | `history.snapshotCompression` (`gzip`/`none`) now applies to snapshot, checkpoint, and pre-restore saves |
+| **History panel refresh fix** | Refresh button wiring corrected in the history webview |
+| **Release packaging** | Version bump and refreshed VSIX artifacts for distribution |
 
 > **Three AI skills, one toolbar**: Rewrite Prompt &middot; PPT Prompt &middot; Fact Check Prompt &mdash; each button copies a self-contained prompt that auto-installs the latest skill before executing.
 
@@ -201,7 +203,7 @@ MaraudersMapMD solves this by generating **AI-native artifacts** that help LLMs 
 ```bash
 # 1. Download the latest .vsix from GitHub Releases
 # 2. In your editor, run:
-code --install-extension marauders-map-md-1.0.0.vsix
+code --install-extension marauders-map-md-1.1.27.vsix
 ```
 
 Or: Command Palette → `Extensions: Install from VSIX...` → select file.
