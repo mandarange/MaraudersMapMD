@@ -329,53 +329,69 @@ async function cmdBuildIndex(): Promise<void> {
 
 function buildReadabilityPrompt(relativePath: string, fileName: string, docId: string): string {
   const artifactDir = `docs/MaraudersMap/${docId}`;
-  const rewrittenName = fileName.replace(/\.md$/, '.rewritten.md');
-
   const skillRepoUrl = 'https://github.com/mandarange/MaraudersMapMD-skill';
   const skillArchiveUrl = 'https://github.com/mandarange/MaraudersMapMD-skill/archive/refs/heads/main.zip';
-  const skillPath = '.cursor/rules/maraudersmapmd-skill.mdc';
+  const skillRulePath = '.cursor/rules/maraudersmapmd-skill.mdc';
   const skillBundleDir = '.cursor/skills/maraudersmapmd-skill';
+  const skillFilePath = `${skillBundleDir}/SKILL.md`;
 
-  return `## Step 1 — Install or update skill
+  return `## Step 1 — Install or refresh MaraudersMapMD skill
 
-Check if \`${skillPath}\` and \`${skillBundleDir}/\` exist in this project.
+Check if \`${skillRulePath}\` and \`${skillBundleDir}/\` exist in this project.
 
 1. Fetch the latest skill repo archive from ${skillArchiveUrl} (repo: ${skillRepoUrl}).
-2. Compare local vs remote \`version\` from YAML frontmatter.
+2. Compare local vs remote \`version\` from YAML frontmatter in \`SKILL.md\`.
 3. If remote is newer (or local is missing), DELETE the existing \`${skillBundleDir}/\` completely first (full clean reset).
 4. After cleanup, extract and sync the FULL repository contents into \`${skillBundleDir}/\`. Do not sync only \`SKILL.md\`.
-5. Ensure every companion file is present in the synced bundle. The skill requires these implementation files:
+5. Ensure companion implementation files are present after sync. At minimum, verify:
    - \`shards_db.py\` — shard database builder (Python)
    - \`shards_search.py\` — shard search utility (Python)
    - \`shards_to_json.py\` — shard-to-JSON converter (Python)
-   - \`docs/MaraudersMap/\` — AI artifact examples and shard index
-   - \`tests/\` — test fixtures and validation scripts
-   If any of these are missing after sync, the installation is incomplete — re-fetch.
-6. Never keep legacy files from previous versions. Old python/templates/scripts must not remain after update.
-7. Read \`${skillBundleDir}/SKILL.md\`, then write/refresh \`${skillPath}\` with that content.
-8. Always use the newest available version of the skill bundle before rewriting.
-9. After saving, ensure the YAML frontmatter in \`${skillPath}\` is Cursor-compatible. It MUST contain these fields:
+   - \`docs/MaraudersMap/\` — artifact examples / shard index materials
+   - \`tests/\` — validation fixtures/scripts
+   If any required file/dir is missing, installation is incomplete — re-fetch and re-sync.
+6. Never keep legacy files from previous versions. Old scripts/templates must not remain after update.
+7. Read \`${skillFilePath}\`, then write/refresh \`${skillRulePath}\` with that same content.
+8. Ensure YAML frontmatter in \`${skillRulePath}\` is Cursor-compatible:
    \`\`\`yaml
    ---
-   description: "<keep the original description>"
+   description: "<keep original description>"
    alwaysApply: false
    ---
    \`\`\`
-   Remove any fields Cursor does not recognize (e.g. name, metadata, tags). Keep the rest of the file content unchanged.
+   Remove unsupported fields (e.g., \`name\`, \`metadata\`, \`tags\`) and keep the rest unchanged.
 
 Execution rule:
 - Do NOT stop after Step 1.
 - Continue immediately to Step 2 in the same run.
 - Do NOT ask for confirmation like "continue?" between steps.
-- Ask questions only if truly blocked (e.g., missing file permission, missing network access, unrecoverable error).
+- Ask questions only if truly blocked (e.g., missing permission or network access).
 
-## Step 2 — Rewrite for readability
+## Step 2 — Rewrite using the skill workflow
 
-Follow the maraudersmapmd-skill to rewrite "${fileName}".
+Use MaraudersMapMD skill to rewrite \`${relativePath}\` for readability.
 
-- File: \`${relativePath}\`
-- Output to: \`${rewrittenName}\` (same directory — do not modify the original)
-- Artifacts at \`${artifactDir}/\`: \`ai-map.md\`, \`sections/*.md\`, \`index.json\``;
+Required behavior:
+- Invoke explicitly: "Use MaraudersMapMD skill".
+- Follow the skill's 5-phase procedure and verification checklist.
+- Keep the source language as-is (no translation).
+- Preserve all facts/constraints/technical details and Markdown semantics.
+- Do not modify the original file.
+
+Output file rule (versioned):
+- First rewrite: \`${fileName.replace(/\.md$/, '.rewritten_v1.md')}\`
+- If already exists, increment version (\`.rewritten_v2.md\`, \`.rewritten_v3.md\`, ...).
+- Never create chained names like \`rewritten.rewritten.md\`.
+
+Retrieval references:
+- Primary index: \`docs/MaraudersMap/shards.db\`
+- Fallback artifacts: \`${artifactDir}/ai-map.md\`, \`${artifactDir}/sections/*.md\`, \`${artifactDir}/index.json\`
+
+Finalize by reporting:
+- installed paths
+- input file
+- output file
+- whether SQLite index was found or fallback was used`;
 }
 
 function buildPptPrompt(relativePath: string): string {

@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.26 - 2026-02-18
+- Restore Rewrite Prompt full-skill installation guard for `MaraudersMapMD-skill`, including companion file validation for Python scripts (`shards_db.py`, `shards_search.py`, `shards_to_json.py`) plus docs/tests directories.
+- Keep the newer readability output naming contract: `<filename>.rewritten_vN.md` with explicit ban on chained names like `rewritten.rewritten.md`.
+- Clarify Rewrite Prompt execution contract to enforce explicit invocation (`Use MaraudersMapMD skill`) and uninterrupted Step 1 → Step 2 flow.
+- Bump extension version and refresh release packaging metadata/docs for VSIX build.
+
 ## 1.1.25 - 2026-02-18
 - Rename "RC Check" → "Fact Check" across all UI labels, commands, docs, and internal identifiers.
 - Update skill repo URL from `Marauders_RealityCheck_Skill` → `Marauders_FactCheck_Skill`.

@@ -16,7 +16,7 @@
 </p>
 
 <p align="center">
-  <a href="#-new-in-v1125">New</a> &middot;
+  <a href="#-new-in-v1126">New</a> &middot;
   <a href="#why-maraudersmapmd">Why?</a> &middot;
   <a href="#features">Features</a> &middot;
   <a href="#quick-start">Quick Start</a> &middot;
@@ -31,16 +31,16 @@
 
 ---
 
-## New in v1.1.25
+## New in v1.1.26
 
-**Fact Check Prompt** &mdash; One-click fact-checking for quantitative claims in your Markdown. Numbers, dates, percentages, version strings &mdash; the [Fact Check skill](https://github.com/mandarange/Marauders_FactCheck_Skill) validates them against live web evidence and adds transparent source citations.
+**Rewrite Prompt Reliability Update** &mdash; Rewrite prompt now enforces full skill-bundle sync checks (including companion Python files), while preserving the newer versioned rewrite filename rule.
 
 | What's new | Details |
 |------------|---------|
-| **Fact Check Prompt** button | Preview toolbar &rarr; copies a ready-to-paste prompt that installs the skill + runs the check |
-| **Explicit companion file manifests** | All three skill prompts (Rewrite, PPT, Fact Check) now list every required Python script, reference doc, and template &mdash; incomplete installs are caught automatically |
-| **`npm run skill:install:fc`** | CLI installer for the Fact Check skill (rule-only or `--full` clone) |
-| **Housekeeping** | Removed stale integration tests, unused fixture, and `@vscode/test-electron` dependency |
+| **Rewrite Prompt installation guard restored** | Prompt now requires full `MaraudersMapMD-skill` bundle sync and companion file validation (`shards_*.py`, docs, tests) before rewrite |
+| **Versioned output naming preserved** | Rewrite output remains `<file>.rewritten_vN.md` and blocks chained names like `rewritten.rewritten.md` |
+| **Skill invocation clarity** | Prompt explicitly requires `Use MaraudersMapMD skill` and runs Step 1 → Step 2 continuously |
+| **Release packaging** | Version bump and refreshed release artifacts for VSIX distribution |
 
 > **Three AI skills, one toolbar**: Rewrite Prompt &middot; PPT Prompt &middot; Fact Check Prompt &mdash; each button copies a self-contained prompt that auto-installs the latest skill before executing.
 
