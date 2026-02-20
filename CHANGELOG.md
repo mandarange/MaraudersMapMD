@@ -2,8 +2,9 @@
 
 ## 1.1.28 - 2026-02-20
 - Update skill installation prompts to correctly identify and support Google Antigravity IDE (`.agent/skills` path).
-- Simplify and robustify skill trigger prompts (Rewrite, PPT, Fact Check) by removing hardcoded workflow instructions; extensions now delegate the full 5-phase execution workflow to the skill definitions themselves.
+- Simplify and robustify skill trigger prompts (Rewrite, PPT, Fact Check, Chart) by removing hardcoded workflow instructions; extensions now delegate the full execution workflow to the skill definitions themselves.
 - Implement version checking (`version` frontmatter) before downloading skills, preventing unnecessary redownloads and network overhead when skills are already up-to-date.
+- Add `AI: Copy Chart Prompt` command and toolbar button for converting text-based ASCII art into Mermaid diagrams via the [Marauders_ASCII2Chart_Skill](https://github.com/mandarange/Marauders_ASCII2Chart_Skill).
 - Optimal performance with Gemini 3.1 Pro (recommended model for readability and artifact generation).
 
 ## 1.1.27 - 2026-02-18

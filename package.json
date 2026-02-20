@@ -181,6 +181,12 @@
         "icon": "$(file-media)"
       },
       {
+        "command": "maraudersMapMd.ai.copyChartPrompt",
+        "title": "Copy Chart Prompt",
+        "category": "MaraudersMapMD: AI",
+        "icon": "$(graph)"
+      },
+      {
         "command": "maraudersMapMd.ai.copyFactCheckPrompt",
         "title": "Copy Fact Check Prompt",
         "category": "MaraudersMapMD: AI",
@@ -304,8 +310,12 @@
           "group": "0_prompts@2"
         },
         {
-          "command": "maraudersMapMd.ai.copyFactCheckPrompt",
+          "command": "maraudersMapMd.ai.copyChartPrompt",
           "group": "0_prompts@3"
+        },
+        {
+          "command": "maraudersMapMd.ai.copyFactCheckPrompt",
+          "group": "0_prompts@4"
         },
         {
           "command": "maraudersMapMd.ai.insertHintRule",

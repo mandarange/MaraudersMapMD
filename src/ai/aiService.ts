@@ -328,7 +328,7 @@ async function cmdBuildIndex(): Promise<void> {
 
 
 function buildReadabilityPrompt(relativePath: string): string {
-  const skillRepoUrl = 'https://github.com/mandarange/MaraudersMapMD-skill';
+  const skillRepoRawUrl = 'https://raw.githubusercontent.com/mandarange/MaraudersMapMD-skill/main/SKILL.md';
 
   return `## Step 1: Ensure MaraudersMapMD skill is installed
 
@@ -338,10 +338,8 @@ Detect your current AI IDE/Environment to determine the skill installation path:
 - Antigravity IDE: \`.agent/skills/maraudersmapmd-skill/SKILL.md\`
 
 1. Check if the skill is already installed at the appropriate path.
-2. If installed, check the YAML frontmatter for the \`version\` and compare it with the remote repository (${skillRepoUrl}).
-3. If the skill is not installed, or if the remote version is newer, fetch the latest content from:
-https://raw.githubusercontent.com/mandarange/MaraudersMapMD-skill/main/SKILL.md
-and save it to the appropriate path for your environment.
+2. If installed, check the YAML frontmatter for the \`version\` and compare it by fetching ${skillRepoRawUrl}
+3. If the skill is not installed, or if the remote version is newer, fetch the latest content from ${skillRepoRawUrl} and save it to the appropriate path for your environment.
 
 ## Step 2: Execute Skill
 Improve the readability of this document: \`${relativePath}\`
@@ -351,6 +349,7 @@ Improve the readability of this document: \`${relativePath}\`
 
 function buildPptPrompt(relativePath: string): string {
   const skillArchiveUrl = 'https://github.com/mandarange/MaraudersPPT-Skill/archive/refs/heads/main.zip';
+  const skillRepoRawUrl = 'https://raw.githubusercontent.com/mandarange/MaraudersPPT-Skill/main/SKILL.md';
 
   return `## Step 1: Ensure MaraudersPPT skill is installed
 
@@ -360,7 +359,7 @@ Detect your current AI IDE/Environment to determine the skill installation path:
 - Antigravity IDE: \`.agent/skills/maraudersppt-skill\`
 
 1. Check if the skill is already installed at the appropriate path.
-2. If installed, check the YAML frontmatter for the \`version\` and compare it with the remote repository.
+2. If installed, check the YAML frontmatter for the \`version\` and compare it by fetching ${skillRepoRawUrl}
 3. If the skill is not installed, or if the remote version is newer, fetch the latest skill repo archive from ${skillArchiveUrl}.
 Extract and sync the FULL repository contents into the appropriate skill directory for your environment.
 
@@ -422,8 +421,51 @@ async function cmdCopyPptPrompt(): Promise<void> {
   vscode.window.showInformationMessage('PPT prompt copied to clipboard');
 }
 
+function buildChartPrompt(relativePath: string): string {
+  const skillArchiveUrl = 'https://github.com/mandarange/Marauders_ASCII2Chart_Skill/archive/refs/heads/main.zip';
+  const skillRepoRawUrl = 'https://raw.githubusercontent.com/mandarange/Marauders_ASCII2Chart_Skill/main/SKILL.md';
+
+  return `## Step 1: Ensure Marauders ASCII2Chart skill is installed
+
+Detect your current AI IDE/Environment to determine the skill installation path:
+- Cursor: \`.cursor/skills/ascii-to-diagram-skill\`
+- Claude Code: \`.claude/skills/ascii-to-diagram-skill\`
+- Antigravity IDE: \`.agent/skills/ascii-to-diagram-skill\`
+
+1. Check if the skill is already installed at the appropriate path.
+2. If installed, check the YAML frontmatter for the \`version\` and compare it by fetching ${skillRepoRawUrl}
+3. If the skill is not installed, or if the remote version is newer, fetch the latest skill repo archive from ${skillArchiveUrl}.
+Extract and sync the FULL repository contents into the appropriate skill directory for your environment.
+
+## Step 2: Execute Skill
+Please convert ASCII diagrams to charts in: \`${relativePath}\`
+
+(Please use the ASCII to Diagram Skill exactly as implemented in its SKILL.md without modifying its workflow)`;
+}
+
+async function cmdCopyChartPrompt(): Promise<void> {
+  const editor = getMarkdownEditor();
+  if (!editor) {
+    vscode.window.showErrorMessage('Open a Markdown file first');
+    return;
+  }
+
+  const filePath = editor.document.uri.fsPath;
+  const workspaceRoot = getWorkspaceRoot(filePath);
+  if (!workspaceRoot) {
+    vscode.window.showErrorMessage('Open a workspace folder first');
+    return;
+  }
+
+  const relativePath = path.relative(workspaceRoot, filePath);
+  const prompt = buildChartPrompt(relativePath);
+  await vscode.env.clipboard.writeText(prompt);
+  vscode.window.showInformationMessage('Chart Prompt copied to clipboard');
+}
+
 function buildFactCheckPrompt(relativePath: string): string {
   const skillArchiveUrl = 'https://github.com/mandarange/Marauders_FactCheck_Skill/archive/refs/heads/main.zip';
+  const skillRepoRawUrl = 'https://raw.githubusercontent.com/mandarange/Marauders_FactCheck_Skill/main/SKILL.md';
 
   return `## Step 1: Ensure Marauders FactCheck skill is installed
 
@@ -433,9 +475,9 @@ Detect your current AI IDE/Environment to determine the skill installation path:
 - Antigravity IDE: \`.agent/skills/marauders-factcheck-skill\`
 
 1. Check if the skill is already installed at the appropriate path.
-2. If installed, check the YAML frontmatter for the \`version\` and compare it with the remote repository.
+2. If installed, check the YAML frontmatter for the \`version\` and compare it by fetching ${skillRepoRawUrl}
 3. If the skill is not installed, or if the remote version is newer, fetch the latest skill repo archive from ${skillArchiveUrl}.
-The skill files live under \`skills/marauders-factcheck-skill/\` inside the archive. Extract and sync that subdirectory's contents into the appropriate skill directory for your environment.
+Extract and sync the FULL repository contents into the appropriate skill directory for your environment.
 
 ## Step 2: Execute Skill
 Please fact-check quantitative claims in: \`${relativePath}\`
@@ -500,6 +542,12 @@ export function registerAiListeners(context: vscode.ExtensionContext): void {
   context.subscriptions.push(
     vscode.commands.registerCommand('maraudersMapMd.ai.copyPptPrompt', () => {
       void cmdCopyPptPrompt();
+    }),
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand('maraudersMapMd.ai.copyChartPrompt', () => {
+      void cmdCopyChartPrompt();
     }),
   );
 

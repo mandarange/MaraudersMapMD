@@ -46,6 +46,9 @@ export function buildPreviewHtml(params: HtmlTemplateParams): string {
       <button class="toolbar-btn" data-command="ai.copyFactCheckPrompt" title="Copy Fact Check Prompt">
         <span class="btn-icon">&#x2705;</span><span class="btn-label">Fact Check Prompt</span>
       </button>
+      <button class="toolbar-btn" data-command="ai.copyChartPrompt" title="Copy Chart Prompt">
+        <span class="btn-icon">&#x1F4CA;</span><span class="btn-label">Chart Prompt</span>
+      </button>
     </div>
     <div class="toolbar-separator"></div>
     <div class="toolbar-group">

@@ -140,6 +140,7 @@ MaraudersMapMD solves this by generating **AI-native artifacts** that help LLMs 
 | Keyword search fails for AI | **Search Index** enables semantic section discovery |
 | Rewriting docs is tedious | **Rewrite Prompt** generates a ready-to-paste AI prompt |
 | Turning docs into slide-ready outputs is manual | **PPT Prompt** generates a ready-to-paste PDF-slide conversion prompt |
+| Converting ASCII diagrams into Mermaid is tedious | **Chart Prompt** generates a ready-to-paste ASCII-to-Mermaid conversion prompt |
 | Numbers in docs go stale | **Fact Check Prompt** fact-checks quantitative claims against live web evidence |
 
 **Plus**: blazing-fast preview, PDF/HTML export, document history with diff/restore &mdash; all in one lightweight extension.
@@ -170,6 +171,7 @@ MaraudersMapMD solves this by generating **AI-native artifacts** that help LLMs 
 - **Rewrite Prompt**: One-click prompt generation for AI-powered readability rewriting ([skill](https://github.com/mandarange/MaraudersMapMD-skill))
 - **PPT Prompt**: One-click prompt generation for presentation PDF conversion ([skill](https://github.com/mandarange/MaraudersPPT-Skill))
 - **Fact Check Prompt**: One-click prompt generation for fact-checking quantitative claims against web evidence ([skill](https://github.com/mandarange/Marauders_FactCheck_Skill))
+- **Chart Prompt**: One-click prompt generation for converting text-based ASCII art to Mermaid diagrams ([skill](https://github.com/mandarange/Marauders_ASCII2Chart_Skill))
 - **Build on Save**: Automatic AI artifact generation to `docs/MaraudersMap/` directory
 - **llms.txt & llms-full.txt**: Standard AI documentation files for Generative Engine Optimization
 
@@ -245,10 +247,11 @@ MaraudersMapMD integrates with three external AI skills. Each skill is a standal
 | **Readability Rewrite** | AI-powered readability rewriting | [MaraudersMapMD-skill](https://github.com/mandarange/MaraudersMapMD-skill) |
 | **PPT Prompt** | Presentation PDF generation | [MaraudersPPT-Skill](https://github.com/mandarange/MaraudersPPT-Skill) |
 | **Fact Check** | Fact-check quantitative claims | [Marauders_FactCheck_Skill](https://github.com/mandarange/Marauders_FactCheck_Skill) |
+| **Chart Prompt** | Convert ASCII art to Mermaid diagrams | [Marauders_ASCII2Chart_Skill](https://github.com/mandarange/Marauders_ASCII2Chart_Skill) |
 
 ### Install Mode A: Prompt button (recommended)
 
-Click the corresponding button in the preview toolbar (**Rewrite Prompt**, **PPT Prompt**, or **Fact Check Prompt**). The copied prompt instructs the AI agent to:
+Click the corresponding button in the preview toolbar (**Rewrite Prompt**, **PPT Prompt**, **Fact Check Prompt**, or **Chart Prompt**). The copied prompt instructs the AI agent to:
 
 1. Fetch the latest skill archive from GitHub
 2. Install/update the full skill bundle into `.cursor/skills/`
@@ -332,6 +335,7 @@ Open the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`) and type **"MaraudersM
 | `AI: Copy Readability Prompt` | Copy prompt for readability-focused rewriting |
 | `AI: Copy PPT Prompt` | Copy prompt for MaraudersPPT-based presentation PDF generation |
 | `AI: Copy Fact Check Prompt` | Copy prompt for fact-checking quantitative claims via Fact Check skill |
+| `AI: Copy Chart Prompt` | Copy prompt for converting ASCII diagrams to Mermaid charts via ASCII2Chart skill |
 
 ### Help
 
@@ -370,6 +374,7 @@ Open the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`) and type **"MaraudersM
 - Use **Rewrite Prompt** button to copy a rewrite prompt.
 - Use **PPT Prompt** button to copy a MaraudersPPT conversion prompt.
 - Use **Fact Check Prompt** button to copy a Fact Check prompt.
+- Use **Chart Prompt** button to copy an ASCII-to-Mermaid conversion prompt.
 - Paste any prompt into Cursor/Antigravity AI chat to execute.
 - Each prompt auto-installs/updates the skill to the newest version before running.
 
