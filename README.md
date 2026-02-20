@@ -31,6 +31,19 @@
 
 ---
 
+## New in v1.1.28
+
+**Skill Trigger Optimization** &mdash; AI skill prompts are now faster, more resilient, and support Google Antigravity IDE natively.
+
+| What's new | Details |
+|------------|---------|
+| **Antigravity IDE Support** | Prompts automatically detect and install skills to `.agent/skills/` when using Antigravity. |
+| **Smart Version Checking** | Prompts now check the skill's `version` in YAML frontmatter, preventing redundant downloads and saving tokens/network if already up-to-date. |
+| **Simplified Workflows** | Hardcoded workflows have been removed from the extension. Prompts now simply trigger the skills, letting the skills themselves govern their latest 5-phase or diagnostic execution logic. |
+| **Gemini 3.1 Pro Recommended** | Testing confirms optimal reasoning and artifact generation when using Gemini 3.1 Pro as the active model. |
+
+---
+
 ## New in v1.1.27
 
 **History & Checkpoint Reliability Update** &mdash; history retention, interval snapshots, and pruning behavior are now aligned with runtime settings and documentation.

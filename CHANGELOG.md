@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.28 - 2026-02-20
+- Update skill installation prompts to correctly identify and support Google Antigravity IDE (`.agent/skills` path).
+- Simplify and robustify skill trigger prompts (Rewrite, PPT, Fact Check) by removing hardcoded workflow instructions; extensions now delegate the full 5-phase execution workflow to the skill definitions themselves.
+- Implement version checking (`version` frontmatter) before downloading skills, preventing unnecessary redownloads and network overhead when skills are already up-to-date.
+- Optimal performance with Gemini 3.1 Pro (recommended model for readability and artifact generation).
+
 ## 1.1.27 - 2026-02-18
 - Fix history retention time math to use millisecond-based day windows, preventing premature snapshot pruning.
 - Implement real `history.mode = interval` behavior with inactivity-based snapshot scheduling and timer cleanup.

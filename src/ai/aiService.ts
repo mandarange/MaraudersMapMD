@@ -327,138 +327,47 @@ async function cmdBuildIndex(): Promise<void> {
 }
 
 
-function buildReadabilityPrompt(relativePath: string, fileName: string, docId: string): string {
-  const artifactDir = `docs/MaraudersMap/${docId}`;
+function buildReadabilityPrompt(relativePath: string): string {
   const skillRepoUrl = 'https://github.com/mandarange/MaraudersMapMD-skill';
-  const skillArchiveUrl = 'https://github.com/mandarange/MaraudersMapMD-skill/archive/refs/heads/main.zip';
-  const skillRulePath = '.cursor/rules/maraudersmapmd-skill.mdc';
-  const skillBundleDir = '.cursor/skills/maraudersmapmd-skill';
-  const skillFilePath = `${skillBundleDir}/SKILL.md`;
 
-  return `## Step 1 — Install or refresh MaraudersMapMD skill
+  return `## Step 1: Ensure MaraudersMapMD skill is installed
 
-Check if \`${skillRulePath}\` and \`${skillBundleDir}/\` exist in this project.
+Detect your current AI IDE/Environment to determine the skill installation path:
+- Cursor: \`.cursor/skills/maraudersmapmd-skill/SKILL.md\` (or \`.cursor/rules/maraudersmapmd-skill.mdc\`)
+- Claude Code: \`.claude/skills/maraudersmapmd-skill/SKILL.md\`
+- Antigravity IDE: \`.agent/skills/maraudersmapmd-skill/SKILL.md\`
 
-1. Fetch the latest skill repo archive from ${skillArchiveUrl} (repo: ${skillRepoUrl}).
-2. Compare local vs remote \`version\` from YAML frontmatter in \`SKILL.md\`.
-3. If remote is newer (or local is missing), DELETE the existing \`${skillBundleDir}/\` completely first (full clean reset).
-4. After cleanup, extract and sync the FULL repository contents into \`${skillBundleDir}/\`. Do not sync only \`SKILL.md\`.
-5. Ensure companion implementation files are present after sync. At minimum, verify:
-   - \`shards_db.py\` — shard database builder (Python)
-   - \`shards_search.py\` — shard search utility (Python)
-   - \`shards_to_json.py\` — shard-to-JSON converter (Python)
-   - \`docs/MaraudersMap/\` — artifact examples / shard index materials
-   - \`tests/\` — validation fixtures/scripts
-   If any required file/dir is missing, installation is incomplete — re-fetch and re-sync.
-6. Never keep legacy files from previous versions. Old scripts/templates must not remain after update.
-7. Read \`${skillFilePath}\`, then write/refresh \`${skillRulePath}\` with that same content.
-8. Ensure YAML frontmatter in \`${skillRulePath}\` is Cursor-compatible:
-   \`\`\`yaml
-   ---
-   description: "<keep original description>"
-   alwaysApply: false
-   ---
-   \`\`\`
-   Remove unsupported fields (e.g., \`name\`, \`metadata\`, \`tags\`) and keep the rest unchanged.
+1. Check if the skill is already installed at the appropriate path.
+2. If installed, check the YAML frontmatter for the \`version\` and compare it with the remote repository (${skillRepoUrl}).
+3. If the skill is not installed, or if the remote version is newer, fetch the latest content from:
+https://raw.githubusercontent.com/mandarange/MaraudersMapMD-skill/main/SKILL.md
+and save it to the appropriate path for your environment.
 
-Execution rule:
-- Do NOT stop after Step 1.
-- Continue immediately to Step 2 in the same run.
-- Do NOT ask for confirmation like "continue?" between steps.
-- Ask questions only if truly blocked (e.g., missing permission or network access).
+## Step 2: Execute Skill
+Improve the readability of this document: \`${relativePath}\`
 
-## Step 2 — Rewrite using the skill workflow
-
-Use MaraudersMapMD skill to rewrite \`${relativePath}\` for readability.
-
-Required behavior:
-- Invoke explicitly: "Use MaraudersMapMD skill".
-- Follow the skill's 5-phase procedure and verification checklist.
-- Keep the source language as-is (no translation).
-- Preserve all facts/constraints/technical details and Markdown semantics.
-- Do not modify the original file.
-
-Output file rule (versioned):
-- First rewrite: \`${fileName.replace(/\.md$/, '.rewritten_v1.md')}\`
-- If already exists, increment version (\`.rewritten_v2.md\`, \`.rewritten_v3.md\`, ...).
-- Never create chained names like \`rewritten.rewritten.md\`.
-
-Retrieval references:
-- Primary index: \`docs/MaraudersMap/shards.db\`
-- Fallback artifacts: \`${artifactDir}/ai-map.md\`, \`${artifactDir}/sections/*.md\`, \`${artifactDir}/index.json\`
-
-Finalize by reporting:
-- installed paths
-- input file
-- output file
-- whether SQLite index was found or fallback was used`;
+(Please use the MaraudersMapMD skill exactly as implemented in its SKILL.md. Do not skip any steps defined in the skill.)`;
 }
 
 function buildPptPrompt(relativePath: string): string {
-  const skillRepoUrl = 'https://github.com/mandarange/MaraudersPPT-Skill';
   const skillArchiveUrl = 'https://github.com/mandarange/MaraudersPPT-Skill/archive/refs/heads/main.zip';
-  const skillPath = '.cursor/rules/maraudersppt-skill.mdc';
-  const skillBundleDir = '.cursor/skills/maraudersppt-skill';
 
-  return `## Step 1 — Install or update skill
+  return `## Step 1: Ensure MaraudersPPT skill is installed
 
-Check if \`${skillPath}\` and \`${skillBundleDir}/\` exist in this project.
+Detect your current AI IDE/Environment to determine the skill installation path:
+- Cursor: \`.cursor/skills/maraudersppt-skill\`
+- Claude Code: \`.claude/skills/maraudersppt-skill\`
+- Antigravity IDE: \`.agent/skills/maraudersppt-skill\`
 
-1. Fetch the latest skill repo archive from ${skillArchiveUrl} (repo: ${skillRepoUrl}).
-2. Compare local vs remote \`version\` from YAML frontmatter.
-3. If remote is newer (or local is missing), DELETE the existing \`${skillBundleDir}/\` completely first (full clean reset).
-4. After cleanup, extract and sync the FULL repository contents into \`${skillBundleDir}/\`. Do not sync only \`SKILL.md\`.
-5. Ensure every companion file is present in the synced bundle. The skill requires these implementation files:
-   - \`templates/charts/*.py\` — Python chart generators (bar, donut, funnel, icon_grid, kpi_cards, comparison, process_flow, timeline)
-   - \`templates/__init__.py\`, \`templates/charts/__init__.py\` — package init files
-   - \`references/*.md\` — content-distillation, image-generation, keyword-extraction, layout-integrity, parallel-execution, visual-qa
-   - \`docs/\` — design specs and PRD
-   If any of these are missing after sync, the installation is incomplete — re-fetch.
-6. Never keep legacy files from previous versions. Old python/templates/scripts must not remain after update.
-7. Read \`${skillBundleDir}/SKILL.md\`, then write/refresh \`${skillPath}\` with that content.
-8. Always use the newest available version of the full skill bundle before generating slides.
-9. After saving, ensure the YAML frontmatter in \`${skillPath}\` is Cursor-compatible. It MUST contain these fields:
-   \`\`\`yaml
-   ---
-   description: "<keep the original description>"
-   alwaysApply: false
-   ---
-   \`\`\`
-   Remove any fields Cursor does not recognize (e.g. name, metadata, tags). Keep the rest of the file content unchanged.
+1. Check if the skill is already installed at the appropriate path.
+2. If installed, check the YAML frontmatter for the \`version\` and compare it with the remote repository.
+3. If the skill is not installed, or if the remote version is newer, fetch the latest skill repo archive from ${skillArchiveUrl}.
+Extract and sync the FULL repository contents into the appropriate skill directory for your environment.
 
-Execution rule:
-- Do NOT stop after Step 1.
-- Continue immediately to Step 2 in the same run.
-- Do NOT ask for confirmation like "continue?" between steps.
-- Do not require any model-switch guidance or confirmation prompt.
-- Detect environment and proceed immediately using the skill's built-in image generation strategy/fallbacks.
-- Ask questions only if truly blocked (e.g., missing file permission, missing network access, unrecoverable error).
+## Step 2: Execute Skill
+MaraudersMD2PPT \`${relativePath}\`
 
-Activation Guard (MUST):
-- If the invocation keyword \`MaraudersMD2PPT\` is missing, HARD FAIL immediately and do not perform any conversion step.
-- Never fall back to generic markdown-to-slides/pdf logic without the explicit \`MaraudersMD2PPT\` activation.
-- After activation, keep \`activation_status=ACTIVE\` and \`pipeline_mode=SKILL_ONLY\` throughout the run.
-
-## Step 2 — Generate presentation PDF
-
-Follow the maraudersppt-skill and invoke it explicitly with \`MaraudersMD2PPT\`.
-Important: \`MaraudersMD2PPT\` is an AI chat invocation keyword, not a terminal/shell command.
-Run this in Cursor/Antigravity AI chat, not in terminal.
-
-- Source Markdown: \`${relativePath}\`
-- Invocation: \`MaraudersMD2PPT ${relativePath}\`
-- Keep source language as-is (no translation).
-- Generate only presentation-ready \`.pdf\` for slides.
-- Do not generate \`.pptx\`.
-
-## Step 3 — Diagnostic report (required)
-
-Print a concise report at the end:
-- Activation: OK/FAIL
-- Invocation keyword detected: \`MaraudersMD2PPT\`
-- Pipeline mode: SKILL_ONLY
-- Step execution: Step1=done, Step2=done
-- Output files: list generated \`.pdf\` path(s) only`;
+(Please use the MaraudersPPT skill exactly as implemented in its SKILL.md without modifying its workflow)`;
 }
 
 async function cmdCopyReadabilityPrompt(): Promise<void> {
@@ -487,10 +396,8 @@ async function cmdCopyReadabilityPrompt(): Promise<void> {
     }
   }
 
-  const fileName = path.basename(filePath);
   const relativePath = path.relative(workspaceRoot, filePath);
-  const docId = docIdFromPath(filePath);
-  const prompt = buildReadabilityPrompt(relativePath, fileName, docId);
+  const prompt = buildReadabilityPrompt(relativePath);
   await vscode.env.clipboard.writeText(prompt);
   vscode.window.showInformationMessage('Readability prompt copied to clipboard');
 }
@@ -516,57 +423,24 @@ async function cmdCopyPptPrompt(): Promise<void> {
 }
 
 function buildFactCheckPrompt(relativePath: string): string {
-  const skillRepoUrl = 'https://github.com/mandarange/Marauders_FactCheck_Skill';
   const skillArchiveUrl = 'https://github.com/mandarange/Marauders_FactCheck_Skill/archive/refs/heads/main.zip';
-  const skillPath = '.cursor/rules/marauders-factcheck-skill.mdc';
-  const skillBundleDir = '.cursor/skills/marauders-factcheck-skill';
 
-  return `## Step 1 — Install or update skill
+  return `## Step 1: Ensure Marauders FactCheck skill is installed
 
-Check if \`${skillPath}\` and \`${skillBundleDir}/\` exist in this project.
+Detect your current AI IDE/Environment to determine the skill installation path:
+- Cursor: \`.cursor/skills/marauders-factcheck-skill\`
+- Claude Code: \`.claude/skills/marauders-factcheck-skill\`
+- Antigravity IDE: \`.agent/skills/marauders-factcheck-skill\`
 
-1. Fetch the latest skill repo archive from ${skillArchiveUrl} (repo: ${skillRepoUrl}).
-2. The skill files live under \`skills/marauders-factcheck-skill/\` inside the archive. Extract that subdirectory's contents into \`${skillBundleDir}/\`.
-3. Compare local vs remote \`version\` from YAML frontmatter in \`SKILL.md\`.
-4. If remote is newer (or local is missing), DELETE the existing \`${skillBundleDir}/\` completely first (full clean reset).
-5. After cleanup, extract and sync the contents of \`skills/marauders-factcheck-skill/\` from the archive into \`${skillBundleDir}/\`. Do not sync only \`SKILL.md\`.
-6. Ensure every companion file is present in the synced bundle. The skill requires these implementation files:
-   - \`scripts/extract_metrics.py\` — metric candidate extractor (Python)
-   - \`scripts/apply_citations.py\` — value replacement and source insertion (Python)
-   - \`references/source-priority.md\` — Tier 1/2/3 source trust rules
-   - \`references/metric-rules.md\` — number parsing and normalization rules
-   - \`references/output-format.md\` — citation and log format templates
-   - \`agents/openai.yaml\` — agent interface config
-   If any of these are missing after sync, the installation is incomplete — re-fetch.
-7. Never keep legacy files from previous versions. Old scripts/references must not remain after update.
-8. Read \`${skillBundleDir}/SKILL.md\`, then write/refresh \`${skillPath}\` with that content.
-9. Always use the newest available version of the skill bundle before running the check.
-10. After saving, ensure the YAML frontmatter in \`${skillPath}\` is Cursor-compatible. It MUST contain these fields:
-    \`\`\`yaml
-    ---
-    description: "<keep the original description>"
-    alwaysApply: false
-    ---
-    \`\`\`
-    Remove any fields Cursor does not recognize (e.g. name, metadata, tags). Keep the rest of the file content unchanged.
+1. Check if the skill is already installed at the appropriate path.
+2. If installed, check the YAML frontmatter for the \`version\` and compare it with the remote repository.
+3. If the skill is not installed, or if the remote version is newer, fetch the latest skill repo archive from ${skillArchiveUrl}.
+The skill files live under \`skills/marauders-factcheck-skill/\` inside the archive. Extract and sync that subdirectory's contents into the appropriate skill directory for your environment.
 
-Execution rule:
-- Do NOT stop after Step 1.
-- Continue immediately to Step 2 in the same run.
-- Do NOT ask for confirmation like "continue?" between steps.
-- Ask questions only if truly blocked (e.g., missing file permission, missing network access, unrecoverable error).
+## Step 2: Execute Skill
+Please fact-check quantitative claims in: \`${relativePath}\`
 
-## Step 2 — Fact-check quantitative claims
-
-Follow the marauders-factcheck-skill to validate numeric claims in "${relativePath}".
-
-- Source Markdown: \`${relativePath}\`
-- Read the full skill workflow from \`${skillBundleDir}/SKILL.md\` and reference docs from \`${skillBundleDir}/references/\`.
-- Use \`${skillBundleDir}/scripts/extract_metrics.py\` to extract metric candidates, then verify against live web evidence using the source-priority tiers.
-- Use \`${skillBundleDir}/scripts/apply_citations.py\` to apply verified values and insert source citation lines.
-- Apply the hybrid decision policy: replace only when Tier 1 evidence is clear and timestamped; otherwise flag with \`<!-- verification-needed -->\`.
-- Add source citation lines directly under updated statements.
-- Do not modify the original file. Output to a new file with \`.fact-checked.md\` suffix in the same directory.`;
+(Please use the Marauders FactCheck skill exactly as implemented in its SKILL.md without modifying its workflow)`;
 }
 
 async function cmdCopyFactCheckPrompt(): Promise<void> {
