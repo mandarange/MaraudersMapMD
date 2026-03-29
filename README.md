@@ -392,7 +392,7 @@ All settings use the `maraudersMapMd.*` namespace. Configure via Settings UI or 
 | `preview.updateDelayMs` | `200` | Debounce delay (ms) before updating preview |
 | `preview.largeDocThresholdKb` | `512` | Size threshold (KB) for large document handling |
 | `preview.largeDocUpdateDelayMs` | `700` | Debounce delay (ms) for large documents |
-| `preview.scrollSync` | `true` | Synchronize scroll between editor and preview |
+| `preview.autoOpen` | `true` | Open preview when switching to a Markdown editor (and on startup if Markdown is active); set `false` to use **Open Preview to Side** only |
 | `render.allowHtml` | `true` | Allow raw HTML rendering in Markdown |
 
 </details>
@@ -448,8 +448,8 @@ All settings use the `maraudersMapMd.*` namespace. Configure via Settings UI or 
 | Setting | Default | Description |
 |---------|---------|-------------|
 | `ai.enabled` | `true` | Enable AI readability features |
-| `ai.outputDir` | `"docs/MaraudersMap"` | AI artifacts output directory |
-| `ai.buildOnSave` | `true` | Generate AI artifacts on save |
+| `ai.outputDir` | `"docs/MaraudersMap"` | AI artifacts base directory relative to workspace root (segments only; `.`, `..`, and empty segments are ignored and fall back to the default) |
+| `ai.buildOnSave` | `true` | Regenerate AI artifacts on save when the Markdown body has changed (unchanged saves are skipped) |
 | `ai.generate.map` | `true` | Generate AI Map artifact |
 | `ai.generate.sections` | `true` | Generate Section Pack artifact |
 | `ai.generate.index` | `true` | Generate Search Index artifact |
@@ -463,10 +463,10 @@ All settings use the `maraudersMapMd.*` namespace. Configure via Settings UI or 
 
 ## AI Artifacts Output Structure
 
-When AI features are enabled, MaraudersMapMD generates the following file structure:
+When AI features are enabled, MaraudersMapMD generates the following file structure under `maraudersMapMd.ai.outputDir` (default `docs/MaraudersMap`):
 
 ```
-docs/MaraudersMap/
+<ai.outputDir>/
   <document-id>/
     ai-map.md          # Document structure map with token estimates
     index.json         # Search index with keywords and links
@@ -476,7 +476,7 @@ docs/MaraudersMap/
       ...
 ```
 
-**For AI agents**: Read `docs/MaraudersMap/<docId>/ai-map.md` first to understand document structure, then selectively load sections as needed.
+**For AI agents**: Read `<ai.outputDir>/<docId>/ai-map.md` first to understand document structure, then selectively load sections as needed.
 
 ---
 
@@ -488,9 +488,9 @@ MaraudersMapMD is designed for the **GEO era** &mdash; where AI search engines (
 |-------------|------|---------|
 | **llms.txt** | [`llms.txt`](llms.txt) | Concise AI-readable project summary |
 | **llms-full.txt** | [`llms-full.txt`](llms-full.txt) | Complete reference for AI agents |
-| **AI Map** | `docs/MaraudersMap/*/ai-map.md` | Token-efficient document structure |
-| **Section Pack** | `docs/MaraudersMap/*/sections/` | Heading-based splits for retrieval |
-| **Search Index** | `docs/MaraudersMap/*/index.json` | Semantic keyword index |
+| **AI Map** | `<ai.outputDir>/*/ai-map.md` | Token-efficient document structure |
+| **Section Pack** | `<ai.outputDir>/*/sections/` | Heading-based splits for retrieval |
+| **Search Index** | `<ai.outputDir>/*/index.json` | Semantic keyword index |
 | **AI Hint Blocks** | In-document markers | Priority content for AI consumption |
 | **Schema.org JSON-LD** | README.md | Structured data for search engines |
 
@@ -559,7 +559,8 @@ cd MaraudersMapMD
 npm install
 npm run compile
 npm test
-npm run package    # Creates .vsix file
+npm run vsix       # compile + package with vsce → marauders-map-md-*.vsix
+npm run package    # extension bundle only (esbuild minify)
 ```
 
 ### Publishing
@@ -569,7 +570,7 @@ See `PUBLISHING.md` for Marketplace publish steps.
 ### Tech Stack
 
 - **Language**: TypeScript
-- **Bundler**: esbuild (single-file bundle)
+- **Bundler**: esbuild (extension + `media/mermaidWebview.js` from `npm run compile`)
 - **Markdown**: markdown-it with task-lists plugin
 - **PDF**: puppeteer-core (system Chrome)
 - **Testing**: Vitest (unit) + VS Code Test Electron (integration)

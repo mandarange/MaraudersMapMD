@@ -10,6 +10,8 @@ export interface PdfExportOptions {
   format: string;
   marginMm: number;
   printBackground: boolean;
+  /** If set, copied next to the temp HTML as mermaidWebview.js for offline Mermaid rendering */
+  mermaidBundleSourcePath?: string;
 }
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -40,6 +42,14 @@ export async function exportToPdf(
 
   try {
     fs.writeFileSync(tmpHtmlPath, options.html, 'utf8');
+
+    if (options.mermaidBundleSourcePath) {
+      const tmpDir = path.dirname(tmpHtmlPath);
+      fs.copyFileSync(
+        options.mermaidBundleSourcePath,
+        path.join(tmpDir, 'mermaidWebview.js'),
+      );
+    }
 
     const browserInstance = browser as Awaited<ReturnType<BrowserLauncher>>;
     const page = await browserInstance.newPage();

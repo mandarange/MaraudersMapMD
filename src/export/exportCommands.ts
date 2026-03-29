@@ -270,8 +270,10 @@ pre.mermaid svg {
 }`;
 
 let exportCssOverride: string | null = null;
+let exportExtensionFsPath: string | null = null;
 
 export function registerExportCommands(context: vscode.ExtensionContext): void {
+  exportExtensionFsPath = context.extensionUri.fsPath;
   try {
     const cssPath = path.join(context.extensionUri.fsPath, 'media', 'preview.css');
     exportCssOverride = fs.readFileSync(cssPath, 'utf8');
@@ -303,22 +305,61 @@ function getThemeClass(): string {
   return 'vscode-light';
 }
 
-const mermaidExportScript = `<script type="module">
-import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
-mermaid.initialize({
-  startOnLoad: false,
-  theme: 'default',
-  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
-  flowchart: { useMaxWidth: true, htmlLabels: true },
-  sequence: { useMaxWidth: true },
-  gantt: { useMaxWidth: true }
-});
-const blocks = document.querySelectorAll('pre.mermaid');
-if (blocks.length > 0) {
-  await mermaid.run({ nodes: Array.from(blocks) });
-}
-window.__mermaidDone = true;
+const MERMAID_BUNDLE_FILE = 'mermaidWebview.js';
+
+function buildMermaidExportScripts(relativeSrc: string): string {
+  return `<script src="${relativeSrc}"></script>
+<script>
+(function () {
+  function runMermaid() {
+    return new Promise(function (resolve) {
+      if (window.__mermaid) {
+        resolve();
+        return;
+      }
+      window.addEventListener('mermaid-ready', function handler() {
+        window.removeEventListener('mermaid-ready', handler);
+        resolve();
+      });
+    });
+  }
+  runMermaid()
+    .then(async function () {
+      if (window.__mermaid) {
+        var blocks = document.querySelectorAll('pre.mermaid');
+        if (blocks.length > 0) {
+          await window.__mermaid.run({ nodes: Array.from(blocks) });
+        }
+      }
+    })
+    .catch(function () { /* offline or bundle error */ })
+    .finally(function () {
+      window.__mermaidDone = true;
+    });
+})();
 </script>`;
+}
+
+function getMermaidBundlePath(extensionFsPath: string): string {
+  return path.join(extensionFsPath, 'media', MERMAID_BUNDLE_FILE);
+}
+
+function copyMermaidBundleTo(destDir: string, extensionFsPath: string): void {
+  const src = getMermaidBundlePath(extensionFsPath);
+  const dest = path.join(destDir, MERMAID_BUNDLE_FILE);
+  try {
+    const st = fs.statSync(src);
+    if (fs.existsSync(dest)) {
+      const dt = fs.statSync(dest);
+      if (dt.size === st.size && Math.abs(dt.mtimeMs - st.mtimeMs) < 2000) {
+        return;
+      }
+    }
+  } catch {
+    /* copy below */
+  }
+  fs.copyFileSync(src, dest);
+}
 
 function getThemeVars(themeClass: string): string {
   if (themeClass === 'vscode-light') {
@@ -407,7 +448,7 @@ async function exportHtml(): Promise<void> {
       body: rendered,
       css: getExportCss(),
       bodyClass: getThemeClass(),
-      scripts: mermaidExportScript,
+      scripts: buildMermaidExportScripts(MERMAID_BUNDLE_FILE),
     });
 
     htmlContent = resolveLocalImages(htmlContent, mdFileDir, 'fileUrl');
@@ -415,6 +456,10 @@ async function exportHtml(): Promise<void> {
     const exportDir = getExportDir(mdFileUri, mdFileName);
     if (!fs.existsSync(exportDir)) {
       fs.mkdirSync(exportDir, { recursive: true });
+    }
+
+    if (exportExtensionFsPath) {
+      copyMermaidBundleTo(exportDir, exportExtensionFsPath);
     }
 
     const outputPath = path.join(exportDir, `${mdFileName}.html`);
@@ -503,7 +548,7 @@ async function exportPdf(): Promise<void> {
           body: rendered,
           css: getExportCss(),
           bodyClass: getThemeClass(),
-          scripts: mermaidExportScript,
+          scripts: buildMermaidExportScripts(MERMAID_BUNDLE_FILE),
         });
 
         htmlContent = resolveLocalImages(htmlContent, mdFileDir, embedMode);
@@ -516,6 +561,9 @@ async function exportPdf(): Promise<void> {
             format,
             marginMm,
             printBackground,
+            mermaidBundleSourcePath: exportExtensionFsPath
+              ? getMermaidBundlePath(exportExtensionFsPath)
+              : undefined,
           },
           puppeteer.launch.bind(puppeteer)
         );

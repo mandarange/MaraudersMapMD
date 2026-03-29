@@ -1,15 +1,39 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs/promises';
 import * as path from 'path';
+import { createHash } from 'crypto';
 import { generateAiMap } from './aiMapGenerator';
 import { generateSectionPack } from './sectionPackGenerator';
 import { buildSearchIndex } from './searchIndexBuilder';
 import { TokenEstimationMode } from './tokenEstimator';
 import { getMarkdownEditor } from '../utils/editorUtils';
 
-// ── Debounce state ──────────────────────────────────────────────────
-let lastGenerationTimestamp = 0;
-const DEBOUNCE_MS = 5_000;
+// ── Skip redundant on-save work when content is unchanged ───────────
+const lastArtifactContentHash = new Map<string, string>();
+
+function fingerprintContent(content: string): string {
+  return createHash('sha256').update(content, 'utf8').digest('hex');
+}
+
+async function syncSectionPackFiles(sectionsDir: string, sections: { filename: string }[]): Promise<void> {
+  const keep = new Set(sections.map((s) => s.filename));
+  let entries: string[];
+  try {
+    entries = await fs.readdir(sectionsDir);
+  } catch {
+    return;
+  }
+  for (const name of entries) {
+    if (!name.endsWith('.md') || keep.has(name)) {
+      continue;
+    }
+    try {
+      await fs.unlink(path.join(sectionsDir, name));
+    } catch {
+      /* ignore */
+    }
+  }
+}
 
 // ── Output channel (lazy) ───────────────────────────────────────────
 let _outputChannel: vscode.OutputChannel | undefined;
@@ -35,7 +59,19 @@ function getTokenMode(): TokenEstimationMode {
 }
 
 function getOutputDir(): string {
-  return 'docs/MaraudersMap';
+  const raw = getConfig().get<string>('ai.outputDir', 'docs/MaraudersMap');
+  const s = (raw ?? '').trim();
+  return s || 'docs/MaraudersMap';
+}
+
+/** Relative path segments under workspace root; rejects .. and . for safety */
+function outputDirToSegments(outputDir: string): string[] {
+  const normalized = outputDir.replace(/\\/g, '/').replace(/^[/\\]+/, '');
+  const parts = normalized.split('/').filter((p) => p.length > 0);
+  if (parts.some((p) => p === '.' || p === '..')) {
+    return ['docs', 'MaraudersMap'];
+  }
+  return parts.length > 0 ? parts : ['docs', 'MaraudersMap'];
 }
 
 function getLargeDocThresholdBytes(): number {
@@ -53,7 +89,8 @@ function getWorkspaceRoot(filePath: string): string | undefined {
 
 function getArtifactsBaseDir(workspaceRoot: string, filePath: string): string {
   const docId = docIdFromPath(filePath);
-  return path.join(workspaceRoot, 'docs', 'MaraudersMap', docId);
+  const segments = outputDirToSegments(getOutputDir());
+  return path.join(workspaceRoot, ...segments, docId);
 }
 
 // ── Core generation logic ───────────────────────────────────────────
@@ -87,18 +124,26 @@ async function generateArtifacts(options: GenerateOptions): Promise<void> {
 
   if (mapOnly) {
     channel.appendLine(`[AI] Large document — skipped sections/index for ${docId}`);
+    lastArtifactContentHash.set(filePath, fingerprintContent(content));
     return;
   }
 
   if (config.get<boolean>('ai.generate.sections', true)) {
     const sections = generateSectionPack({ filePath, content });
+    const sectionsDir = path.join(outputBase, 'sections');
     if (sections.length > 0) {
-      const sectionsDir = path.join(outputBase, 'sections');
       await fs.mkdir(sectionsDir, { recursive: true });
+      await syncSectionPackFiles(sectionsDir, sections);
       for (const section of sections) {
         await fs.writeFile(path.join(sectionsDir, section.filename), section.content, 'utf-8');
       }
       channel.appendLine(`[AI] Generated ${sections.length} section file(s) for ${docId}`);
+    } else {
+      try {
+        await fs.rm(sectionsDir, { recursive: true, force: true });
+      } catch {
+        /* no prior sections dir */
+      }
     }
   }
 
@@ -111,6 +156,8 @@ async function generateArtifacts(options: GenerateOptions): Promise<void> {
     );
     channel.appendLine(`[AI] Generated index.json for ${docId}`);
   }
+
+  lastArtifactContentHash.set(filePath, fingerprintContent(content));
 }
 
 // ── onSave handler ──────────────────────────────────────────────────
@@ -131,14 +178,12 @@ async function handleDocumentSave(document: vscode.TextDocument): Promise<void> 
     return;
   }
 
-  const now = Date.now();
-  if (now - lastGenerationTimestamp < DEBOUNCE_MS) {
-    return;
-  }
-  lastGenerationTimestamp = now;
-
   const filePath = document.uri.fsPath;
   const content = document.getText();
+  const fp = fingerprintContent(content);
+  if (lastArtifactContentHash.get(filePath) === fp) {
+    return;
+  }
 
   const fileSizeBytes = Buffer.byteLength(content, 'utf-8');
   const threshold = getLargeDocThresholdBytes();
@@ -253,6 +298,7 @@ async function cmdGenerateMap(): Promise<void> {
 
   const mapContent = generateAiMap({ filePath, content, tokenMode: getTokenMode() });
   await fs.writeFile(path.join(outputBase, 'ai-map.md'), mapContent, 'utf-8');
+  lastArtifactContentHash.set(filePath, fingerprintContent(content));
   vscode.window.showInformationMessage(`AI map generated for ${docId}`);
 }
 
@@ -281,12 +327,21 @@ async function cmdExportSectionPack(): Promise<void> {
 
   const docId = docIdFromPath(filePath);
   const sectionsDir = path.join(getArtifactsBaseDir(workspaceRoot, filePath), 'sections');
-  await fs.mkdir(sectionsDir, { recursive: true });
-
   const sections = generateSectionPack({ filePath, content });
-  for (const section of sections) {
-    await fs.writeFile(path.join(sectionsDir, section.filename), section.content, 'utf-8');
+  if (sections.length > 0) {
+    await fs.mkdir(sectionsDir, { recursive: true });
+    await syncSectionPackFiles(sectionsDir, sections);
+    for (const section of sections) {
+      await fs.writeFile(path.join(sectionsDir, section.filename), section.content, 'utf-8');
+    }
+  } else {
+    try {
+      await fs.rm(sectionsDir, { recursive: true, force: true });
+    } catch {
+      /* none */
+    }
   }
+  lastArtifactContentHash.set(filePath, fingerprintContent(content));
   vscode.window.showInformationMessage(`Exported ${sections.length} section(s) for ${docId}`);
 }
 
@@ -323,6 +378,7 @@ async function cmdBuildIndex(): Promise<void> {
     JSON.stringify(index, null, 2),
     'utf-8',
   );
+  lastArtifactContentHash.set(filePath, fingerprintContent(content));
   vscode.window.showInformationMessage(`Search index built for ${docId}`);
 }
 
@@ -508,6 +564,12 @@ async function cmdCopyFactCheckPrompt(): Promise<void> {
 // ── Registration ────────────────────────────────────────────────────
 
 export function registerAiListeners(context: vscode.ExtensionContext): void {
+  context.subscriptions.push(
+    vscode.workspace.onDidChangeWorkspaceFolders(() => {
+      lastArtifactContentHash.clear();
+    }),
+  );
+
   context.subscriptions.push(
     vscode.workspace.onDidSaveTextDocument((document) => {
       // Fire-and-forget — do not block editor

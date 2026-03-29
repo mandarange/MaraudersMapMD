@@ -141,11 +141,6 @@ window.addEventListener('message', (event) => {
       }
       break;
 
-    case 'theme':
-      // Always force light mode regardless of VS Code theme changes
-      forceLightMode();
-      break;
-
     case 'rawText':
       if (activeEditor && activeEditor.textarea) {
         activeEditor.textarea.value = message.text;

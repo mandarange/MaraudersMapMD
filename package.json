@@ -3,7 +3,7 @@
   "displayName": "MaraudersMapMD",
   "description": "Ultra-fast Markdown preview with AI-native readability artifacts (AI Map, Section Pack, Token Budget), PDF/HTML export, document history, and GEO (Generative Engine Optimization) support for Cursor, Antigravity.",
   "icon": "icon.png",
-  "version": "1.1.28",
+  "version": "1.1.31",
   "license": "MIT",
   "publisher": "Mandarange",
   "homepage": "https://github.com/mandarange/MaraudersMapMD#readme",
@@ -113,12 +113,6 @@
         "title": "Insert Image from File",
         "category": "MaraudersMapMD: Images",
         "icon": "$(file-media)"
-      },
-      {
-        "command": "maraudersMapMd.images.pasteToAssets",
-        "title": "Paste Image to Assets",
-        "category": "MaraudersMapMD: Images",
-        "icon": "$(clippy)"
       },
       {
         "command": "maraudersMapMd.images.copyForMaraudersMap",
@@ -395,10 +389,10 @@
           "minimum": 100,
           "maximum": 3000
         },
-        "maraudersMapMd.preview.scrollSync": {
+        "maraudersMapMd.preview.autoOpen": {
           "type": "boolean",
           "default": true,
-          "description": "Synchronize scroll position between editor and preview"
+          "description": "Open the MaraudersMapMD preview when a Markdown editor becomes active or on startup. Set to false to open the preview only via Open Preview to Side."
         },
         "maraudersMapMd.render.allowHtml": {
           "type": "boolean",
@@ -608,11 +602,12 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "npm run esbuild-base -- --minify",
+    "vscode:prepublish": "npm run build:mermaid && npm run esbuild-base -- --minify",
+    "build:mermaid": "esbuild ./src/preview/mermaidWebviewEntry.ts --bundle --outfile=media/mermaidWebview.js --platform=browser --format=iife --legal-comments=none --minify",
     "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node",
     "esbuild": "npm run esbuild-base -- --sourcemap",
     "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
-    "compile": "npm run esbuild",
+    "compile": "npm run build:mermaid && npm run esbuild",
     "watch": "npm run esbuild-watch",
     "pretest": "npm run compile",
     "test": "vitest run",
@@ -621,11 +616,13 @@
     "skill:install:mmd": "bash ./scripts/install-maraudersmapmd-skill.sh",
     "skill:install:mmd:full": "bash ./scripts/install-maraudersmapmd-skill.sh --full",
     "skill:install:fc": "bash ./scripts/install-factcheck-skill.sh",
-    "skill:install:fc:full": "bash ./scripts/install-factcheck-skill.sh --full"
+    "skill:install:fc:full": "bash ./scripts/install-factcheck-skill.sh --full",
+    "vsix": "npm run compile && vsce package --allow-missing-repository"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
     "@types/vscode": "^1.75.0",
+    "@vscode/vsce": "^3.7.1",
     "esbuild": "^0.21.0",
     "typescript": "^5.3.0",
     "vitest": "^1.0.0"
@@ -635,6 +632,7 @@
     "highlight.js": "^11.11.1",
     "markdown-it": "^14.1.0",
     "markdown-it-task-lists": "^2.1.1",
+    "mermaid": "^11.13.0",
     "puppeteer-core": "^24.36.1"
   }
 }

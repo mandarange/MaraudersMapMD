@@ -131,7 +131,6 @@ All commands are prefixed with `maraudersMapMd.` in the command system.
 | Command ID | Title | Description |
 |------------|-------|-------------|
 | `maraudersMapMd.images.insertFromFile` | Insert Image from File | Opens file picker, copies image to assets directory, inserts Markdown link |
-| `maraudersMapMd.images.pasteToAssets` | Paste Image to Assets | Saves clipboard image to assets directory, inserts Markdown link |
 
 ### Export Commands
 | Command ID | Title | Description |
@@ -169,7 +168,7 @@ All settings use the `maraudersMapMd.*` namespace.
 | `maraudersMapMd.preview.updateDelayMs` | number | 200 | Debounce delay in ms before preview update (50-2000) |
 | `maraudersMapMd.preview.largeDocThresholdKb` | number | 512 | Document size threshold in KB for large doc handling (100-5000) |
 | `maraudersMapMd.preview.largeDocUpdateDelayMs` | number | 700 | Debounce delay in ms for large documents (100-3000) |
-| `maraudersMapMd.preview.scrollSync` | boolean | true | Synchronize scroll position between editor and preview |
+| `maraudersMapMd.preview.autoOpen` | boolean | true | Open preview when switching to a Markdown editor |
 | `maraudersMapMd.render.allowHtml` | boolean | false | Allow rendering of raw HTML in Markdown |
 
 ### Image Settings

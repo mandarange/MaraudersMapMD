@@ -42,7 +42,11 @@ export function activate(context: vscode.ExtensionContext): void {
   );
 
   const activeEditor = vscode.window.activeTextEditor;
-  if (activeEditor && activeEditor.document.languageId === 'markdown') {
+  if (
+    activeEditor &&
+    activeEditor.document.languageId === 'markdown' &&
+    vscode.workspace.getConfiguration('maraudersMapMd.preview').get<boolean>('autoOpen', true)
+  ) {
     previewManager.openPreview(activeEditor.document);
   }
 
@@ -62,13 +66,6 @@ export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(
     vscode.commands.registerCommand('maraudersMapMd.usage.open', () => {
       UsagePanel.show(context);
-    })
-  );
-
-  // Paste to assets (deferred to v1.0)
-  context.subscriptions.push(
-    vscode.commands.registerCommand('maraudersMapMd.images.pasteToAssets', () => {
-      vscode.window.showInformationMessage('Paste to Assets is not implemented yet');
     })
   );
 
@@ -101,5 +98,5 @@ export function activate(context: vscode.ExtensionContext): void {
 }
 
 export function deactivate(): void {
-  console.log('MaraudersMapMD extension deactivated');
+  /* noop */
 }

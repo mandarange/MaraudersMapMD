@@ -76,6 +76,10 @@ export class PreviewManager implements vscode.Disposable {
       this.suppressNextAutoOpen = false;
       return false;
     }
+    const auto = vscode.workspace.getConfiguration('maraudersMapMd.preview').get<boolean>('autoOpen', true);
+    if (!auto) {
+      return false;
+    }
     return !!(editor && editor.document.languageId === 'markdown');
   }
 
@@ -115,10 +119,8 @@ export class PreviewManager implements vscode.Disposable {
     const workspaceFolders = vscode.workspace.workspaceFolders;
     const localResourceRoots: vscode.Uri[] = [
       vscode.Uri.joinPath(this.extensionUri, 'media'),
+      ...(workspaceFolders?.map((f) => f.uri) ?? []),
     ];
-    if (workspaceFolders && workspaceFolders.length > 0) {
-      localResourceRoots.push(workspaceFolders[0].uri);
-    }
 
     this.panel = vscode.window.createWebviewPanel(
       'maraudersMapMd.preview',
@@ -129,18 +131,6 @@ export class PreviewManager implements vscode.Disposable {
         retainContextWhenHidden: true,
         localResourceRoots,
       },
-    );
-
-    this.disposables.push(
-      vscode.window.onDidChangeActiveColorTheme(() => {
-        if (!this.panel) {
-          return;
-        }
-        this.panel.webview.postMessage({
-          type: 'theme',
-          className: this.getThemeClass(),
-        });
-      })
     );
 
     this.panel.onDidDispose(() => {
@@ -321,6 +311,9 @@ export class PreviewManager implements vscode.Disposable {
     const jsUri = webview.asWebviewUri(
       vscode.Uri.joinPath(this.extensionUri, 'media', 'preview.js'),
     ).toString();
+    const mermaidUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(this.extensionUri, 'media', 'mermaidWebview.js'),
+    ).toString();
     const cspSource = webview.cspSource;
 
     const themeClass = this.getThemeClass();
@@ -331,6 +324,7 @@ export class PreviewManager implements vscode.Disposable {
       cspSource,
       cssUri,
       jsUri,
+      mermaidUri,
       themeClass,
     });
   }

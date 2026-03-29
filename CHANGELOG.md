@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.1.31 - 2026-03-29
+- `maraudersMapMd.preview.autoOpen` default is `true` again (open preview when activating Markdown, same as before 1.1.30).
+
+## 1.1.30 - 2026-03-29
+- **Preview:** Add `maraudersMapMd.preview.autoOpen` (shipped with default `false` in 1.1.30; use 1.1.31+ for default `true`).
+- **AI artifacts:** Skip on-save regeneration when document content is unchanged (SHA-256 fingerprint); remove global 5s debounce that blocked other files. Section pack folder stays in sync (stale `sections/*.md` removed; empty structure deletes `sections/`).
+- **Removed** unimplemented *Paste Image to Assets* command (Markdown paste/drag still works via the editor provider).
+- **Export:** Skip copying `mermaidWebview.js` when the destination already matches extension bundle size and mtime.
+- **Preview:** Drop no-op active-color-theme webview messages (forced light preview).
+
+## 1.1.29 - 2026-03-29
+- Bundle Mermaid for the Markdown preview and HTML/PDF export (no jsDelivr CDN), tightening the webview CSP to `script-src` nonce + `cspSource` only — fixes strict CSP / offline failures on recent Cursor/Electron builds.
+- HTML export ships `mermaidWebview.js` alongside the `.html` file; PDF export copies the bundle next to the temp HTML for Puppeteer.
+- Honor `maraudersMapMd.ai.outputDir` when writing AI artifacts (safe path segments; `.` / `..` fall back to default).
+- Add all workspace folders to preview `localResourceRoots` for multi-root workspaces.
+- Remove unused `preview.scrollSync` setting (was never implemented).
+- Apply `themeClass` in preview HTML; add `DOM` lib for webview entry typing.
+
 ## 1.1.28 - 2026-02-20
 - Update skill installation prompts to correctly identify and support Google Antigravity IDE (`.agent/skills` path).
 - Simplify and robustify skill trigger prompts (Rewrite, PPT, Fact Check, Chart) by removing hardcoded workflow instructions; extensions now delegate the full execution workflow to the skill definitions themselves.
